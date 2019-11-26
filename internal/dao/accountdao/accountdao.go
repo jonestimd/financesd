@@ -5,14 +5,13 @@ import (
 	"github.com/jonestimd/financesd/internal/model"
 )
 
-// GetAccounts gets all of the accounts.
 func GetAll(db *gorm.DB) ([]*model.Account, error) {
 	accounts := make([]*model.Account, 0)
 	err := db.Order("name").Find(&accounts).Error
 	return accounts, err
 }
 
-func FindById(db *gorm.DB, id int) (*model.Account, error) {
+func FindById(db *gorm.DB, id int64) (*model.Account, error) {
 	var account model.Account
 	err := db.First(&account, "id = ?", id).Error
 	return &account, err

@@ -28,10 +28,18 @@ func main() {
 		Schema:   &schema,
 		Pretty:   true,
 		GraphiQL: true,
-		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
-			return map[string]interface{}{"db": db}
-		},
 	})
-	http.Handle("/finances/graphql", h)
+	http.Handle("/finances/graphql", &graphqlHandler{db: db, handler: h})
 	http.ListenAndServe("localhost:8080", nil)
+}
+
+type graphqlHandler struct {
+	db      *gorm.DB
+	handler http.Handler
+}
+
+func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// TODO start transaction
+	h.handler.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), graphql.DbContextKey, h.db)))
+	// TODO end transaction
 }

@@ -1,12 +1,15 @@
 package main
 
 import (
-	"log"
-	"os"
+	"context"
+	"net/http"
+
+	// "os"
 
 	_ "github.com/go-sql-driver/mysql" // because
+	"github.com/graphql-go/handler"
 	"github.com/jinzhu/gorm"
-	"github.com/jonestimd/financesd/internal/dao/accountdao"
+	"github.com/jonestimd/financesd/internal/graphql"
 )
 
 func main() {
@@ -17,12 +20,18 @@ func main() {
 	defer db.Close()
 	db.SingularTable(true)
 
-	accounts, err := accountdao.GetAll(db)
+	schema, err := graphql.Schema()
 	if err != nil {
-		log.Fatal(err.Error())
-		os.Exit(1)
+		panic(err.Error())
 	}
-	for index := 0; index < len(accounts); index++ {
-		log.Printf("%3d '%s' %v, %v\n", accounts[index].ID, accounts[index].Name, accounts[index].Closed, accounts[index].CompanyID)
-	}
+	h := handler.New(&handler.Config{
+		Schema:   &schema,
+		Pretty:   true,
+		GraphiQL: true,
+		RootObjectFn: func(ctx context.Context, r *http.Request) map[string]interface{} {
+			return map[string]interface{}{"db": db}
+		},
+	})
+	http.Handle("/finances/graphql", h)
+	http.ListenAndServe("localhost:8080", nil)
 }

@@ -22,14 +22,8 @@ var companySchema = graphql.NewObject(graphql.ObjectConfig{
 var companyQueryFields = &graphql.Field{
 	Type: graphql.NewList(companySchema),
 	Args: map[string]*graphql.ArgumentConfig{
-		"id": &graphql.ArgumentConfig{
-			Type:        graphql.ID,
-			Description: "company ID",
-		},
-		"name": &graphql.ArgumentConfig{
-			Type:        graphql.String,
-			Description: "unique company name",
-		},
+		"id":   &graphql.ArgumentConfig{Type: graphql.ID, Description: "company ID"},
+		"name": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique company name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)

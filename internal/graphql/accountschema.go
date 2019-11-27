@@ -27,14 +27,8 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 var accountQueryFields = &graphql.Field{
 	Type: graphql.NewList(accountSchema),
 	Args: map[string]*graphql.ArgumentConfig{
-		"id": &graphql.ArgumentConfig{
-			Type:        graphql.ID,
-			Description: "account ID",
-		},
-		"name": &graphql.ArgumentConfig{
-			Type:        graphql.String,
-			Description: "unique account name",
-		},
+		"id":   &graphql.ArgumentConfig{Type: graphql.ID, Description: "account ID"},
+		"name": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique account name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)

@@ -1,6 +1,8 @@
 package graphql
 
 import (
+	"reflect"
+
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 )
@@ -12,12 +14,13 @@ const accountQuery = "accounts"
 const companyQuery = "companies"
 const payeeQuery = "payees"
 const assetsQuery = "assets"
+const securityQuery = "securities"
 
 var queries = graphql.Fields{
-	accountQuery: accountQueryFields,
-	companyQuery: companyQueryFields,
-	payeeQuery:   payeeQueryFields,
-	assetsQuery:  assetQueryFields,
+	accountQuery:  accountQueryFields,
+	companyQuery:  companyQueryFields,
+	payeeQuery:    payeeQueryFields,
+	securityQuery: securityQueryFields,
 }
 
 func Schema() (graphql.Schema, error) {
@@ -45,4 +48,17 @@ func isSelected(schemaName string, info graphql.ResolveInfo, selectionName strin
 		}
 	}
 	return false
+}
+
+func nestedResolver(fieldNames ...string) graphql.FieldResolveFn {
+	return func(p graphql.ResolveParams) (interface{}, error) {
+		value := reflect.ValueOf(p.Source)
+		for _, fieldName := range fieldNames {
+			if value.Kind() == reflect.Interface || value.Kind() == reflect.Ptr {
+				value = value.Elem()
+			}
+			value = value.FieldByName(fieldName)
+		}
+		return value.Interface(), nil
+	}
 }

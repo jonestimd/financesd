@@ -5,7 +5,6 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"github.com/jonestimd/financesd/internal/dao/companydao"
 	"github.com/jonestimd/financesd/internal/model"
 )
 
@@ -34,21 +33,20 @@ var companyQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
+		companies := make([]*model.Company, 0)
 		if isSelected(companyQuery, p.Info, "accounts") {
 			db = db.Preload("Accounts") // TODO make sure it only applies to company query and doesn't effect TX
 		}
 		if id, ok := p.Args["id"]; ok {
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				company, err := companydao.FindById(db, intId)
-				return []*model.Company{company}, err
+				return companies, db.Find(&companies, intId).Error
 			} else {
 				return nil, err
 			}
 		}
 		if name, ok := p.Args["name"]; ok {
-			company, err := companydao.FindByName(db, name.(string))
-			return []*model.Company{company}, err
+			return companies, db.Find(&companies, "lower(name) = lower(?)", name.(string)).Error
 		}
-		return companydao.GetAll(db)
+		return companies, db.Order("name").Find(&companies).Error
 	},
 }

@@ -11,11 +11,13 @@ const DbContextKey = ReqContextKey("db")
 const accountQuery = "accounts"
 const companyQuery = "companies"
 const payeeQuery = "payees"
+const assetsQuery = "assets"
 
 var queries = graphql.Fields{
 	accountQuery: accountQueryFields,
 	companyQuery: companyQueryFields,
 	payeeQuery:   payeeQueryFields,
+	assetsQuery:  assetQueryFields,
 }
 
 func Schema() (graphql.Schema, error) {

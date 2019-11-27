@@ -4,5 +4,8 @@
         "--config .revive.toml"
     ],
     "go.useLanguageServer": true,
-    "go.formatTool": "goimports"
+    "go.formatTool": "goimports",
+    "go.toolsEnvVars": {
+        "GO111MODULES": "on" // use true instead?
+    }
 }

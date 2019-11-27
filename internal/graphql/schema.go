@@ -15,12 +15,14 @@ const companyQuery = "companies"
 const payeeQuery = "payees"
 const assetsQuery = "assets"
 const securityQuery = "securities"
+const categoryQuery = "categories"
 
 var queries = graphql.Fields{
 	accountQuery:  accountQueryFields,
 	companyQuery:  companyQueryFields,
 	payeeQuery:    payeeQueryFields,
 	securityQuery: securityQueryFields,
+	categoryQuery: categoryQueryFields,
 }
 
 func Schema() (graphql.Schema, error) {

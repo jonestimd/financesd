@@ -25,14 +25,14 @@ func Schema() (graphql.Schema, error) {
 
 // isSelected checks if a property has been selected for a schema in the query.
 func isSelected(schemaName string, info graphql.ResolveInfo, selectionName string) bool {
-	for _, set := range info.Operation.GetSelectionSet().Selections {
-		switch set.(type) {
+	for _, query := range info.Operation.GetSelectionSet().Selections {
+		switch queryField := query.(type) {
 		case *ast.Field:
-			if set.(*ast.Field).Name.Value == schemaName {
-				for _, selection := range set.GetSelectionSet().Selections {
-					switch selection.(type) {
+			if queryField.Name.Value == schemaName {
+				for _, selection := range query.GetSelectionSet().Selections {
+					switch selectionField := selection.(type) {
 					case *ast.Field:
-						if selection.(*ast.Field).Name.Value == selectionName {
+						if selectionField.Name.Value == selectionName {
 							return true
 						}
 					}

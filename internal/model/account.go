@@ -13,6 +13,6 @@ type Account struct {
 	Type        string
 	Closed      *YesNo
 	CurrencyID  int
-	Versioned
+	Version     int
 	Audited
 }

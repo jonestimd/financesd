@@ -4,6 +4,6 @@ type Company struct {
 	ID       int
 	Name     string
 	Accounts []Account
-	Versioned
+	Version  int
 	Audited
 }

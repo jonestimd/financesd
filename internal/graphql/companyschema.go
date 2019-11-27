@@ -13,11 +13,11 @@ import (
 var companySchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "company",
 	Description: "a financial company",
-	Fields: graphql.Fields{
+	Fields: addAudit(graphql.Fields{
 		"id":   &graphql.Field{Type: graphql.ID},
 		"name": &graphql.Field{Type: graphql.String},
 		// add later in Schema(): "accounts": &graphql.Field{Type: graphql.NewList(accountSchema())},
-	},
+	}),
 })
 
 var companyQueryFields = &graphql.Field{

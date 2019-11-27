@@ -13,11 +13,16 @@ import (
 var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "account",
 	Description: "a financial account",
-	Fields: graphql.Fields{
-		"id":      &graphql.Field{Type: graphql.ID},
-		"name":    &graphql.Field{Type: graphql.String},
-		"company": &graphql.Field{Type: companySchema},
-	},
+	Fields: addAudit(graphql.Fields{
+		"id":          &graphql.Field{Type: graphql.ID},
+		"company":     &graphql.Field{Type: companySchema},
+		"name":        &graphql.Field{Type: graphql.String},
+		"description": &graphql.Field{Type: graphql.String},
+		"accountNo":   &graphql.Field{Type: graphql.String},
+		"type":        &graphql.Field{Type: graphql.String}, // TODO enum?
+		"closed":      &graphql.Field{Type: yesNoType},
+		"currencyId":  &graphql.Field{Type: graphql.Int},
+	}),
 })
 
 var accountQueryFields = &graphql.Field{

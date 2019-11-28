@@ -1,13 +1,11 @@
 package model
 
-import "database/sql"
-
 type TransactionCategory struct {
 	ID          int
 	Code        string
 	Description *string
 	AmountType  string
-	ParentId    sql.NullInt64
+	ParentId    *int
 	Security    *YesNo
 	Income      *YesNo
 	Audited

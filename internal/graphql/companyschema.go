@@ -28,7 +28,7 @@ var companyQueryFields = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
 		companies := make([]*model.Company, 0)
-		if isSelected(companyQuery, p.Info, "accounts") {
+		if isPathSelected(p.Info, "accounts") {
 			db = db.Preload("Accounts") // TODO make sure it only applies to company query and doesn't effect TX
 		}
 		if id, ok := p.Args["id"]; ok {

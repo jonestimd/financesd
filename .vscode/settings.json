@@ -6,6 +6,6 @@
     "go.useLanguageServer": true,
     "go.formatTool": "goimports",
     "go.toolsEnvVars": {
-        "GO111MODULES": "on" // use true instead?
+        "GO111MODULES": "on"
     }
 }

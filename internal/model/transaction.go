@@ -11,6 +11,16 @@ type Transaction struct {
 	AccountId       int
 	PayeeId         *int
 	SecurityId      *int
+	Details         []TransactionDetail
 	Version         int
 	Audited
+}
+
+func (tx *Transaction) GetRelatedDetailIDs(dest []int) []int {
+	for _, detail := range tx.Details {
+		if detail.RelatedDetailID != nil {
+			dest = append(dest, *detail.RelatedDetailID)
+		}
+	}
+	return dest
 }

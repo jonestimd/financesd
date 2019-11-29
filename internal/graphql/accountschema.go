@@ -33,7 +33,7 @@ var accountQueryFields = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
 		accounts := make([]*model.Account, 0)
-		if isSelected(accountQuery, p.Info, "company") {
+		if isPathSelected(p.Info, "company") {
 			db = db.Preload("Company") // TODO make sure it only applies to account query and doesn't effect TX
 		}
 		if id, ok := p.Args["id"]; ok {

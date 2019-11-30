@@ -11,16 +11,24 @@ type selectionPredicate func(field *ast.Field) bool
 
 // isPathSelected checks if a property path has been selected for a query.
 func isPathSelected(info graphql.ResolveInfo, path ...string) bool {
+	return getSelection(info, path...) != nil
+}
+
+func getSelection(info graphql.ResolveInfo, path ...string) []ast.Selection {
 	query := findField(info.Operation.GetSelectionSet().Selections, byAlias(info.Path.Key))
 	fields := query.GetSelectionSet().Selections
 	for _, name := range path {
 		field := findField(fields, byName(name))
 		if field == nil {
-			return false
+			return nil
 		}
 		fields = field.GetSelectionSet().Selections
 	}
-	return true
+	return fields
+}
+
+func findQuery(info graphql.ResolveInfo) *ast.Field {
+	return findField(info.Operation.GetSelectionSet().Selections, byAlias(info.Path.Key))
 }
 
 func byAlias(alias interface{}) selectionPredicate {

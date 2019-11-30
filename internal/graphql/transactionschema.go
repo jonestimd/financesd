@@ -73,11 +73,24 @@ var transactionQueryFields = &graphql.Field{
 				if isPathSelected(p.Info, "details", "relatedDetail") {
 					relatedDetailIDs := getRelatedDetailIDs(transactions)
 					relatedDetails := make([]*model.TransactionDetail, 0)
-					// TODO check for selected transaction
 					if err := db.Find(&relatedDetails, "id in (?)", relatedDetailIDs).Error; err != nil {
 						return nil, err
 					}
-					// TODO populate details with related details
+					detailsMap := DetailsCacheKey.getCache(p.Context)
+					for _, detail := range relatedDetails {
+						detailsMap[detail.ID] = detail
+					}
+					if isPathSelected(p.Info, "details", "relatedDetails", "transaction") {
+						relatedTransactionIDs := getRelatedTransactionIDs(relatedDetails)
+						relatedTransactions := make([]*model.Transaction, 0)
+						if err := db.Find(&relatedTransactions, "id in (?)", relatedTransactionIDs).Error; err != nil {
+							return nil, err
+						}
+						transactionsMap := TransactionsCacheKey.getCache(p.Context)
+						for _, transaction := range relatedTransactions {
+							transactionsMap[transaction.ID] = transaction
+						}
+					}
 				}
 				return transactions, nil
 			} else {
@@ -94,6 +107,14 @@ func getRelatedDetailIDs(transactions []*model.Transaction) []int {
 	relatedIDs := make([]int, 0)
 	for _, transaction := range transactions {
 		relatedIDs = transaction.GetRelatedDetailIDs(relatedIDs)
+	}
+	return relatedIDs
+}
+
+func getRelatedTransactionIDs(details []*model.TransactionDetail) []int {
+	relatedIDs := make([]int, 0)
+	for _, detail := range details {
+		relatedIDs = append(relatedIDs, detail.TransactionID)
 	}
 	return relatedIDs
 }

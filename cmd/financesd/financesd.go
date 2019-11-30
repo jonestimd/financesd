@@ -40,6 +40,8 @@ type graphqlHandler struct {
 
 func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// TODO start transaction
-	h.handler.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), graphql.DbContextKey, h.db.Debug())))
+	ctx := context.WithValue(r.Context(), graphql.DbContextKey, h.db.Debug())
+	ctx = context.WithValue(ctx, graphql.RequestCachesKey, make(graphql.RequestCache))
+	h.handler.ServeHTTP(w, r.WithContext(ctx))
 	// TODO end transaction
 }

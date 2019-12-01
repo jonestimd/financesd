@@ -35,7 +35,7 @@ var securityQueryFields = &graphql.Field{
 		}
 		if symbol, ok := p.Args["symbol"]; ok {
 			return securities, db.Joins("join asset a on a.id = security.asset_id").
-				Find(&securities, "lower(a.symbol) = lower(?)", symbol.(string)).Error
+				Find(&securities, "a.symbol = ?", symbol.(string)).Error
 		}
 		return securities, db.Find(&securities).Error
 	},

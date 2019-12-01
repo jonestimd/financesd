@@ -3,7 +3,6 @@ package graphql
 import (
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"github.com/jonestimd/financesd/internal/model"
 )
 
 var categorySchema = graphql.NewObject(graphql.ObjectConfig{
@@ -24,7 +23,6 @@ var categoryQueryFields = &graphql.Field{
 	Type: graphql.NewList(categorySchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		categories := make([]*model.TransactionCategory, 0)
-		return categories, db.Find(&categories).Error
+		return NewQuery("transaction_category", "c").Convert(p.Info).Execute(db)
 	},
 }

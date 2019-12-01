@@ -5,7 +5,6 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"github.com/jonestimd/financesd/internal/model"
 )
 
 // Schema
@@ -27,20 +26,15 @@ var companyQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		companies := make([]*model.Company, 0)
-		if isPathSelected(p.Info, "accounts") {
-			db = db.Preload("Accounts") // TODO make sure it only applies to company query and doesn't effect TX
-		}
+		query := NewQuery("company", "c").Convert(p.Info)
 		if id, ok := p.Args["id"]; ok {
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				return companies, db.Find(&companies, intId).Error
-			} else {
-				return nil, err
+				query = query.Where("%s.id = ?", intId)
 			}
 		}
 		if name, ok := p.Args["name"]; ok {
-			return companies, db.Find(&companies, "lower(name) = lower(?)", name.(string)).Error
+			query = query.Where("%s.name = ?", name.(string))
 		}
-		return companies, db.Order("name").Find(&companies).Error
+		return query.Execute(db)
 	},
 }

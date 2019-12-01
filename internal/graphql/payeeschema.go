@@ -5,7 +5,6 @@ import (
 
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
-	"github.com/jonestimd/financesd/internal/model"
 )
 
 // Schema
@@ -26,17 +25,15 @@ var payeeQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		payees := make([]*model.Payee, 0)
-		if id, ok := p.Args["id"]; ok {
+		query := NewQuery("payee", "p").Convert(p.Info)
+		if id, ok := p.Args["id"]; ok { // TODO pass Args to query.Convert()
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				return payees, db.Find(&payees, intId).Error
-			} else {
-				return nil, err
+				query = query.Where("%s.id = ?", intId)
 			}
 		}
 		if name, ok := p.Args["name"]; ok {
-			return payees, db.Find(&payees, "lower(name) = lower(?)", name.(string)).Error
+			query = query.Where("%s.name = ?", name.(string))
 		}
-		return payees, db.Order("name").Find(&payees).Error
+		return query.Execute(db)
 	},
 }

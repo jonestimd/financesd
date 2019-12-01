@@ -1,8 +1,6 @@
 package graphql
 
 import (
-	"strconv"
-
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 )
@@ -26,15 +24,6 @@ var companyQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		query := NewQuery("company", "c").SelectFields(p.Info)
-		if id, ok := p.Args["id"]; ok {
-			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				query = query.Where("%s.id = ?", intId)
-			}
-		}
-		if name, ok := p.Args["name"]; ok {
-			query = query.Where("%s.name = ?", name.(string))
-		}
-		return query.Execute(db)
+		return NewQuery("company", "c").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

@@ -1,8 +1,6 @@
 package graphql
 
 import (
-	"strconv"
-
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 )
@@ -30,16 +28,7 @@ var accountQueryFields = &graphql.Field{
 		"name": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique account name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		query := NewQuery("account", "a").SelectFields(p.Info)
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		if id, ok := p.Args["id"]; ok {
-			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				query = query.Where("%s.id = ?", intId)
-			}
-		}
-		if name, ok := p.Args["name"]; ok {
-			query = query.Where("%s.name = ?", name.(string))
-		}
-		return query.Execute(db)
+		return NewQuery("account", "a").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

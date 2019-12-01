@@ -1,13 +1,10 @@
 package graphql
 
 import (
-	"strconv"
-
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
 )
 
-// Schema
 var payeeSchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "payee",
 	Description: "the other party in a transaction",
@@ -25,15 +22,6 @@ var payeeQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		query := NewQuery("payee", "p").SelectFields(p.Info)
-		if id, ok := p.Args["id"]; ok { // TODO pass Args to query.Convert()
-			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				query = query.Where("%s.id = ?", intId)
-			}
-		}
-		if name, ok := p.Args["name"]; ok {
-			query = query.Where("%s.name = ?", name.(string))
-		}
-		return query.Execute(db)
+		return NewQuery("payee", "p").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

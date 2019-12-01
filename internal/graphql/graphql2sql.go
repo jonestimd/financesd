@@ -61,6 +61,13 @@ func getFieldType(parentType graphql.Type, name string) graphql.Type {
 	return nil
 }
 
+func (q *sqlData) Filter(args map[string]interface{}) *sqlData {
+	for name, value := range args {
+		q.Where(fmt.Sprintf("%%s.%s = ?", toSnakeCase(name)), value)
+	}
+	return q
+}
+
 func (q *sqlData) Where(condition string, args ...interface{}) *sqlData {
 	if q.conditions == nil {
 		q.conditions = make([]string, 0)

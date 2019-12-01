@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"errors"
-	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jinzhu/gorm"
@@ -58,16 +57,9 @@ var transactionQueryFields = &graphql.Field{
 		"accountId": &graphql.ArgumentConfig{Type: graphql.ID, Description: "account ID"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		if id, ok := p.Args["accountId"]; ok {
-			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				db := p.Context.Value(DbContextKey).(*gorm.DB)
-				query := NewQuery("transaction", "t").SelectFields(p.Info).
-					Where("%s.account_id = ?", intId).
-					OrderBy("%[1]s.date, %[1]s.id")
-				return query.Execute(db)
-			} else {
-				return nil, err
-			}
+		if _, ok := p.Args["accountId"]; ok {
+			db := p.Context.Value(DbContextKey).(*gorm.DB)
+			return NewQuery("transaction", "t").SelectFields(p.Info).Filter(p.Args).OrderBy("%[1]s.date, %[1]s.id").Execute(db)
 		}
 		return nil, errors.New("accountId is required")
 	},

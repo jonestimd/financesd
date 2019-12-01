@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"regexp"
 	"strings"
 
@@ -12,22 +14,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type fieldConfig struct {
-	table   string
-	alias   string
-	where   string
-	aggFunc *string
-}
-
 var jsonArrayagg = "json_arrayagg"
-
-var fieldConfigMap = map[string]fieldConfig{
-	"company":       fieldConfig{table: "company", alias: "c", where: "%s.company_id = %%s.id"},
-	"accounts":      fieldConfig{table: "account", alias: "a", where: "%s.id = %%s.company_id", aggFunc: &jsonArrayagg},
-	"details":       fieldConfig{table: "transaction_detail", alias: "td", where: "%s.id = %%s.transaction_id", aggFunc: &jsonArrayagg},
-	"relatedDetail": fieldConfig{table: "transaction_detail", alias: "rd", where: "%s.related_detail_id = %%s.id"},
-	"transaction":   fieldConfig{table: "transaction", alias: "rt", where: "%s.transaction_id = %%s.id"},
-}
 
 type sqlData struct { // TODO unique alias per subquery
 	depth      int
@@ -45,29 +32,33 @@ func NewQuery(table string, alias string) *sqlData {
 	return &sqlData{table: table, alias: alias, columns: make([]string, 0)}
 }
 
-func subQuery(parent *sqlData, config fieldConfig) *sqlData {
-	q := NewQuery(config.table, fmt.Sprintf("%s%d", config.alias, parent.depth))
-	q.depth = parent.depth + 1
-	q.aggFunc = config.aggFunc
-	return q
+func (q *sqlData) SelectFields(info graphql.ResolveInfo) *sqlData {
+	gq := findQuery(info)
+	fieldType := info.Schema.QueryType().Fields()[gq.Name.Value].Type
+	return q.selectFields(fieldType, gq.GetSelectionSet().Selections)
 }
 
-func (q *sqlData) Convert(info graphql.ResolveInfo) *sqlData { // TODO rename to Select()?
-	return q.Append(findQuery(info).GetSelectionSet().Selections)
-}
-
-func (q *sqlData) Append(selection []ast.Selection) *sqlData {
+func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection) *sqlData {
 	for _, field := range selection {
 		switch field := field.(type) {
 		case *ast.Field:
 			if field.GetSelectionSet() == nil {
-				q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toColumn(field.Name.Value)))
+				q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toSnakeCase(field.Name.Value)))
 			} else {
-				q.addSubQuery(field.Name.Value, fieldConfigMap[field.Name.Value], field.GetSelectionSet().Selections)
+				fieldType := getFieldType(outType, field.Name.Value)
+				q.addSubQuery(field.Name.Value, fieldType, field.GetSelectionSet().Selections)
 			}
 		}
 	}
 	return q
+}
+
+func getFieldType(parentType graphql.Type, name string) graphql.Type {
+	switch gt := unwrapList(parentType).(type) {
+	case *graphql.Object:
+		return gt.Fields()[name].Type
+	}
+	return nil
 }
 
 func (q *sqlData) Where(condition string, args ...interface{}) *sqlData {
@@ -89,14 +80,42 @@ func (q *sqlData) OrderBy(orderBy string) *sqlData {
 	return q
 }
 
-func (q *sqlData) addSubQuery(name string, config fieldConfig, selection []ast.Selection) {
-	subQuery := subQuery(q, config)
-	subQuery.Append(selection).Where(fmt.Sprintf(config.where, q.alias))
-	q.columns = append(q.columns, fmt.Sprintf("\"%s\", (%s)", name, subQuery))
+func (q *sqlData) addSubQuery(fieldName string, outType graphql.Type, selection []ast.Selection) {
+	table := getTableName(outType)
+	subQuery := NewQuery(table, fmt.Sprintf("%s%d", getAlias(table), q.depth))
+	subQuery.depth = q.depth + 1
+	subQuery.selectFields(outType, selection)
+	if isList(outType) {
+		subQuery.aggFunc = &jsonArrayagg
+		subQuery.Where(fmt.Sprintf("%s.id = %%s.%s_id", q.alias, q.table))
+	} else {
+		subQuery.Where(fmt.Sprintf("%s.%s_id = %%s.id", q.alias, toSnakeCase(fieldName)))
+	}
+	q.columns = append(q.columns, fmt.Sprintf("\"%s\", (%s)", fieldName, subQuery))
+}
+
+func isList(gt graphql.Type) bool {
+	_, ok := gt.(*graphql.List)
+	return ok
+}
+
+func unwrapList(gt graphql.Type) graphql.Type {
+	if list, ok := gt.(*graphql.List); ok {
+		return list.OfType
+	}
+	return gt
+}
+
+func getTableName(gt graphql.Type) string {
+	return toSnakeCase(unwrapList(gt).Name())
 }
 
 func (q *sqlData) Execute(db *gorm.DB) ([]interface{}, error) {
-	if rows, err := db.CommonDB().Query(q.String(), q.Args...); err != nil {
+	query := q.String()
+	if os.Getenv("SHOW_SQL") != "" {
+		log.Println(query)
+	}
+	if rows, err := db.CommonDB().Query(query, q.Args...); err != nil {
 		return nil, err
 	} else {
 		results := make([]interface{}, 0)
@@ -114,7 +133,12 @@ func (q *sqlData) Execute(db *gorm.DB) ([]interface{}, error) {
 }
 
 func (q *sqlData) String() string {
+	indent := strings.Repeat("  ", q.depth)
 	builder := &strings.Builder{}
+	if q.depth > 0 {
+		builder.WriteRune('\n')
+		builder.WriteString(indent)
+	}
 	builder.WriteString("select ")
 	if q.aggFunc != nil {
 		builder.WriteString(*q.aggFunc)
@@ -124,21 +148,35 @@ func (q *sqlData) String() string {
 	if q.aggFunc != nil {
 		builder.WriteRune(')')
 	}
-	builder.WriteString(fmt.Sprintf("\nfrom %s %s", q.table, q.alias))
+	builder.WriteString(fmt.Sprintf("\n%sfrom %s %s", indent, q.table, q.alias))
 	if q.conditions != nil {
-		builder.WriteString("\nwhere ")
+		builder.WriteRune('\n')
+		builder.WriteString(indent)
+		builder.WriteString("where ")
 		builder.WriteString(strings.Join(q.conditions, " and "))
 	}
 	if q.orderBy != nil {
-		builder.WriteString("\norder by ")
+		builder.WriteRune('\n')
+		builder.WriteString(indent)
+		builder.WriteString("order by ")
 		builder.WriteString(fmt.Sprintf(*q.orderBy, q.alias))
 	}
 	return builder.String()
 }
 
-func toColumn(fieldName string) string {
+func getAlias(table string) string {
+	alias := table[0:1]
+	for i, rune := range table {
+		if rune == '_' && len(table) > i+1 {
+			alias += table[i+1 : i+2]
+		}
+	}
+	return alias
+}
+
+func toSnakeCase(name string) string {
 	re := regexp.MustCompile("[A-Z]")
-	return re.ReplaceAllStringFunc(fieldName, func(match string) string {
+	return re.ReplaceAllStringFunc(name, func(match string) string {
 		return "_" + strings.ToLower(match)
 	})
 }

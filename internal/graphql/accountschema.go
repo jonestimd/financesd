@@ -30,7 +30,7 @@ var accountQueryFields = &graphql.Field{
 		"name": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique account name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		query := NewQuery("account", "a").Convert(p.Info)
+		query := NewQuery("account", "a").SelectFields(p.Info)
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
 		if id, ok := p.Args["id"]; ok {
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {

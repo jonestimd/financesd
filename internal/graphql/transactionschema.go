@@ -61,7 +61,7 @@ var transactionQueryFields = &graphql.Field{
 		if id, ok := p.Args["accountId"]; ok {
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
 				db := p.Context.Value(DbContextKey).(*gorm.DB)
-				query := NewQuery("transaction", "t").Convert(p.Info).
+				query := NewQuery("transaction", "t").SelectFields(p.Info).
 					Where("%s.account_id = ?", intId).
 					OrderBy("%[1]s.date, %[1]s.id")
 				return query.Execute(db)

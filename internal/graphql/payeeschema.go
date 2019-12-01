@@ -25,7 +25,7 @@ var payeeQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		query := NewQuery("payee", "p").Convert(p.Info)
+		query := NewQuery("payee", "p").SelectFields(p.Info)
 		if id, ok := p.Args["id"]; ok { // TODO pass Args to query.Convert()
 			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
 				query = query.Where("%s.id = ?", intId)

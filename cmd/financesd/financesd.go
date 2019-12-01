@@ -47,8 +47,14 @@ type graphqlHandler struct {
 }
 
 func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// TODO start transaction
-	ctx := context.WithValue(r.Context(), graphql.DbContextKey, h.db.Debug())
+	// start transaction
+	tx := h.db.Begin()
+	ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
 	h.handler.ServeHTTP(w, r.WithContext(ctx))
-	// TODO end transaction
+	// end transaction
+	if tx.Error == nil {
+		tx.Commit()
+	} else {
+		tx.Rollback()
+	}
 }

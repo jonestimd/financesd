@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-akka/configuration"
@@ -37,8 +39,14 @@ func main() {
 		Pretty:   false,
 		GraphiQL: true,
 	})
-	http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
-	http.ListenAndServe("localhost:8080", nil)
+	if cwd, err := os.Getwd(); err != nil {
+		log.Fatal("can't get current directory")
+	} else {
+		webRoot := filepath.Join(cwd, "web", "resources")
+		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
+		http.Handle("/finances/", http.StripPrefix("/finances/", http.FileServer(http.Dir(webRoot))))
+		log.Fatal(http.ListenAndServe("localhost:8080", nil))
+	}
 }
 
 type graphqlHandler struct {

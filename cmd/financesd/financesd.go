@@ -2,34 +2,42 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
 
-	// "os"
-
-	_ "github.com/go-sql-driver/mysql" // because
+	"github.com/go-akka/configuration"
+	_ "github.com/go-sql-driver/mysql" // register the driver
 	"github.com/graphql-go/handler"
 	"github.com/jinzhu/gorm"
 	"github.com/jonestimd/financesd/internal/graphql"
 )
 
 func main() {
-	db, err := gorm.Open("mysql", "user:password@tcp(host)/schema?parseTime=true")
+	config := configuration.LoadConfig(fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME")))
+	driver := strings.ToLower(config.GetString("connection.default.driver"))
+	user := config.GetString("connection.default.user")
+	password := config.GetString("connection.default.password")
+	host := config.GetString("connection.default.host")
+	schema := config.GetString("connection.default.schema")
+	db, err := gorm.Open(driver, fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, host, schema))
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
 	db.SingularTable(true)
 
-	schema, err := graphql.Schema()
+	graphqlSchema, err := graphql.Schema()
 	if err != nil {
 		panic(err.Error())
 	}
 	h := handler.New(&handler.Config{
-		Schema:   &schema,
+		Schema:   &graphqlSchema,
 		Pretty:   false,
 		GraphiQL: true,
 	})
-	http.Handle("/finances/graphql", &graphqlHandler{db: db, handler: h})
+	http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
 	http.ListenAndServe("localhost:8080", nil)
 }
 

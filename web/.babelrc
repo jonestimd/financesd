@@ -1,0 +1,25 @@
+{
+    "presets": [
+        "@babel/preset-react",
+        [
+            "@babel/preset-env",
+            {
+                "targets": {"chrome": "60", "node": "current"},
+                "shippedProposals": true,
+                "useBuiltIns": "entry",
+                "corejs": {"version": 3, "proposals": true}
+            }
+        ],
+        "@babel/preset-typescript"
+    ],
+    "plugins": [
+        // ["@babel/plugin-proposal-decorators", {"legacy": true}],
+        // "istanbul",
+        // ["@babel/plugin-proposal-class-properties", {"loose": true}],
+        // "@babel/plugin-transform-async-to-generator",
+        // "@babel/plugin-proposal-optional-chaining",
+        // "@babel/plugin-proposal-nullish-coalescing-operator"
+    ],
+    "sourceMaps": true,
+    "retainLines": true
+}

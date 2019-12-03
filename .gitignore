@@ -1,2 +1,4 @@
 /cmd/financesd/financesd
 *.debug
+/web/node_modules/
+/web/dist/

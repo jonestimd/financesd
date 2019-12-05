@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/go-akka/configuration"
@@ -43,9 +47,11 @@ func main() {
 		log.Fatal("can't get current directory")
 	} else {
 		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
-		http.Handle("/finances/", http.StripPrefix("/finances/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "resources")))))
 		http.Handle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
-		log.Fatal(http.ListenAndServe("localhost:8080", nil))
+		http.Handle("/finances/", loadHtml(cwd, config))
+		host := config.GetString("listen.host", "localhost")
+		port := config.GetInt32("listen.port", 8080)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil))
 	}
 }
 
@@ -64,5 +70,32 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		tx.Commit()
 	} else {
 		tx.Rollback()
+	}
+}
+
+type staticHtml string
+
+func loadHtml(cwd string, config *configuration.Config) staticHtml {
+	htmlTemplate, err := template.New("index.html").ParseFiles(filepath.Join(cwd, "web", "resources", "index.html"))
+	if err != nil {
+		log.Panicf("Error reading template html: %v", err)
+	}
+	data := map[string]string{
+		"baseUrl": config.GetString("baseUrl", "http://localhost:8080/finances"),
+	}
+	var buff bytes.Buffer
+	if err = htmlTemplate.Execute(&buff, data); err != nil {
+		log.Panicf("Error generating html: %v", err)
+	}
+	return staticHtml(buff.String())
+}
+
+func (sf staticHtml) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	sendSize := int64(len(sf))
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
+	w.Header().Set("Content-Length", strconv.FormatInt(sendSize, 10))
+	w.WriteHeader(http.StatusOK)
+	if r.Method != "HEAD" {
+		io.CopyN(w, strings.NewReader(string(sf)), sendSize)
 	}
 }

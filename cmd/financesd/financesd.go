@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-akka/configuration"
 	_ "github.com/go-sql-driver/mysql" // register the driver
@@ -73,10 +74,19 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type staticHtml string
+type staticHtml struct {
+	modTime time.Time
+	size    int64
+	content string
+}
 
-func loadHtml(cwd string, config *configuration.Config) staticHtml {
-	htmlTemplate, err := template.New("index.html").ParseFiles(filepath.Join(cwd, "web", "resources", "index.html"))
+func loadHtml(cwd string, config *configuration.Config) *staticHtml {
+	file := filepath.Join(cwd, "web", "resources", "index.html")
+	stat, err := os.Stat(file)
+	if err != nil {
+		log.Panicf("Can't stat file: %s, %v", file, err)
+	}
+	htmlTemplate, err := template.New("index.html").ParseFiles(file)
 	if err != nil {
 		log.Panicf("Error reading template html: %v", err)
 	}
@@ -87,15 +97,39 @@ func loadHtml(cwd string, config *configuration.Config) staticHtml {
 	if err = htmlTemplate.Execute(&buff, data); err != nil {
 		log.Panicf("Error generating html: %v", err)
 	}
-	return staticHtml(buff.String())
+	content := buff.String()
+	return &staticHtml{content: content, size: int64(len(content)), modTime: stat.ModTime()}
 }
 
-func (sf staticHtml) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	sendSize := int64(len(sf))
+var unixEpochTime = time.Unix(0, 0)
+
+func (st *staticHtml) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Header().Set("Allow", "GET, OPTIONS, HEAD")
+	}
+	w.Header().Set("Last-Modified", st.modTime.UTC().Format(http.TimeFormat))
+	ims := r.Header.Get("If-Modified-Since")
+	if ims != "" && !st.modTime.IsZero() && st.modTime != unixEpochTime {
+		if t, err := http.ParseTime(ims); err == nil {
+			// The Date-Modified header truncates sub-second precision, so
+			// use mtime < t+1s instead of mtime <= t to check for unmodified.
+			if !st.modTime.Before(t.Add(1 * time.Second)) {
+				h := w.Header()
+				delete(h, "Content-Type")
+				delete(h, "Content-Length")
+				if h.Get("Etag") != "" {
+					delete(h, "Last-Modified")
+				}
+				w.WriteHeader(http.StatusNotModified)
+				return
+			}
+		}
+	}
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Content-Length", strconv.FormatInt(sendSize, 10))
+	w.Header().Set("Content-Length", strconv.FormatInt(st.size, 10))
 	w.WriteHeader(http.StatusOK)
-	if r.Method != "HEAD" {
-		io.CopyN(w, strings.NewReader(string(sf)), sendSize)
+	if r.Method == "GET" {
+		io.CopyN(w, strings.NewReader(st.content), st.size)
 	}
 }

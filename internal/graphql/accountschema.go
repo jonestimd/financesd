@@ -11,6 +11,7 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	Description: "a financial account",
 	Fields: addAudit(graphql.Fields{
 		"id":          &graphql.Field{Type: graphql.ID},
+		"companyId":   &graphql.Field{Type: graphql.Int},
 		"company":     &graphql.Field{Type: companySchema},
 		"name":        &graphql.Field{Type: graphql.String},
 		"description": &graphql.Field{Type: graphql.String},

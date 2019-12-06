@@ -1,13 +1,14 @@
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 
-module.exports = [{
+module.exports = {
+    mode: 'development',
     entry: {
-      styles: './src/styles/app.scss',
-      bundle: './src/lib/main.tsx'
+      styles: './web/src/styles/app.scss',
+      bundle: './web/src/lib/component/main.tsx'
     },
     output: {
-      path: path.resolve(__dirname, 'dist'),
+      path: path.resolve(__dirname, 'web', 'dist'),
       filename: '[name].js',
       publicPath: '/finances/scripts/bundle.js'
     },
@@ -27,7 +28,7 @@ module.exports = [{
         {
           test: /\.tsx?$/,
           loader: 'babel-loader',
-          include: /src\/lib/,
+          include: /web\/src\/lib/,
         }
       ]
     },
@@ -35,4 +36,4 @@ module.exports = [{
       modules: [path.resolve(__dirname, 'public'), 'node_modules'],
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
-  }];
+  };

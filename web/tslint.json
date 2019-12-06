@@ -1,0 +1,15 @@
+{
+    "defaultSeverity": "error",
+    "extends": ["tslint:recommended", "tslint-react"],
+    "linterOptions": {
+        "exclude": ["*.js"]
+    },
+    "rules": {
+        "curly": [true, "ignore-same-line"],
+        "member-access": [true, "no-public"],
+        "quotemark": [true, "single"],
+        "max-line-length": 160,
+        "eofline": false,
+        "no-console": false
+    }
+}

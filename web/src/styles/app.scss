@@ -15,7 +15,11 @@ table.table {
         }
     }
 
-    td {
+    td, th {
         padding: 1px 2px;
+    }
+
+    td.check-mark {
+        text-align: center;
     }
 }

@@ -1,38 +1,25 @@
 $mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
 $mdc-theme-accent: rgb(84, 110, 122) !default;
 
+@import "@material/theme/mdc-theme";
+@import "@material/typography/mdc-typography";
+
 .hidden {
     display: none;
 }
+$app-margin: 5px !default;
 
-table.table {
-    border-collapse: collapse;
-
-    &, tr, th, td {
-        border: 1px solid #d8d8d8;
-    }
-
-    thead {
-        background: #ccddee;
-    }
-
-    tbody {
-        tr:nth-child(even) {
-            background: #eeeeee;
-        }
-    }
-
-    td, th {
-        padding: 1px 2px;
-    }
-
-    td.check-mark {
-        text-align: center;
-    }
-
-    td.number {
-        text-align: right;
-    }
+body {
+    margin: 0;
+    // .app-main {
+    //     position: absolute;
+    //     top: $app-margin;
+    //     bottom: $app-margin;
+    //     left: $app-margin;
+    //     right: $app-margin;
+    //     overflow: hidden;
+    // }
 }
 
+@import "table.scss";
 @import "progress.scss";

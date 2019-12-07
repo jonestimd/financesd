@@ -1,4 +1,5 @@
 /cmd/financesd/financesd
-*.debug
 /node_modules/
 /web/dist/
+
+__debug_bin

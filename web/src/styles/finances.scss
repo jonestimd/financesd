@@ -1,5 +1,5 @@
 $mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
-$mdc-theme-accent: rgb(84, 110, 122) !default;
+$mdc-theme-secondary: rgb(84, 110, 122) !default;
 
 @import "@material/theme/mdc-theme";
 @import "@material/typography/mdc-typography";
@@ -7,18 +7,10 @@ $mdc-theme-accent: rgb(84, 110, 122) !default;
 .hidden {
     display: none;
 }
-$app-margin: 5px !default;
+$app-margin: 0 !default;
 
 body {
-    margin: 0;
-    // .app-main {
-    //     position: absolute;
-    //     top: $app-margin;
-    //     bottom: $app-margin;
-    //     left: $app-margin;
-    //     right: $app-margin;
-    //     overflow: hidden;
-    // }
+    margin: $app-margin;
 }
 
 @import "table.scss";

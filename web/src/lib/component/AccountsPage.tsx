@@ -3,6 +3,19 @@ import {Link} from 'react-router-dom';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import * as formats from '../formats';
+import Table, {IColumn} from './Table';
+import {AccountModel} from '../model/AccountModel';
+
+const columns: IColumn<AccountModel>[] = [
+    {name: 'Company', getter: (account) => account.companyName},
+    {name: 'Name', getter: (account) => <Link to={`account/${account.id}`}>{account.name}</Link>},
+    {name: 'Type', getter: (account) => account.type, className: 'enum'},
+    {name: 'Description', getter: (account) => account.description},
+    {name: 'Account Number', getter: (account) => account.accountNo},
+    {name: 'Closed', getter: (account) => account.closed ? <span>&#x1F5F8;</span> : null, className: 'boolean'},
+    {name: 'Transactions', getter: (account) => account.transactionCount, className: 'number'},
+    {name: 'Balance', getter: (account) => formats.currency.format(account.balance), className: 'number'},
+];
 
 const AccountsPage: React.FC<{}> = observer(() => {
     const {accountStore} = React.useContext(RootStoreContext);
@@ -10,34 +23,7 @@ const AccountsPage: React.FC<{}> = observer(() => {
     React.useEffect(() => accountStore.getAccounts(), []);
     return (
         <div className='account-list'>
-            <table className='table'>
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Name</th>
-                        <th className='enum'>Type</th>
-                        <th>Description</th>
-                        <th>Account Number</th>
-                        <th className='boolean'>Closed</th>
-                        <th className='number'>Transactions</th>
-                        <th className='number'>Balance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {accounts.map(account => (
-                        <tr>
-                            <td>{account.companyName}</td>
-                            <td><Link to={`account/${account.id}`}>{account.name}</Link></td>
-                            <td className='enum'>{account.type}</td>
-                            <td>{account.description || ''}</td>
-                            <td>{account.accountNo || ''}</td>
-                            <td className='boolean'>{account.closed ? <span>&#x1F5F8;</span> : null}</td>
-                            <td className='number'>{account.transactionCount}</td>
-                            <td className='number'>{formats.currency.format(account.balance)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <Table columns={columns} data={accounts}/>
         </div>
     );
 });

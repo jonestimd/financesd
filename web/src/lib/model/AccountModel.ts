@@ -15,6 +15,8 @@ export interface IAccount {
     accountNo: string;
     closed: boolean;
     version: number;
+    transactionCount: number;
+    balance: number;
 }
 
 export class AccountModel implements IAccount {
@@ -26,6 +28,8 @@ export class AccountModel implements IAccount {
     accountNo: string;
     closed: boolean;
     version: number;
+    transactionCount: number;
+    balance: number;
     company?: ICompany;
 
     constructor(account: IAccount, company?: ICompany) {

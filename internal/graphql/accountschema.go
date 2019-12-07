@@ -10,17 +10,28 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "account",
 	Description: "a financial account",
 	Fields: addAudit(graphql.Fields{
-		"id":          &graphql.Field{Type: graphql.ID},
-		"companyId":   &graphql.Field{Type: graphql.Int},
-		"company":     &graphql.Field{Type: companySchema},
-		"name":        &graphql.Field{Type: graphql.String},
-		"description": &graphql.Field{Type: graphql.String},
-		"accountNo":   &graphql.Field{Type: graphql.String},
-		"type":        &graphql.Field{Type: graphql.String}, // TODO enum?
-		"closed":      &graphql.Field{Type: yesNoType},
-		"currencyId":  &graphql.Field{Type: graphql.Int},
+		"id":               &graphql.Field{Type: graphql.ID},
+		"companyId":        &graphql.Field{Type: graphql.Int},
+		"company":          &graphql.Field{Type: companySchema},
+		"name":             &graphql.Field{Type: graphql.String},
+		"description":      &graphql.Field{Type: graphql.String},
+		"accountNo":        &graphql.Field{Type: graphql.String},
+		"type":             &graphql.Field{Type: graphql.String}, // TODO enum?
+		"closed":           &graphql.Field{Type: yesNoType},
+		"currencyId":       &graphql.Field{Type: graphql.Int},
+		"transactionCount": &graphql.Field{Type: graphql.Int},
+		"balance":          &graphql.Field{Type: graphql.Float},
 	}),
 })
+
+var derivedFieldSql = map[string]string{
+	"transactionCount": "(select count(*) from transaction where account_id = %s.id)",
+	"balance": "(select sum(td.amount) " +
+		"from transaction tx " +
+		"join transaction_detail td on tx.id = td.transaction_id " +
+		"left join transaction_category tc on td.transaction_category_id = tc.id " +
+		"where tx.account_id = %s.id and coalesce(tc.amount_type, '') != 'ASSET_VALUE')",
+}
 
 var accountQueryFields = &graphql.Field{
 	Type: graphql.NewList(accountSchema),
@@ -30,6 +41,6 @@ var accountQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)
-		return NewQuery("account", "a").SelectFields(p.Info).Filter(p.Args).Execute(db)
+		return NewQuery("account", "a").SelectFields(p.Info, derivedFieldSql).Filter(p.Args).Execute(db)
 	},
 }

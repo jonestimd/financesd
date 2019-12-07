@@ -6,7 +6,7 @@ import {computed, flow, observable} from 'mobx';
 
 const graphql = `{
     accounts {
-        id name type accountNo description closed companyId version
+        id name type accountNo description closed companyId version transactionCount balance
     }
     companies {
         id name version
@@ -22,9 +22,9 @@ const loadingAccounts = 'Loading accounts...';
 export class AccountStore {
     private loading: boolean = false;
     @observable
-    private companiesById: {[id: string]: ICompany};
+    private companiesById: {[id: string]: ICompany} = {};
     @observable
-    private accountsById: {[id: string]: AccountModel};
+    private accountsById: {[id: string]: AccountModel} = {};
     private messageStore: IMessageStore;
 
     constructor(messageStore: IMessageStore) {
@@ -33,17 +33,19 @@ export class AccountStore {
 
     @computed
     get accounts(): AccountModel[] {
-        if (this.accountsById) return Object.values(this.accountsById).sort(AccountModel.compare);
-        if (!this.loading) {
-            this.messageStore.addProgressMessage(loadingAccounts);
-            this.loadAccounts();
-        }
-        return [];
+        return Object.values(this.accountsById).sort(AccountModel.compare);
     }
 
     @computed
     get companies(): ICompany[] {
-        return this.companiesById ? sortByName(this.companiesById) : [];
+        return sortByName(this.companiesById);
+    }
+
+    getAccounts(): void {
+        if (!this.loading) {
+            this.messageStore.addProgressMessage(loadingAccounts);
+            this.loadAccounts();
+        }
     }
 
     private loadAccounts = flow(function* () {

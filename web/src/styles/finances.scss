@@ -1,3 +1,10 @@
+$mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
+$mdc-theme-accent: rgb(84, 110, 122) !default;
+
+.hidden {
+    display: none;
+}
+
 table.table {
     border-collapse: collapse;
 
@@ -22,4 +29,10 @@ table.table {
     td.check-mark {
         text-align: center;
     }
+
+    td.number {
+        text-align: right;
+    }
 }
+
+@import "progress.scss";

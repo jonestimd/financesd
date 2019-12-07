@@ -8,11 +8,13 @@
             "name": "financesd",
             "type": "go",
             "request": "launch",
-            "preLaunchTask": "build-web",
+            // "preLaunchTask": "build-web",
             "mode": "auto",
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/cmd/financesd/financesd.go",
-            "env": {},
+            "env": {
+                "SHOW_SQL": false
+            },
             "args": []
         }
     ]

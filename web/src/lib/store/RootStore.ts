@@ -1,7 +1,7 @@
 import React from 'react';
 import {IMessageStore} from './MessageStore';
 import {AccountStore} from './AccountStore';
-import {action, observable} from 'mobx';
+import {action, observable, computed} from 'mobx';
 
 declare global {
     // tslint:disable-next-line: interface-name
@@ -31,7 +31,7 @@ export class RootStore implements IMessageStore {
     }
 
     get progressMessage(): string | undefined {
-        return this.progressMessages[0];
+        return this.progressMessages.length > 0 ? this.progressMessages[0] : undefined;
     }
 }
 

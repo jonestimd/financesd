@@ -4,7 +4,7 @@ const autoprefixer = require('autoprefixer');
 module.exports = {
     mode: 'development',
     entry: {
-      styles: './web/src/styles/app.scss',
+      styles: './web/src/styles/finances.scss',
       bundle: './web/src/lib/component/main.tsx'
     },
     output: {

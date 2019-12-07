@@ -32,18 +32,28 @@ func NewQuery(table string, alias string) *sqlData {
 	return &sqlData{table: table, alias: alias, columns: make([]string, 0)}
 }
 
-func (q *sqlData) SelectFields(info graphql.ResolveInfo) *sqlData {
+func (q *sqlData) SelectFields(info graphql.ResolveInfo, derivedFieldSqls ...map[string]string) *sqlData {
 	gq := findQuery(info)
 	fieldType := info.Schema.QueryType().Fields()[gq.Name.Value].Type
-	return q.selectFields(fieldType, gq.GetSelectionSet().Selections)
+	return q.selectFields(fieldType, gq.GetSelectionSet().Selections, derivedFieldSqls...)
 }
 
-func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection) *sqlData {
+func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection, derivedFieldSqls ...map[string]string) *sqlData {
+	derivedfieldSql := make(map[string]string)
+	for _, fieldSql := range derivedFieldSqls {
+		for field, sql := range fieldSql {
+			derivedfieldSql[field] = sql
+		}
+	}
 	for _, field := range selection {
 		switch field := field.(type) {
 		case *ast.Field:
 			if field.GetSelectionSet() == nil {
-				q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toSnakeCase(field.Name.Value)))
+				if sql, ok := derivedfieldSql[field.Name.Value]; ok {
+					q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s", field.Name.Value, fmt.Sprintf(sql, q.alias)))
+				} else {
+					q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toSnakeCase(field.Name.Value)))
+				}
 			} else {
 				fieldType := getFieldType(outType, field.Name.Value)
 				q.addSubQuery(field.Name.Value, fieldType, field.GetSelectionSet().Selections)

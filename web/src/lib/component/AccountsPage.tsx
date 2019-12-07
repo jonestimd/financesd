@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import * as formats from '../formats';
@@ -26,7 +27,7 @@ const AccountsPage: React.FC<{}> = observer(() => {
                     {accounts.map(account => (
                         <tr>
                             <td>{account.companyName}</td>
-                            <td>{account.name}</td>
+                            <td><Link to={`account/${account.id}`}>{account.name}</Link></td>
                             <td>{account.type}</td>
                             <td>{account.description || ''}</td>
                             <td>{account.accountNo || ''}</td>

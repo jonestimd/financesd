@@ -42,7 +42,7 @@ export class AccountStore {
     }
 
     getAccounts(): void {
-        if (!this.loading) {
+        if (!this.loading && Object.keys(this.accounts).length === 0) {
             this.messageStore.addProgressMessage(loadingAccounts);
             this.loadAccounts();
         }

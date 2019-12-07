@@ -1,7 +1,7 @@
 import React from 'react';
 import {IMessageStore} from './MessageStore';
 import {AccountStore} from './AccountStore';
-import {action, observable, computed} from 'mobx';
+import {action, observable} from 'mobx';
 
 declare global {
     // tslint:disable-next-line: interface-name

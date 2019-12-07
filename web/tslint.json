@@ -10,6 +10,6 @@
         "quotemark": [true, "single"],
         "max-line-length": 160,
         "eofline": false,
-        "no-console": false
+        "no-console": [true, "log"]
     }
 }

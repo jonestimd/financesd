@@ -1,6 +1,7 @@
 table.table {
     border-spacing: 0;
     position: relative;
+    top: $mdc-top-app-bar-dense-row-height;
     width: 100%;
 
     th, td {
@@ -15,7 +16,7 @@ table.table {
         color: $mdc-theme-on-secondary;
         font-weight: 500;
         position: sticky;
-        top: $app-margin;
+        top: $app-margin + $mdc-top-app-bar-dense-row-height;
     }
 
     tbody {

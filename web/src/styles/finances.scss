@@ -1,8 +1,14 @@
 $mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
 $mdc-theme-secondary: rgb(84, 110, 122) !default;
 
-@import "@material/theme/mdc-theme";
-@import "@material/typography/mdc-typography";
+@import "@material/react-typography/index";
+@import '@material/react-button/index';
+@import '@material/react-icon-button/index';
+@import "@material/react-material-icon/index";
+@import "@material/react-top-app-bar/index";
+@import '@material/react-list/index';
+@import '@material/react-menu-surface/index';
+@import '@material/react-menu/index';
 
 .hidden {
     display: none;

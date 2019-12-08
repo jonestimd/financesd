@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import * as formats from '../formats';
+import TopAppBar from './TopAppBar';
 import Table, {IColumn} from './Table';
 import {AccountModel} from '../model/AccountModel';
 
@@ -23,7 +24,8 @@ const AccountsPage: React.FC<{}> = observer(() => {
     React.useEffect(() => accountStore.getAccounts(), []);
     return (
         <div className='account-list'>
-            <Table columns={columns} data={accounts}/>
+            <TopAppBar title='Accounts' menuItems={['Categories', 'Securities']}/>
+            <Table columns={columns} data={accounts} />
         </div>
     );
 });

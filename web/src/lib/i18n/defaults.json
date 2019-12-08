@@ -1,0 +1,13 @@
+{
+    "menu.accounts": "Accounts",
+    "menu.categories": "Categories",
+    "menu.securities": "Securities",
+    "account.company": "Company",
+    "account.name": "Name",
+    "account.type": "Type",
+    "account.description": "Description",
+    "account.number": "Account Number",
+    "account.closed": "Closed",
+    "account.transactions": "Transactions",
+    "account.balance": "Balance"
+}

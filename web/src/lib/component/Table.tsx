@@ -16,7 +16,7 @@ const Table: React.FC<ITableProps<any>> = <T extends {id: string}>({columns, dat
         <table className='table'>
             <thead>
                 <tr>
-                    {columns.map((column, i) =>
+                    {columns.map((column) =>
                         <th key={column.name} className={column.className}>{column.name}</th>
                     )}
                 </tr>

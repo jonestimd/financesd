@@ -1,39 +1,31 @@
 import {createBrowserHistory} from 'history';
 import React from 'react';
 import ReactDom from 'react-dom';
-import {Route, Router, Switch} from 'react-router';
+import {Route, Router} from 'react-router';
 import {RootStore, RootStoreContext} from '../store/RootStore';
 import ProgressMessage from './ProgressMessage';
 import AccountsPage from './AccountsPage';
+import TransactionsPage from './TransactionsPage';
 
 const history = createBrowserHistory();
 
 const NotFound = () => <h4>No such page</h4>;
 
-interface IMainProps {
-    match: {url: string};
-}
-
-const Main: React.FC<IMainProps> = ({match}) => (
-    <main className='app-main'>
-        <Switch>
-            <Route exact={true} path={match.url} component={AccountsPage}/>
-            <Route component={NotFound}/>
-        </Switch>
-    </main>
-);
-
 const Routes: React.FC<{}> = () => {
     const rootStore = (window.rootStore = window.rootStore || new RootStore());
     return (
         <RootStoreContext.Provider value={rootStore}>
-            <ProgressMessage/>
-            <Router history={history}>
-                <Route path='/finances' component={Main}/>
-            </Router>
+            <main className='app-main'>
+                <ProgressMessage />
+                <Router history={history}>
+                    <Route exact={true} path='/finances' component={AccountsPage} />
+                    <Route exact={true} path='/finances/account/:accountId' component={TransactionsPage} />
+                    <Route component={NotFound} />
+                </Router>
+            </main>
         </RootStoreContext.Provider>
     );
 };
 
 const domContainer = document.querySelector('#root-container');
-ReactDom.render(<Routes/>, domContainer);
+ReactDom.render(<Routes />, domContainer);

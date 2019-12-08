@@ -6,7 +6,7 @@ import Menu, {MenuList, MenuListItem, MenuListItemText} from '@material/react-me
 
 export interface ITopAppBarProps {
     title: string;
-    menuItems: string[];
+    menuItems: React.ReactNode[];
 }
 
 const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems}) => {

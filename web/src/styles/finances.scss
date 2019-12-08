@@ -19,5 +19,10 @@ body {
     margin: $app-margin;
 }
 
+a.menu-item {
+    text-decoration: unset;
+    color: inherit;
+}
+
 @import "table.scss";
 @import "progress.scss";

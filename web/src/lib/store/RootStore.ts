@@ -2,6 +2,8 @@ import React from 'react';
 import {IMessageStore} from './MessageStore';
 import {AccountStore} from './AccountStore';
 import {action, observable} from 'mobx';
+import {TransactionStore} from './TransactionStore';
+import {PayeeStore} from './PayeeStore';
 
 declare global {
     // tslint:disable-next-line: interface-name
@@ -13,7 +15,9 @@ declare global {
 export class RootStore implements IMessageStore {
     @observable
     private progressMessages: string[] = [];
-    private _accountStore = new AccountStore(this);
+    accountStore = new AccountStore(this);
+    payeeStore = new PayeeStore(this);
+    transactionStore = new TransactionStore(this);
 
     @action
     addProgressMessage(message: string) {
@@ -24,10 +28,6 @@ export class RootStore implements IMessageStore {
     removeProgressMessage(message: string) {
         const index = this.progressMessages.indexOf(message);
         if (index >= 0) this.progressMessages.splice(index, 1);
-    }
-
-    get accountStore() {
-        return this._accountStore;
     }
 
     get progressMessage(): string | undefined {

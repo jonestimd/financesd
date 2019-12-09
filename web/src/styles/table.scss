@@ -33,7 +33,7 @@ table.table {
         padding: 1px 3px;
     }
 
-    td.boolean, th.boolean, td.number, th.number, td.enum, th.enum {
+    td.boolean, th.boolean, td.number, th.number, td.enum, th.enum, td.date, th.date {
         width: 1px;
     }
 
@@ -42,6 +42,11 @@ table.table {
     }
 
     td.number {
+        white-space: nowrap;
         text-align: right;
+    }
+
+    td.date {
+        white-space: nowrap;
     }
 }

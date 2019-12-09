@@ -1,7 +1,7 @@
 import {createBrowserHistory} from 'history';
 import React from 'react';
 import ReactDom from 'react-dom';
-import {Route, Router} from 'react-router';
+import {Route, Router, Switch} from 'react-router';
 import {RootStore, RootStoreContext} from '../store/RootStore';
 import ProgressMessage from './ProgressMessage';
 import AccountsPage from './AccountsPage';
@@ -18,9 +18,11 @@ const Routes: React.FC<{}> = () => {
             <main className='app-main'>
                 <ProgressMessage />
                 <Router history={history}>
-                    <Route exact={true} path='/finances' component={AccountsPage} />
-                    <Route exact={true} path='/finances/account/:accountId' component={TransactionsPage} />
-                    <Route component={NotFound} />
+                    <Switch>
+                        <Route exact={true} path='/finances' component={AccountsPage} />
+                        <Route exact={true} path='/finances/account/:accountId' component={TransactionsPage} />
+                        <Route component={NotFound} />
+                    </Switch>
                 </Router>
             </main>
         </RootStoreContext.Provider>

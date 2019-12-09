@@ -9,5 +9,12 @@
     "account.number": "Account Number",
     "account.closed": "Closed",
     "account.transactions": "Transactions",
-    "account.balance": "Balance"
+    "account.balance": "Balance",
+    "transaction.date": "Date",
+    "transaction.referenceNumber": "Ref #",
+    "transaction.payee": "Payee",
+    "transaction.memo": "Description",
+    "transaction.cleared": "\ud83d\uddf8",
+    "transaction.subtotal": "Subtotal",
+    "transaction.balance": "Balance"
 }

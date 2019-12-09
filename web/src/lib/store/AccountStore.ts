@@ -4,7 +4,7 @@ import {indexById, sortByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
 import {computed, flow, observable} from 'mobx';
 
-const graphql = `{
+const query = `{
     accounts {
         id name type accountNo description closed companyId version transactionCount balance
     }
@@ -41,17 +41,21 @@ export class AccountStore {
         return sortByName(this.companiesById);
     }
 
-    getAccounts(): void {
+    getAccount(id: string) {
+        return this.accountsById[id];
+    }
+
+    loadAccounts(): void {
         if (!this.loading && Object.keys(this.accounts).length === 0) {
             this.messageStore.addProgressMessage(loadingAccounts);
-            this.loadAccounts();
+            this._loadAccounts();
         }
     }
 
-    private loadAccounts = flow(function* () {
+    private _loadAccounts = flow(function* () {
         this.loading = true;
         try {
-            const {body: {data}}: IAccountsResponse = yield agent.post('/finances/api/v1/graphql').send({query: graphql});
+            const {body: {data}}: IAccountsResponse = yield agent.post('/finances/api/v1/graphql').send({query});
             this.companiesById = indexById(data.companies);
             this.accountsById = indexById(data.accounts.map((account) => new AccountModel(account, this.companiesById[account.companyId])));
         } catch (err) {

@@ -41,6 +41,11 @@ export class AccountModel implements IAccount {
         return this.company ? this.company.name : "";
     }
 
+    get displayName(): string {
+        if (this.company) return `${this.company.name}: ${this.name}`;
+        return this.name;
+    }
+
     compareTo(that: AccountModel): number {
         const diff = compareByName(this.company, that.company);
         return diff === 0 ? compareByName(this, that) : diff;

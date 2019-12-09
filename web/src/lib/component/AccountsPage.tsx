@@ -24,7 +24,7 @@ const AccountsPage: React.FC<{}> = observer(() => {
     const menuItems = [translate('menu.categories'), translate('menu.securities')];
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
-    React.useEffect(() => accountStore.getAccounts(), []);
+    React.useEffect(() => accountStore.loadAccounts(), []);
     return (
         <div className='account-list'>
             <TopAppBar title={translate('menu.accounts')} menuItems={menuItems} />

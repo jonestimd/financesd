@@ -27,10 +27,17 @@ $progress-circular-size: $progress-circular-height + 2 * $progress-circular-spin
   background: rgba(255, 255, 255, 0.5);
   div.message {
     position: absolute;
-    top: calc(50% - 8px);
+    top: calc(50% - 2.5em);
     left: 0;
     right: 0;
-    text-align: center;
+    width: 75%;
+    height: 5em;
+    margin: auto;
+    display: flex;
+    p {
+      margin: auto;
+      text-align: center;
+    }
   }
 }
 

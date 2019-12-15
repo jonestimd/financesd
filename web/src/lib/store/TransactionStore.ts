@@ -2,11 +2,11 @@ import agent from 'superagent';
 import {TransactionModel, ITransaction} from '../model/TransactionModel';
 import {flow, observable} from 'mobx';
 import {ICategoryStore} from './CategoryStore';
-import {IRootStore} from './RootStore';
+import {RootStore} from './RootStore';
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
-        date referenceNumber payeeId memo cleared
+        date referenceNumber payeeId securityId memo cleared
         details {
             id transactionCategoryId transactionGroupId memo amount assetQuantity
             relatedDetail {transaction {id accountId}}
@@ -33,9 +33,9 @@ export class TransactionStore {
     private pendingAccounts: string[] = [];
     @observable
     private transactionsByAccountId: {[accountId: string]: TransactionModel[]} = {};
-    private rootStore: IRootStore;
+    private rootStore: RootStore;
 
-    constructor(rootStore: IRootStore) {
+    constructor(rootStore: RootStore) {
         this.rootStore = rootStore;
     }
 

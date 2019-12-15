@@ -1,4 +1,6 @@
 $table-border: #c0c0c0 !default;
+$table-even-background: #eeeeee !default;
+$table-hover-background: #dddddd !default;
 
 table.table {
     border-spacing: 0;
@@ -29,8 +31,14 @@ table.table {
     }
 
     tbody {
+        tr:hover {
+            background: $table-hover-background;
+        }
         tr:nth-child(even) {
-            background: #eeeeee;
+            background: $table-even-background;
+            &:hover {
+                background: $table-hover-background;
+            }
         }
 
         td {
@@ -68,6 +76,9 @@ table.table {
         }
         tr:nth-child(even) {
             background: unset;
+            &:hover {
+                background: $table-hover-background;
+            }
         }
         tr.detail td {
             color: #505486;

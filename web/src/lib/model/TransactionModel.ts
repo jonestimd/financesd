@@ -25,6 +25,7 @@ export interface ITransaction extends IRelatedTransaction {
     date: string;
     referenceNumber: string;
     payeeId: number;
+    securityId: number;
     memo: string;
     cleared: boolean;
     details: ITransactionDetail[];
@@ -36,6 +37,7 @@ export class TransactionModel implements ITransaction {
     date: string;
     referenceNumber: string;
     payeeId: number;
+    securityId: number;
     memo: string;
     cleared: boolean;
     details: ITransactionDetail[];

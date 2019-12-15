@@ -36,7 +36,7 @@ export class PayeeStore {
     }
 
     loadPayees(): void {
-        if (!this.loading && Object.keys(this.payees).length === 0) {
+        if (!this.loading && Object.keys(this.payeesById).length === 0) {
             this.messageStore.addProgressMessage(loadingPayees);
             this._loadPayees();
         }

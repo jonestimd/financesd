@@ -24,20 +24,22 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     const menuItems = [
         <Link to='/finances/' className='menu-item'>{translate('menu.accounts')}</Link>
     ]
-    const {accountStore, categoryStore, payeeStore, transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, categoryStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => {
         accountStore.loadAccounts();
         categoryStore.loadCategories();
         payeeStore.loadPayees();
+        securityStore.loadSecurities();
         transactionStore.loadTransactions(accountId);
     }, []);
     const account = accountStore.getAccount(accountId);
+    const renderSecurity = (tx: TransactionModel) => securityStore.getSecurity(tx.securityId).name;
     const columns: IColumn<TransactionModel>[] = [
         {key: 'transaction.date', render: tx => tx.date, className: 'date'},
         {key: 'transaction.referenceNumber', render: tx => tx.referenceNumber},
         {key: 'transaction.payee', render: tx => payeeStore.getPayee(tx.payeeId).name},
         {key: 'transaction.memo', render: tx => tx.memo},
-        {key: 'transaction.security', render: () => 'tx.securityId', className: 'security'},
+        {key: 'transaction.security', render: renderSecurity, className: 'security'},
         {key: 'transaction.subtotal', render: tx => formats.currency.format(tx.subtotal), className: (tx) => numberClass(tx && tx.subtotal)},
         {key: 'transaction.cleared', render: tx => tx.cleared ? <span>&#x1F5F8;</span> : null, className: 'boolean'},
         {key: 'transaction.balance', render: tx => formats.currency.format(tx.balance), className: (tx) => numberClass(tx && tx.balance)},

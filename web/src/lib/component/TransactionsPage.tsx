@@ -4,38 +4,61 @@ import TopAppBar from './TopAppBar';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../store/RootStore';
 import {translate} from '../i18n/localize';
-import Table, {IColumn} from './Table';
-import {TransactionModel} from '../model/TransactionModel';
+import {IColumn} from './Table';
+import HeaderDetailTable from './HeaderDetailTable';
+import {TransactionModel, ITransactionDetail} from '../model/TransactionModel';
 import * as formats from '../formats'
 
 interface IProps {
     match: {params: {[name: string]: string}}
 }
 
+const securityAccountTypes = ['BROKERAGE', '_401K'];
+
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
     const menuItems = [
         <Link to='/finances/' className='menu-item'>{translate('menu.accounts')}</Link>
     ]
-    const {accountStore, payeeStore, transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, categoryStore, payeeStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => {
         accountStore.loadAccounts();
+        categoryStore.loadCategories();
         payeeStore.loadPayees();
         transactionStore.loadTransactions(accountId);
     }, []);
     const account = accountStore.getAccount(accountId);
     const columns: IColumn<TransactionModel>[] = [
-        {name: translate('transaction.date'), getter: tx => tx.date, className: 'date'},
-        {name: translate('transaction.referenceNumber'), getter: tx => tx.referenceNumber},
-        {name: translate('transaction.payee'), getter: tx => payeeStore.getPayee(tx.payeeId).name},
-        {name: translate('transaction.memo'), getter: tx => tx.memo},
-        {name: translate('transaction.cleared'), getter: tx => tx.cleared ? <span>&#x1F5F8;</span> : null, className: 'boolean'},
-        {name: translate('transaction.subtotal'), getter: tx => formats.currency.format(tx.subtotal), className: 'number'},
-        {name: translate('transaction.balance'), getter: tx => formats.currency.format(tx.balance), className: 'number'},
+        {key: 'transaction.date', render: tx => tx.date, className: 'date'},
+        {key: 'transaction.referenceNumber', render: tx => tx.referenceNumber},
+        {key: 'transaction.payee', render: tx => payeeStore.getPayee(tx.payeeId).name},
+        {key: 'transaction.memo', render: tx => tx.memo},
+        {key: 'transaction.security', render: () => 'tx.securityId', className: 'security'},
+        {key: 'transaction.subtotal', render: tx => formats.currency.format(tx.subtotal), className: 'number'},
+        {key: 'transaction.cleared', render: tx => tx.cleared ? <span>&#x1F5F8;</span> : null, className: 'boolean'},
+        {key: 'transaction.balance', render: tx => formats.currency.format(tx.balance), className: 'number'},
+    ];
+    const renderCategory = (detail: ITransactionDetail) => {
+        if (detail.relatedDetail) return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId).name}</span>;
+        return <span>{categoryStore.getCategory(detail.transactionCategoryId).displayName}</span>;
+    };
+    const subcolumns: IColumn<ITransactionDetail>[] = [
+        {key: 'detail.group', colspan: 2, render: detail => detail.transactionGroupId},
+        {key: 'detail.category', render: renderCategory, className: 'category'},
+        {key: 'detail.memo', render: detail => detail.memo},
+        {key: 'detail.shares', render: () => 'detail.shares', className: 'security'},
+        {key: 'detail.amount', render: detail => formats.currency.format(detail.amount), className: 'number'},
+        {key: 'dummy1', header: () => '', render: () => ''},
+        {key: 'dummy2', header: () => '', render: () => ''},
     ];
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={menuItems} />
-            <Table columns={columns} data={transactionStore.getTransactions(accountId)} />
+            <HeaderDetailTable
+                className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
+                columns={columns}
+                subColumns={subcolumns}
+                data={transactionStore.getTransactions(accountId)}
+                subrows={tx => tx.details} />
         </>
     );
 });

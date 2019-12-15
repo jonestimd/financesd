@@ -1,12 +1,15 @@
 import agent from 'superagent';
-import {TransactionModel, ITransaction, ITransactionDetail} from '../model/TransactionModel';
+import {TransactionModel, ITransaction} from '../model/TransactionModel';
 import {IMessageStore} from './MessageStore';
 import {flow, observable} from 'mobx';
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
         date referenceNumber payeeId memo cleared
-        details {id transactionCategoryId transactionGroupId memo amount}
+        details {
+            id transactionCategoryId transactionGroupId memo amount assetQuantity
+            relatedDetail {transaction {id accountId}}
+        }
     }
 }`;
 

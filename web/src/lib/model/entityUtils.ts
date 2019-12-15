@@ -1,6 +1,14 @@
-
 export interface IName {
     name: string;
+}
+
+export function compareBy<T, P>(getter: (item: T) => P): (v1: T, v2: T) => number {
+    return (v1: T, v2: T) => {
+        const p1 = getter(v1);
+        const p2 = getter(v2);
+        if (p1 === p2) return 0;
+        return p1 < p2 ? -1 : 1;
+    };
 }
 
 export function compareByName(v1: IName, v2: IName): number {

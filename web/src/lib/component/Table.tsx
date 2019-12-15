@@ -1,31 +1,38 @@
-import React from 'react';
+import React, {ReactNode} from 'react';
+import classnames from 'classnames';
+import {translate} from '../i18n/localize';
 
 export interface IColumn<T> {
-    name: string;
+    key: string;
     className?: string;
-    getter: (row: T) => React.ReactNode;
+    colspan?: number;
+    header?: (key: string) => ReactNode;
+    render: (row: T) => React.ReactNode;
 }
 
 export interface ITableProps<T> {
     columns: IColumn<T>[];
     data: T[];
+    className?: string;
 }
 
-const Table: React.FC<ITableProps<any>> = <T extends {id: string}>({columns, data}: ITableProps<T>) => {
+export interface IRow {
+    id: string;
+}
+
+const Table: React.FC<ITableProps<any>> = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
     return (
-        <table className='table'>
+        <table className={classnames('table', className)}>
             <thead>
                 <tr>
-                    {columns.map((column) =>
-                        <th key={column.name} className={column.className}>{column.name}</th>
-                    )}
+                    {columns.map(({key, className, header = translate}) => <th key={key} className={className}>{header(key)}</th>)}
                 </tr>
             </thead>
             <tbody>
                 {data.map(row => (
                     <tr key={row.id}>
                         {columns.map(column =>
-                            <td key={column.name} className={column.className}>{column.getter(row)}</td>
+                            <td key={column.key} className={column.className}>{column.render(row)}</td>
                         )}
                     </tr>
                 ))}

@@ -1,9 +1,10 @@
 import React from 'react';
+import {action, observable} from 'mobx';
 import {IMessageStore} from './MessageStore';
 import {AccountStore} from './AccountStore';
-import {action, observable} from 'mobx';
-import {TransactionStore} from './TransactionStore';
+import {CategoryStore} from './CategoryStore';
 import {PayeeStore} from './PayeeStore';
+import {TransactionStore} from './TransactionStore';
 
 declare global {
     // tslint:disable-next-line: interface-name
@@ -16,6 +17,7 @@ export class RootStore implements IMessageStore {
     @observable
     private progressMessages: string[] = [];
     accountStore = new AccountStore(this);
+    categoryStore = new CategoryStore(this);
     payeeStore = new PayeeStore(this);
     transactionStore = new TransactionStore(this);
 

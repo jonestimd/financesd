@@ -10,18 +10,18 @@ import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';
 
 const columns: IColumn<AccountModel>[] = [
-    {name: translate('account.company'), getter: (account) => account.companyName},
-    {name: translate('account.name'), getter: (account) => <Link to={`account/${account.id}`}>{account.name}</Link>},
-    {name: translate('account.type'), getter: (account) => accountType(account.type), className: 'enum'},
-    {name: translate('account.description'), getter: (account) => account.description},
-    {name: translate('account.number'), getter: (account) => account.accountNo},
-    {name: translate('account.closed'), getter: (account) => account.closed ? <span>&#x1F5F8;</span> : null, className: 'boolean'},
-    {name: translate('account.transactions'), getter: (account) => account.transactionCount, className: 'number'},
-    {name: translate('account.balance'), getter: (account) => formats.currency.format(account.balance), className: 'number'},
+    {key: 'account.company', render: (account) => account.companyName},
+    {key: 'account.name', render: (account) => <Link to={`account/${account.id}`}>{account.name}</Link>},
+    {key: 'account.type', render: (account) => accountType(account.type), className: 'enum'},
+    {key: 'account.description', render: (account) => account.description},
+    {key: 'account.number', render: (account) => account.accountNo},
+    {key: 'account.closed', render: (account) => account.closed ? <span>&#x1f5f8;</span> : null, className: 'boolean'},
+    {key: 'account.transactions', render: (account) => account.transactionCount, className: 'number'},
+    {key: 'account.balance', render: (account) => formats.currency.format(account.balance), className: 'number'},
 ];
 
 const AccountsPage: React.FC<{}> = observer(() => {
-    const menuItems = [translate('menu.categories'), translate('menu.securities')];
+    const menuItems = [translate('menu.categories'), translate('menu.payees'), translate('menu.securities')];
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
     React.useEffect(() => accountStore.loadAccounts(), []);

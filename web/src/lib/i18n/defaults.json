@@ -1,6 +1,7 @@
 {
     "menu.accounts": "Accounts",
     "menu.categories": "Categories",
+    "menu.payees": "Payees",
     "menu.securities": "Securities",
     "account.company": "Company",
     "account.name": "Name",
@@ -13,8 +14,14 @@
     "transaction.date": "Date",
     "transaction.referenceNumber": "Ref #",
     "transaction.payee": "Payee",
+    "transaction.security": "Security",
     "transaction.memo": "Description",
     "transaction.cleared": "\ud83d\uddf8",
     "transaction.subtotal": "Subtotal",
-    "transaction.balance": "Balance"
+    "transaction.balance": "Balance",
+    "detail.group": "Group",
+    "detail.category": "Category",
+    "detail.memo": "Memo",
+    "detail.shares": "Shares",
+    "detail.amount": "Amount"
 }

@@ -41,8 +41,8 @@ export class AccountStore {
         return sortByName(this.companiesById);
     }
 
-    getAccount(id: string) {
-        return this.accountsById[id];
+    getAccount(id: string | number) {
+        return this.accountsById['' + id] || {} as AccountModel;
     }
 
     loadAccounts(): void {

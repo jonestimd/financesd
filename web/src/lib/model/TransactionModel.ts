@@ -1,16 +1,26 @@
 import {computed} from "mobx";
 
+export interface IRelatedTransaction {
+    id: string;
+    accountId: number;
+}
+
+export interface IRelatedDetail {
+    id: string;
+    transaction: IRelatedTransaction;
+}
+
 export interface ITransactionDetail {
     id: string;
     transactionCategoryId: number;
     transactionGroupId: number;
     memo: string;
     amount: number;
+    assetQuantity: number;
+    relatedDetail: IRelatedDetail;
 }
 
-export interface ITransaction {
-    id: string;
-    accountId: number;
+export interface ITransaction extends IRelatedTransaction {
     date: string;
     referenceNumber: string;
     payeeId: number;

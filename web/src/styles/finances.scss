@@ -24,5 +24,27 @@ a.menu-item {
     color: inherit;
 }
 
+table.transactions {
+    .security {
+        display: none;
+    }
+}
+
+table.transactions,
+table.security-transactions {
+    td.category {
+        span::before {
+            content: '';
+            padding-right: 20px;
+        }
+        span.transfer::before {
+            content: '\02b95';
+            font-weight: bold;
+            color: darkblue;
+            padding-right: 3px;
+        }
+    }
+}
+
 @import "table.scss";
 @import "progress.scss";

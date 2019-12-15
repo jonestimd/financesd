@@ -6,7 +6,7 @@ import {RootStore} from './RootStore';
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
-        date referenceNumber payeeId securityId memo cleared
+        id date referenceNumber payeeId securityId memo cleared
         details {
             id transactionCategoryId transactionGroupId memo amount assetQuantity
             relatedDetail {transaction {id accountId}}

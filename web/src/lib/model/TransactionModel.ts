@@ -21,7 +21,8 @@ export interface ITransactionDetail {
     relatedDetail: IRelatedDetail;
 }
 
-export interface ITransaction extends IRelatedTransaction {
+export interface ITransaction {
+    id: string;
     date: string;
     referenceNumber: string;
     payeeId: number;

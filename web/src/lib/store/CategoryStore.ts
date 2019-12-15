@@ -10,9 +10,14 @@ interface ICategoryResponse {
     body: {data: {categories: ICategory[]}}
 }
 
+export interface ICategoryStore {
+    getCategory: (id: string | number) => CategoryModel;
+    loadCategories: () => void;
+}
+
 const loadingCategories = 'Loading categories...';
 
-export class CategoryStore {
+export class CategoryStore implements ICategoryStore {
     private loading: boolean = false;
     @observable
     private categoriesById: {[id: string]: CategoryModel} = {};

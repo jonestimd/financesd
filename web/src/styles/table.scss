@@ -53,6 +53,9 @@ table.table {
     td.number {
         white-space: nowrap;
         text-align: right;
+        &.negative {
+            color: red;
+        }
     }
 
     td.date {
@@ -68,6 +71,9 @@ table.table {
         }
         tr.detail td {
             color: #505486;
+            &.number.negative {
+                color: rgba(255, 0, 0, 0.7);
+            }
         }
     }
 }

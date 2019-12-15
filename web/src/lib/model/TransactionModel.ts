@@ -1,4 +1,5 @@
 import {computed} from "mobx";
+import {ICategoryStore} from '../store/CategoryStore';
 
 export interface IRelatedTransaction {
     id: string;
@@ -37,16 +38,28 @@ export class TransactionModel implements ITransaction {
     payeeId: number;
     memo: string;
     cleared: boolean;
-    balance: number;
     details: ITransactionDetail[];
+    previous: TransactionModel;
+    categoryStore: ICategoryStore;
 
-    constructor(transaction: ITransaction) {
+    constructor(transaction: ITransaction, categoryStore: ICategoryStore) {
         Object.assign(this, transaction);
+        this.categoryStore = categoryStore;
+    }
+
+    private isAssetValue(detail: ITransactionDetail) {
+        return this.categoryStore.getCategory(detail.transactionCategoryId).isAssetValue;
     }
 
     @computed
     get subtotal() {
-        return this.details.reduce((sum, detail) => sum + detail.amount, 0);
+        return this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
+    }
+
+    @computed
+    get balance(): number {
+        const previousBalance = this.previous ? this.previous.balance : 0;
+        return previousBalance + this.subtotal;
     }
 
     static compare(t1: ITransaction, t2: ITransaction): number {

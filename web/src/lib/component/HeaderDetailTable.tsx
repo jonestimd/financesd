@@ -1,7 +1,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import {translate} from '../i18n/localize';
-import {IColumn, IRow, ITableProps} from './Table';
+import {IColumn, IRow, ITableProps, getClassName} from './Table';
 
 export interface IHeaderDetailTableProps<T, S> extends ITableProps<T> {
     subColumns: IColumn<S>[];
@@ -17,12 +17,12 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
             <thead>
                 <tr>
                     {columns.map(({key, className, colspan, header = translate}) =>
-                        <th key={key} className={className} colSpan={colspan}>{header(key)}</th>
+                        <th key={key} className={getClassName(className)} colSpan={colspan}>{header(key)}</th>
                     )}
                 </tr>
                 <tr className='detail'>
                     {subColumns.map(({key, className, colspan, header = translate}) =>
-                        <th key={key} className={className} colSpan={colspan}>{header(key)}</th>
+                        <th key={key} className={getClassName(className)} colSpan={colspan}>{header(key)}</th>
                     )}
                 </tr>
             </thead>
@@ -30,13 +30,13 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
                 <tbody key={row.id}>
                     <tr>
                         {columns.map(({key, className, render, colspan}) =>
-                            <td key={key} className={className} colSpan={colspan}>{render(row)}</td>
+                            <td key={key} className={getClassName(className, row)} colSpan={colspan}>{render(row)}</td>
                         )}
                     </tr>
                     {subrows(row).map(subrow =>
                         <tr key={subrow.id} className='detail'>
                             {subColumns.map(({key, className, render, colspan}) =>
-                                <td key={key} className={className} colSpan={colspan}>{render(subrow)}</td>
+                                <td key={key} className={getClassName(className, subrow)} colSpan={colspan}>{render(subrow)}</td>
                             )}
                         </tr>
                     )}

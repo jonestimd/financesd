@@ -20,6 +20,10 @@ export interface IAccount {
 }
 
 export class AccountModel implements IAccount {
+    static compare(a1: AccountModel, a2: AccountModel): number {
+        return a1.compareTo(a2);
+    }
+
     id: string;
     companyId: number;
     type: string;
@@ -38,7 +42,7 @@ export class AccountModel implements IAccount {
     }
 
     get companyName(): string {
-        return this.company ? this.company.name : "";
+        return this.company ? this.company.name : '';
     }
 
     get displayName(): string {
@@ -49,9 +53,5 @@ export class AccountModel implements IAccount {
     compareTo(that: AccountModel): number {
         const diff = compareByName(this.company, that.company);
         return diff === 0 ? compareByName(this, that) : diff;
-    }
-
-    static compare(a1: AccountModel, a2: AccountModel): number {
-        return a1.compareTo(a2);
     }
 }

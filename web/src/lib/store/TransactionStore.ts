@@ -1,7 +1,7 @@
 import agent from 'superagent';
-import {TransactionModel, ITransaction} from '../model/TransactionModel';
+import TransactionModel, {ITransaction} from '../model/TransactionModel';
 import {flow, observable} from 'mobx';
-import {ICategoryStore} from './CategoryStore';
+import CategoryStore from './CategoryStore';
 import {RootStore} from './RootStore';
 
 const query = `query($accountId: ID) {
@@ -20,7 +20,7 @@ interface ITransactionsResponse {
 
 const loadingTransactions = 'Loading transactions...';
 
-function toModels(transactions: ITransaction[], categoryStore: ICategoryStore): TransactionModel[] {
+function toModels(transactions: ITransaction[], categoryStore: CategoryStore): TransactionModel[] {
     const models = transactions.map(tx => new TransactionModel(tx, categoryStore)).sort(TransactionModel.compare);
     models.reduce((previous, model) => {
         model.previous = previous;
@@ -29,7 +29,7 @@ function toModels(transactions: ITransaction[], categoryStore: ICategoryStore): 
     return models;
 }
 
-export class TransactionStore {
+export default class TransactionStore {
     private pendingAccounts: string[] = [];
     @observable
     private transactionsByAccountId: {[accountId: string]: TransactionModel[]} = {};

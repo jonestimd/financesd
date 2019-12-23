@@ -19,8 +19,8 @@ const Routes: React.FC<{}> = () => {
                 <ProgressMessage />
                 <Router history={history}>
                     <Switch>
-                        <Route exact={true} path='/finances' component={AccountsPage} />
-                        <Route exact={true} path='/finances/account/:accountId' component={TransactionsPage} />
+                        <Route exact path='/finances' component={AccountsPage} />
+                        <Route exact path='/finances/account/:accountId' component={TransactionsPage} />
                         <Route component={NotFound} />
                     </Switch>
                 </Router>

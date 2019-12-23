@@ -1,13 +1,13 @@
-import {Bundle, defaultKey, translate} from './localize';
+import {IBundle, defaultKey, translate} from './localize';
 
-const bundle: Bundle = {
+const bundle: IBundle = {
     [defaultKey]: {
-        BANK: "Bank",
-        BROKERAGE: "Brokerage",
-        CASH: "Cash",
-        CREDIT: "Credit",
-        LOAN: "Loan",
-        _401K: "401(K)",
+        BANK: 'Bank',
+        BROKERAGE: 'Brokerage',
+        CASH: 'Cash',
+        CREDIT: 'Credit',
+        LOAN: 'Loan',
+        _401K: '401(K)',
     }
 };
 

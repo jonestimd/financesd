@@ -13,7 +13,7 @@ export function compareBy<T, P>(getter: (item: T) => P): (v1: T, v2: T) => numbe
 
 export function compareByName(v1: IName, v2: IName): number {
     if (v1 === undefined) return v2 === undefined ? 0 : -1;
-    return v2 === undefined ? 1 : v1.name.toLocaleLowerCase().localeCompare(v2.name.toLocaleLowerCase())
+    return v2 === undefined ? 1 : v1.name.toLocaleLowerCase().localeCompare(v2.name.toLocaleLowerCase());
 }
 
 export function sortByName<T extends IName>(itemMap: {[id: string]: T}): T[] {

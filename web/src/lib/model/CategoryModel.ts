@@ -1,4 +1,4 @@
-import {computed} from "mobx";
+import {computed} from 'mobx';
 
 export type AmountType = 'DEBIT_DEPOSIT' | 'ASSET_VALUE';
 

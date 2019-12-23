@@ -12,16 +12,18 @@ export interface ITopAppBarProps {
 const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems}) => {
     const menuAnchor = React.useRef(null);
     const [showMenu, setShowMenu] = React.useState(false);
+    const toggleMenu = React.useCallback(() => setShowMenu(!showMenu), [showMenu]);
+    const hideMenu = React.useCallback(() => setShowMenu(false), []);
     return (
         <MDCAppBar fixed dense>
             <TopAppBarRow>
                 <TopAppBarSection>
-                    <IconButton onClick={() => setShowMenu(!showMenu)}><MaterialIcon icon='menu' /></IconButton>
+                    <IconButton onClick={toggleMenu}><MaterialIcon icon='menu' /></IconButton>
                     <TopAppBarTitle>{title}</TopAppBarTitle>
                 </TopAppBarSection>
             </TopAppBarRow>
             <div ref={menuAnchor} className='mdc-menu-surface--anchor'>
-                <Menu open={showMenu} onClose={() => setShowMenu(false)} onSelected={() => setShowMenu(false)} anchorElement={menuAnchor.current}>
+                <Menu open={showMenu} onClose={hideMenu} onSelected={hideMenu} anchorElement={menuAnchor.current}>
                     <MenuList>
                         {menuItems.map((item, index) =>
                             <MenuListItem key={index}>

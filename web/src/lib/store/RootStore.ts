@@ -1,10 +1,10 @@
 import React from 'react';
-import {MessageStore} from './MessageStore';
-import {AccountStore} from './AccountStore';
-import {CategoryStore} from './CategoryStore';
-import {PayeeStore} from './PayeeStore';
-import {TransactionStore} from './TransactionStore';
-import {SecurityStore} from './SecurityStore';
+import MessageStore from './MessageStore';
+import AccountStore from './AccountStore';
+import CategoryStore from './CategoryStore';
+import PayeeStore from './PayeeStore';
+import TransactionStore from './TransactionStore';
+import SecurityStore from './SecurityStore';
 
 declare global {
     // tslint:disable-next-line: interface-name

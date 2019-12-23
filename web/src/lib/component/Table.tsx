@@ -31,8 +31,8 @@ const Table: React.FC<ITableProps<any>> = <T extends IRow>({columns, data, class
         <table className={classnames('table', className)}>
             <thead>
                 <tr>
-                    {columns.map(({key, className, header = translate}) =>
-                         <th key={key} className={getClassName(className)}>{header(key)}</th>
+                    {columns.map(({key, className: colClass, header = translate}) =>
+                         <th key={key} className={getClassName(colClass)}>{header(key)}</th>
                     )}
                 </tr>
             </thead>

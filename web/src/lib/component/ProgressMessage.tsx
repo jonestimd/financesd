@@ -7,15 +7,15 @@ const ProgressMessage: React.FC<{}> = observer(() => {
     const message = rootStore.messageStore.progressMessage;
     return (
         <div className={'progress-overlay' + (message ? '' : ' hidden')}>
-            <div className="progress-circular">
+            <div className='progress-circular'>
                 <div className='message'><p>{message}</p></div>
-                <div className="progress-circular-wrapper">
-                    <div className="progress-circular-inner">
-                        <div className="progress-circular-left">
-                            <div className="progress-circular-spinner"></div>
+                <div className='progress-circular-wrapper'>
+                    <div className='progress-circular-inner'>
+                        <div className='progress-circular-left'>
+                            <div className='progress-circular-spinner' />
                         </div>
-                        <div className="progress-circular-right">
-                            <div className="progress-circular-spinner"></div>
+                        <div className='progress-circular-right'>
+                            <div className='progress-circular-spinner' />
                         </div>
                     </div>
                 </div>

@@ -7,7 +7,7 @@ import {computed, flow, observable} from 'mobx';
 const query = '{securities {id name scale symbol type version}}';
 
 interface ISecurityResponse {
-    body: {data: {securities: ISecurity[]}}
+    body: {data: {securities: ISecurity[]}};
 }
 
 const loadingSecurities = 'Loading securities...';
@@ -17,7 +17,7 @@ export interface ISecurityStore {
     loadSecurities: () => void;
 }
 
-export class SecurityStore {
+export default class SecurityStore {
     private loading: boolean = false;
     @observable
     private securitiesById: {[id: string]: SecurityModel} = {};
@@ -43,10 +43,10 @@ export class SecurityStore {
         }
     }
 
-    private _loadSecurities = flow(function* () {
+    private _loadSecurities = flow(function*() {
         this.loading = true;
         try {
-            const {body: {data}}: ISecurityResponse = yield agent.post('/finances/api/v1/graphql').send({query: query});
+            const {body: {data}}: ISecurityResponse = yield agent.post('/finances/api/v1/graphql').send({query});
             this.securitiesById = indexById(data.securities.map(security => new SecurityModel(security)));
         } catch (err) {
             console.error('error gettting securities', err); // TODO show toast

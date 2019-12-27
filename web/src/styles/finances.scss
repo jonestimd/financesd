@@ -40,11 +40,13 @@ table.security-transactions {
         span.transfer::before {
             content: '\02b95';
             font-weight: bold;
+            font-size: small;
             color: darkblue;
             padding-right: 3px;
         }
     }
 }
 
+@import "scrollable.scss";
 @import "table.scss";
 @import "progress.scss";

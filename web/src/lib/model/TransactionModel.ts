@@ -41,7 +41,6 @@ export default class TransactionModel implements ITransaction {
     }
 
     id: string;
-    accountId: number;
     date: string;
     referenceNumber: string;
     payeeId: number;
@@ -51,26 +50,18 @@ export default class TransactionModel implements ITransaction {
     @observable
     details: ITransactionDetail[];
     @observable
-    previous: TransactionModel;
+    subtotal: number;
+    @observable
+    balance: number;
     categoryStore: CategoryStore;
 
-    constructor(transaction: ITransaction, categoryStore: CategoryStore) {
+    constructor(transaction: ITransaction, categoryStore:  CategoryStore) {
         Object.assign(this, transaction);
         this.categoryStore = categoryStore;
+        this.subtotal = this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
     }
 
     private isAssetValue(detail: ITransactionDetail) {
         return this.categoryStore.getCategory(detail.transactionCategoryId).isAssetValue;
-    }
-
-    @computed
-    get subtotal() {
-        return this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
-    }
-
-    @computed
-    get balance(): number {
-        const previousBalance = this.previous ? this.previous.balance : 0;
-        return previousBalance + this.subtotal;
     }
 }

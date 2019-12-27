@@ -10,11 +10,6 @@ interface ICategoryResponse {
     body: {data: {categories: ICategory[]}};
 }
 
-export interface ICategoryStore {
-    getCategory: (id: string | number) => CategoryModel;
-    loadCategories: () => void;
-}
-
 const loadingCategories = 'Loading categories...';
 
 export default class CategoryStore implements ICategoryStore {

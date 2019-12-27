@@ -73,7 +73,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
                 className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
                 columns={columns}
                 subColumns={subcolumns}
-                data={transactionStore.getTransactions(accountId)}
+                data={transactionStore.getTransactionsModel(accountId).transactions}
                 subrows={getDetails} />
         </>
     );

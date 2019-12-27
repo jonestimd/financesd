@@ -1,8 +1,8 @@
 import agent from 'superagent';
-import TransactionModel, {ITransaction} from '../model/TransactionModel';
+import {ITransaction} from '../model/TransactionModel';
 import {flow, observable} from 'mobx';
-import CategoryStore from './CategoryStore';
 import {RootStore} from './RootStore';
+import TransactionTableModel from '../model/TransactionTableModel';
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
@@ -20,27 +20,18 @@ interface ITransactionsResponse {
 
 const loadingTransactions = 'Loading transactions...';
 
-function toModels(transactions: ITransaction[], categoryStore: CategoryStore): TransactionModel[] {
-    const models = transactions.map(tx => new TransactionModel(tx, categoryStore)).sort(TransactionModel.compare);
-    models.reduce((previous, model) => {
-        model.previous = previous;
-        return model;
-    });
-    return models;
-}
-
 export default class TransactionStore {
     private pendingAccounts: string[] = [];
     @observable
-    private transactionsByAccountId: {[accountId: string]: TransactionModel[]} = {};
+    private transactionsByAccountId: {[accountId: string]: TransactionTableModel} = {};
     private rootStore: RootStore;
 
     constructor(rootStore: RootStore) {
         this.rootStore = rootStore;
     }
 
-    getTransactions(accountId: string): TransactionModel[] {
-        return this.transactionsByAccountId[accountId] || [];
+    getTransactionsModel(accountId: string): TransactionTableModel {
+        return this.transactionsByAccountId[accountId] || TransactionTableModel.EMPTY;
     }
 
     loadTransactions(accountId: string): void {
@@ -55,7 +46,7 @@ export default class TransactionStore {
         try {
             const variables = {accountId};
             const {body: {data}}: ITransactionsResponse = yield agent.post('/finances/api/v1/graphql').send({query, variables});
-            this.transactionsByAccountId[accountId] = toModels(data.transactions, this.rootStore.categoryStore);
+            this.transactionsByAccountId[accountId] = new TransactionTableModel(data.transactions, this.rootStore.categoryStore);
         } catch (err) {
             console.error('error gettting transactions', err);
         } finally {

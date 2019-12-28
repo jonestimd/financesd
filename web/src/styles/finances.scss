@@ -45,6 +45,9 @@ table.security-transactions {
             padding-right: 3px;
         }
     }
+    td.number {
+        min-width: 6em;
+    }
 }
 
 @import "scrollable.scss";

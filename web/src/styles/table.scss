@@ -31,6 +31,10 @@ table.table {
     }
 
     tbody {
+        tr.prototype {
+            position: absolute;
+            top: -1000px;
+        }
         tr:hover {
             background: $table-hover-background;
         }

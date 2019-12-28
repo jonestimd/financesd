@@ -1,40 +1,66 @@
 import React from 'react';
 import classNames from 'classnames';
 import {translate} from '../i18n/localize';
-import {IColumn, IRow, ITableProps, getClassName} from './Table';
-import ScrollViewport from './ScrollViewport';
+import {IColumn, IRow, getClassName} from './Table';
+import VirtualScroll from './VirtualScroll';
+import IMixedRowTableModel from '../model/IMixedRowTableModel';
 
-export interface IHeaderDetailTableProps<T, S> extends ITableProps<T> {
+export interface IHeaderDetailTableProps<T, S> {
+    className?: string;
+    columns: IColumn<T>[];
     subColumns: IColumn<S>[];
     subrows: (row: T) => S[];
+    model: IMixedRowTableModel<T>;
 }
 
 type TableType = React.FC<IHeaderDetailTableProps<any, any>>;
-const chunk = 50;
+const defaultRowHeight = 22;
+
+const useHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: number = 0) => {
+    return React.useMemo(() => tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight, [tableRef]);
+};
 
 const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
-    const {columns, subColumns, data, subrows, className} = props;
+    const {columns, subColumns, model, subrows, className} = props;
     const [startRow, setStartRow] = React.useState(0);
-    const [endRow, setEndRow] = React.useState(0);
     const [offset, setOffset] = React.useState(0);
     const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
-    const bodyRef: React.MutableRefObject<HTMLTableSectionElement> = React.useRef(null);
+    const rowHeight = useHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
+    const headerHeight = useHeight(tableRef.current, 'thead');
+    const scrollHeight = React.useMemo(() => tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0,
+        [tableRef.current, headerHeight]);
     React.useEffect(() => {
-        if (data.length > 0 && bodyRef.current.getBoundingClientRect().height === 0) {
-            setStartRow(data.length - chunk);
-            setEndRow(data.length);
+        if (tableRef.current && model.groups.length > 0) {
+            const visibleRows = Math.ceil(scrollHeight / rowHeight);
+            const start = Math.max(0, model.rowCount - visibleRows);
+            const initOffset = Math.min(0, scrollHeight - (model.rowCount - start) * rowHeight);
+            setStartRow(start);
+            setOffset(initOffset);
         }
-        else if (data.length > 0) {
-            const headerHeight = bodyRef.current.getBoundingClientRect().top - tableRef.current.getBoundingClientRect().top;
-            const bodyHeight = bodyRef.current.getBoundingClientRect().height;
-            const scrollHeight = tableRef.current.parentElement.getBoundingClientRect().height;
-            setOffset(scrollHeight - bodyHeight - headerHeight);
+    }, [model, tableRef.current, rowHeight]);
+    const [startGroup, precedingRows] = model.getGroupIndex(startRow);
+    const endRow = startRow + Math.ceil(scrollHeight / rowHeight);
+    const [endGroup] = model.getGroupIndex(endRow);
+    const top = offset - (startRow - precedingRows) * rowHeight;
+    const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => {
+        let newOffset = offset - deltaY, start = startRow;
+        if (newOffset > 0 && start > 0) {
+            const deltaRows = Math.ceil(newOffset / rowHeight);
+            start = start - deltaRows;
         }
-    }, [data, tableRef.current, bodyRef.current, startRow, endRow]);
-    const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => setOffset((value) => value - deltaY), []);
+        else if (newOffset < -rowHeight) {
+            const deltaRows = Math.floor(-newOffset / rowHeight);
+            start = start + deltaRows;
+        }
+        if (start >= 0 && start < model.rowCount) {
+            newOffset += rowHeight * (start - startRow);
+            setStartRow(start);
+            setOffset(newOffset);
+        }
+    }, [offset, startRow, rowHeight]);
     return (
-        <ScrollViewport scroll={{onWheel, itemCount: data.length, start: data.length / 2, end: data.length / 2 + 20}}>
-            <table ref={tableRef} className={classNames('table header-detail', className)} style={{top: offset}}>
+        <VirtualScroll onWheel={onWheel} itemCount={model.rowCount} start={startRow} end={endRow}>
+            <table ref={tableRef} className={classNames('table header-detail', className)} style={{top}}>
                 <thead>
                     <tr>
                         {columns.map(({key, className: colClass, colspan, header = translate}) =>
@@ -47,16 +73,17 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
                         )}
                     </tr>
                 </thead>
-                <tbody ref={bodyRef}>
-                    {data.slice(startRow, endRow).map((row, index) =>
+                <tbody>
+                    <tr className='prototype'><td>0</td></tr>
+                    {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
                         <React.Fragment key={row.id}>
-                            <tr className={classNames({even: index % 2})}>
+                            <tr className={classNames({even: (startGroup + index) % 2})}>
                                 {columns.map(({key, className: colClass, render, colspan}) =>
                                     <td key={key} className={getClassName(colClass, row)} colSpan={colspan}>{render(row)}</td>
                                 )}
                             </tr>
                             {subrows(row).map(subrow =>
-                                <tr key={subrow.id} className={classNames('detail', {even: index % 2})}>
+                                <tr key={subrow.id} className={classNames('detail', {even: (startGroup + index) % 2})}>
                                     {subColumns.map(({key, className: colClass, render, colspan}) =>
                                         <td key={key} className={getClassName(colClass, subrow)} colSpan={colspan}>{render(subrow)}</td>
                                     )}
@@ -66,7 +93,7 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
                     )}
                 </tbody>
             </table>
-        </ScrollViewport>
+        </VirtualScroll>
     );
 };
 

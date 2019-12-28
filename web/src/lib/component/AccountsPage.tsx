@@ -21,7 +21,7 @@ const columns: IColumn<AccountModel>[] = [
 ];
 
 const AccountsPage: React.FC<{}> = observer(() => {
-    const menuItems = [translate('menu.categories'), translate('menu.payees'), translate('menu.securities')];
+    const menuItems = [<Link to='/finances/categories'>{translate('menu.categories')}</Link>, translate('menu.payees'), translate('menu.securities')];
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
     React.useEffect(() => accountStore.loadAccounts(), []);

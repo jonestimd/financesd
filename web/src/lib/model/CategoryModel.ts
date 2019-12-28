@@ -11,6 +11,7 @@ export interface ICategory {
     security: boolean;
     income: boolean;
     version: number;
+    transactionCount: number;
 }
 
 interface ICategoryStore {
@@ -26,6 +27,7 @@ export class CategoryModel implements ICategory {
     security: boolean;
     income: boolean;
     version: number;
+    transactionCount: number;
     categoryStore: ICategoryStore;
 
     constructor(category: ICategory, categoryStore: ICategoryStore) {

@@ -23,5 +23,12 @@
     "detail.category": "Category",
     "detail.memo": "Memo",
     "detail.shares": "Shares",
-    "detail.amount": "Amount"
+    "detail.amount": "Amount",
+    "category.parent": "Parent",
+    "category.code": "Code",
+    "category.description": "Description",
+    "category.amountType": "Type",
+    "category.security": "Security",
+    "category.income": "Income",
+    "category.transactionCount": "Transactions"
 }

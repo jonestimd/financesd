@@ -4,7 +4,7 @@ import {indexById, compareBy} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
 import {computed, flow, observable} from 'mobx';
 
-const query = '{categories {id code description amountType parentId security income version}}';
+const query = '{categories {id code description amountType parentId security transactionCount income version}}';
 
 interface ICategoryResponse {
     body: {data: {categories: ICategory[]}}

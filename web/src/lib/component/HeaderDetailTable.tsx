@@ -42,7 +42,7 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
     const endRow = startRow + Math.ceil(scrollHeight / rowHeight);
     const [endGroup] = model.getGroupIndex(endRow);
     const top = offset - (startRow - precedingRows) * rowHeight;
-    const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => {
+    const onScroll = React.useCallback((deltaY: number) => {
         let newOffset = offset - deltaY, start = startRow;
         if (newOffset > 0 && start > 0) {
             const deltaRows = Math.ceil(newOffset / rowHeight);
@@ -59,7 +59,7 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
         }
     }, [offset, startRow, rowHeight]);
     return (
-        <VirtualScroll onWheel={onWheel} itemCount={model.rowCount} start={startRow} end={endRow}>
+        <VirtualScroll onScroll={onScroll} itemCount={model.rowCount} start={startRow} end={endRow}>
             <table ref={tableRef} className={classNames('table header-detail', className)} style={{top}}>
                 <thead>
                     <tr>

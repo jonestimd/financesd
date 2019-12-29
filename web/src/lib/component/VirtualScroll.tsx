@@ -31,16 +31,23 @@ const VitrualScroll: React.FC<IProps> = ({children, itemCount, start, end, onScr
         };
     }, [onResize]);
     const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => onScroll(deltaY), [onScroll]);
+    const onKeyDown = React.useCallback(({target, key, shiftKey, altKey, ctrlKey, metaKey}: React.KeyboardEvent) => {
+        if (!shiftKey && !ctrlKey && !altKey && !metaKey) {
+            const div = target as HTMLDivElement;
+            if (key === 'PageUp') onScroll(-div.clientHeight / 2);
+            else if (key === 'PageDown') onScroll(div.clientHeight / 2);
+        }
+    }, [onScroll]);
     const scrollbarRef: React.MutableRefObject<HTMLDivElement> = React.useRef(null);
     const viewHeight = scrollbarRef.current ? scrollbarRef.current.clientHeight - 2 * scrollSize : 0;
-    const height = itemCount ? Math.max(scrollSize, viewHeight * (end - start) / itemCount) : viewHeight;
-    const top = itemCount ? Math.min(viewHeight - height, start * viewHeight / itemCount) : 0;
+    const handleHeight = itemCount ? Math.max(scrollSize, viewHeight * (end - start) / itemCount) : viewHeight;
+    const top = itemCount ? Math.min(viewHeight - handleHeight, start * viewHeight / itemCount) : 0;
     return (
         <div className={classNames(className, 'hide-scroll')} onWheel={onWheel}>
-            <div className='scrollable'>{children}</div>
+            <div className='scrollable' onKeyDown={onKeyDown} tabIndex={0}>{children}</div>
             <div ref={scrollbarRef} className='scroll-bar'>
                 <div className='up arrow' />
-                <div className='scroll-handle' style={{height, top}} />
+                <div className='scroll-handle' style={{height: handleHeight, top}} />
                 <div className='down arrow' />
             </div>
         </div>);

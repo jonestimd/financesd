@@ -16,8 +16,8 @@ export interface IHeaderDetailTableProps<T, S> {
 type TableType = React.FC<IHeaderDetailTableProps<any, any>>;
 const defaultRowHeight = 22;
 
-const useHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: number = 0) => {
-    return React.useMemo(() => tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight, [tableRef]);
+const getHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: number = 0) => {
+    return tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight;
 };
 
 const useRedraw = () => {
@@ -32,38 +32,46 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
     const [offset, setOffset] = React.useState(0);
     const onResize = useRedraw();
     const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
-    const rowHeight = useHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
-    const headerHeight = useHeight(tableRef.current, 'thead');
+    const rowHeight = getHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
+    const headerHeight = getHeight(tableRef.current, 'thead');
     const scrollHeight = tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0;
+    const gotoEnd = React.useCallback(() => {
+        const visibleRows = Math.ceil(scrollHeight / rowHeight);
+        const start = Math.max(0, model.rowCount - visibleRows);
+        const initOffset = Math.min(0, scrollHeight - (model.rowCount - start) * rowHeight);
+        setStartRow(start);
+        setOffset(initOffset);
+    }, [scrollHeight, rowHeight, model.rowCount]);
     React.useEffect(() => {
-        if (tableRef.current && model.groups.length > 0) {
-            const visibleRows = Math.ceil(scrollHeight / rowHeight);
-            const start = Math.max(0, model.rowCount - visibleRows);
-            const initOffset = Math.min(0, scrollHeight - (model.rowCount - start) * rowHeight);
-            setStartRow(start);
-            setOffset(initOffset);
-        }
+        if (tableRef.current && model.groups.length > 0) gotoEnd();
     }, [model, tableRef.current, rowHeight]);
     const [startGroup, precedingRows] = model.getGroupIndex(startRow);
     const endRow = startRow + Math.ceil(scrollHeight / rowHeight);
     const [endGroup] = model.getGroupIndex(endRow);
     const top = offset - (startRow - precedingRows) * rowHeight;
     const onScroll = React.useCallback((deltaY: number) => {
-        let newOffset = offset - deltaY, start = startRow;
-        if (newOffset > 0 && start > 0) {
-            const deltaRows = Math.ceil(newOffset / rowHeight);
-            start = start - deltaRows;
+        if (deltaY === -Infinity) {
+            setStartRow(0);
+            setOffset(0);
         }
-        else if (newOffset < -rowHeight) {
-            const deltaRows = Math.floor(-newOffset / rowHeight);
-            start = start + deltaRows;
+        else if (deltaY === Infinity) gotoEnd();
+        else {
+            let newOffset = offset - deltaY, start = startRow;
+            if (newOffset > 0 && start > 0) {
+                const deltaRows = Math.ceil(newOffset / rowHeight);
+                start = start - deltaRows;
+            }
+            else if (newOffset < -rowHeight) {
+                const deltaRows = Math.floor(-newOffset / rowHeight);
+                start = start + deltaRows;
+            }
+            if (start >= 0 && start < model.rowCount) {
+                newOffset += rowHeight * (start - startRow);
+                setStartRow(start);
+                setOffset(newOffset);
+            }
         }
-        if (start >= 0 && start < model.rowCount) {
-            newOffset += rowHeight * (start - startRow);
-            setStartRow(start);
-            setOffset(newOffset);
-        }
-    }, [offset, startRow, rowHeight]);
+    }, [offset, startRow, rowHeight, gotoEnd]);
     return (
         <VirtualScroll onScroll={onScroll} onResize={onResize} itemCount={model.rowCount} start={startRow} end={endRow}>
             <table ref={tableRef} className={classNames('table header-detail', className)} style={{top}}>

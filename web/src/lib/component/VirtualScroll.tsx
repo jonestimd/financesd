@@ -31,11 +31,16 @@ const VitrualScroll: React.FC<IProps> = ({children, itemCount, start, end, onScr
         };
     }, [onResize]);
     const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => onScroll(deltaY), [onScroll]);
-    const onKeyDown = React.useCallback(({target, key, shiftKey, altKey, ctrlKey, metaKey}: React.KeyboardEvent) => {
-        if (!shiftKey && !ctrlKey && !altKey && !metaKey) {
-            const div = target as HTMLDivElement;
-            if (key === 'PageUp') onScroll(-div.clientHeight / 2);
-            else if (key === 'PageDown') onScroll(div.clientHeight / 2);
+    const onKeyDown = React.useCallback(({currentTarget: target, key, shiftKey, altKey, ctrlKey, metaKey}: React.KeyboardEvent) => {
+        if (!shiftKey && !altKey && !metaKey) {
+            if (ctrlKey) {
+                if (key === 'Home') onScroll(-Infinity);
+                else if (key === 'End') onScroll(Infinity);
+            }
+            else {
+                if (key === 'PageUp') onScroll(-target.clientHeight / 2);
+                else if (key === 'PageDown') onScroll(target.clientHeight / 2);
+            }
         }
     }, [onScroll]);
     const scrollbarRef: React.MutableRefObject<HTMLDivElement> = React.useRef(null);

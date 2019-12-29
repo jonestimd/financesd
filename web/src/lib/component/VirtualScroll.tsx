@@ -45,7 +45,7 @@ const VitrualScroll: React.FC<IProps> = ({children, itemCount, start, end, onScr
     }, [onScroll]);
     const scrollbarRef: React.MutableRefObject<HTMLDivElement> = React.useRef(null);
     const viewHeight = scrollbarRef.current ? scrollbarRef.current.clientHeight - 2 * scrollSize : 0;
-    const handleHeight = itemCount ? Math.max(scrollSize, viewHeight * (end - start) / itemCount) : viewHeight;
+    const handleHeight = itemCount ? viewHeight * (end - start) / itemCount : viewHeight;
     const top = itemCount ? Math.min(viewHeight - handleHeight, start * viewHeight / itemCount) : 0;
     return (
         <div className={classNames(className, 'hide-scroll')} onWheel={onWheel}>

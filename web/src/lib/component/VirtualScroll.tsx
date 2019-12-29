@@ -1,6 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
 
+type ResizeListener = (event: UIEvent) => void;
+
 interface IProps {
     className?: string;
     children: React.ReactNode;
@@ -8,12 +10,26 @@ interface IProps {
     start: number;
     end: number;
     onScroll: (deltaY: number) => void;
+    onResize: ResizeListener;
 }
 
 const scrollSize = 15;
-// window.onresize = (event: UIEvent) => console.log(event);
 
-const VitrualScroll: React.FC<IProps> = ({children, itemCount, start, end, onScroll, className = 'scroll-container'}) => {
+const resizeListeners: ResizeListener[] = [];
+window.onresize = (event: UIEvent) => {
+    resizeListeners.forEach(listener => {
+        listener(event);
+    });
+};
+
+const VitrualScroll: React.FC<IProps> = ({children, itemCount, start, end, onScroll, onResize, className = 'scroll-container'}) => {
+    React.useEffect(() => {
+        resizeListeners.push(onResize);
+        return () => {
+            const index = resizeListeners.indexOf(onResize);
+            resizeListeners.splice(index, 1);
+        };
+    }, [onResize]);
     const onWheel = React.useCallback(({deltaY}: React.WheelEvent) => onScroll(deltaY), [onScroll]);
     const scrollbarRef: React.MutableRefObject<HTMLDivElement> = React.useRef(null);
     const viewHeight = scrollbarRef.current ? scrollbarRef.current.clientHeight - 2 * scrollSize : 0;

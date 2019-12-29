@@ -20,15 +20,21 @@ const useHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: 
     return React.useMemo(() => tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight, [tableRef]);
 };
 
+const useRedraw = () => {
+    const [redraw, setRedraw] = React.useState(false);
+    React.useEffect(() => setRedraw(false), [redraw]);
+    return React.useCallback(() => setRedraw(true), []);
+};
+
 const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
     const [startRow, setStartRow] = React.useState(0);
     const [offset, setOffset] = React.useState(0);
+    const onResize = useRedraw();
     const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
     const rowHeight = useHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
     const headerHeight = useHeight(tableRef.current, 'thead');
-    const scrollHeight = React.useMemo(() => tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0,
-        [tableRef.current, headerHeight]);
+    const scrollHeight = tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0;
     React.useEffect(() => {
         if (tableRef.current && model.groups.length > 0) {
             const visibleRows = Math.ceil(scrollHeight / rowHeight);
@@ -59,7 +65,7 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
         }
     }, [offset, startRow, rowHeight]);
     return (
-        <VirtualScroll onScroll={onScroll} itemCount={model.rowCount} start={startRow} end={endRow}>
+        <VirtualScroll onScroll={onScroll} onResize={onResize} itemCount={model.rowCount} start={startRow} end={endRow}>
             <table ref={tableRef} className={classNames('table header-detail', className)} style={{top}}>
                 <thead>
                     <tr>

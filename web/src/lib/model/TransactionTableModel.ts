@@ -40,7 +40,7 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
 
     @computed
     get rowCount() {
-        return this.precedingRows[this.transactions.length]
+        return this.precedingRows[this.transactions.length];
     }
 }
 

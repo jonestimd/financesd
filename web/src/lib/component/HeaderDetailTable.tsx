@@ -1,9 +1,10 @@
 import React from 'react';
+import {observer} from 'mobx-react-lite';
 import classNames from 'classnames';
 import {translate} from '../i18n/localize';
 import {IColumn, IRow, getClassName} from './Table';
-import VirtualScroll from './VirtualScroll';
 import IMixedRowTableModel from '../model/IMixedRowTableModel';
+import ScrollViewport from './ScrollViewport';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;
@@ -20,61 +21,28 @@ const getHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: 
     return tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight;
 };
 
-const useRedraw = () => {
-    const [redraw, setRedraw] = React.useState(false);
-    React.useEffect(() => setRedraw(false), [redraw]);
-    return React.useCallback(() => setRedraw(true), []);
-};
-
-const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
+const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
     const [startRow, setStartRow] = React.useState(0);
-    const [offset, setOffset] = React.useState(0);
-    const onResize = useRedraw();
     const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
     const rowHeight = getHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
     const headerHeight = getHeight(tableRef.current, 'thead');
     const scrollHeight = tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0;
-    const gotoEnd = React.useCallback(() => {
-        const visibleRows = Math.ceil(scrollHeight / rowHeight);
-        const start = Math.max(0, model.rowCount - visibleRows);
-        const initOffset = Math.min(0, scrollHeight - (model.rowCount - start) * rowHeight);
-        setStartRow(start);
-        setOffset(initOffset);
-    }, [scrollHeight, rowHeight, model.rowCount]);
-    React.useEffect(() => {
-        if (tableRef.current && model.groups.length > 0) gotoEnd();
-    }, [model, tableRef.current, rowHeight]);
-    const [startGroup, precedingRows] = model.getGroupIndex(startRow);
-    const endRow = startRow + Math.ceil(scrollHeight / rowHeight);
-    const [endGroup] = model.getGroupIndex(endRow);
-    const top = offset - (startRow - precedingRows) * rowHeight;
-    const onScroll = React.useCallback((deltaY: number) => {
-        if (deltaY === -Infinity) {
-            setStartRow(0);
-            setOffset(0);
-        }
-        else if (deltaY === Infinity) gotoEnd();
-        else {
-            let newOffset = offset - deltaY, start = startRow;
-            if (newOffset > 0 && start > 0) {
-                const deltaRows = Math.ceil(newOffset / rowHeight);
-                start = start - deltaRows;
-            }
-            else if (newOffset < -rowHeight) {
-                const deltaRows = Math.floor(-newOffset / rowHeight);
-                start = start + deltaRows;
-            }
-            if (start >= 0 && start < model.rowCount) {
-                newOffset += rowHeight * (start - startRow);
-                setStartRow(start);
-                setOffset(newOffset);
-            }
-        }
-    }, [offset, startRow, rowHeight, gotoEnd]);
+    // React.useEffect(() => {
+    //     if (tableRef.current && model.groups.length > 0) gotoBottom();
+    // }, [model, tableRef.current, rowHeight]);
+    const startGroup = model.getGroupIndex(startRow);
+    const leadingHeight = model.precedingRows[startGroup] * rowHeight;
+    const endGroup = model.getGroupIndex(startRow + Math.ceil(scrollHeight / rowHeight));
+    const height = model.rowCount * rowHeight + headerHeight;
+    const trailingHeight = model.getRowsAfter(endGroup) * rowHeight;
+    const onScroll = React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
+        const {scrollTop} = currentTarget;
+        setStartRow(Math.floor(scrollTop / rowHeight));
+    }, [rowHeight]);
     return (
-        <VirtualScroll onScroll={onScroll} onResize={onResize} itemCount={model.rowCount} start={startRow} end={endRow}>
-            <table ref={tableRef} className={classNames('table header-detail', className)} style={{top}}>
+        <ScrollViewport onScroll={onScroll}>
+            <table ref={tableRef} className={classNames('table header-detail', className)} style={{height}}>
                 <thead>
                     <tr>
                         {columns.map(({key, className: colClass, colspan, header = translate}) =>
@@ -89,6 +57,7 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
                 </thead>
                 <tbody>
                     <tr className='prototype'><td>0</td></tr>
+                    {leadingHeight > 0 ? <tr style={{height: leadingHeight}}><td /></tr> : null}
                     {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
                         <React.Fragment key={row.id}>
                             <tr className={classNames({even: (startGroup + index) % 2})}>
@@ -105,10 +74,11 @@ const HeaderDetailTable: TableType = <T extends IRow, S extends IRow>(props: IHe
                             )}
                         </React.Fragment>
                     )}
+                    {trailingHeight > 0 ? <tr style={{height: trailingHeight}}><td /></tr> : null}
                 </tbody>
             </table>
-        </VirtualScroll>
+        </ScrollViewport>
     );
-};
+});
 
 export default HeaderDetailTable;

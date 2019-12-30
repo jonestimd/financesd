@@ -3,9 +3,10 @@ export default interface IMixedRowTableModel<T> {
 
     /**
      * Get the index of the group containing a row.
-     * @returns the group index and the number of rows before the group
      */
-    getGroupIndex(rowIndex: number): [number, number];
+    getGroupIndex(rowIndex: number): number;
+    getRowsAfter(groupIndex: number): number;
 
+    readonly precedingRows: number[];
     readonly rowCount: number;
 }

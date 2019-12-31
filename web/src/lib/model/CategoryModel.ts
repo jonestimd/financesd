@@ -1,16 +1,15 @@
 import {computed} from 'mobx';
 
-export type AmountType = 'DEBIT_DEPOSIT' | 'ASSET_VALUE';
-
 export interface ICategory {
     id: string;
     code: string;
     description: string;
-    amountType: AmountType;
+    amountType: string;
     parentId: number;
     security: boolean;
     income: boolean;
     version: number;
+    transactionCount: number;
 }
 
 interface ICategoryStore {
@@ -21,11 +20,12 @@ export class CategoryModel implements ICategory {
     id: string;
     code: string;
     description: string;
-    amountType: AmountType;
+    amountType: string;
     parentId: number;
     security: boolean;
     income: boolean;
     version: number;
+    transactionCount: number;
     categoryStore: ICategoryStore;
 
     constructor(category: ICategory, categoryStore: ICategoryStore) {

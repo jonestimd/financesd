@@ -1,14 +1,13 @@
 import React, {useCallback, useMemo} from 'react';
-import {Link} from 'react-router-dom';
 import TopAppBar from './TopAppBar';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../store/RootStore';
-import {translate} from '../i18n/localize';
 import {IColumn} from './Table';
 import HeaderDetailTable from './HeaderDetailTable';
 import TransactionModel, {ITransactionDetail} from '../model/TransactionModel';
 import * as formats from '../formats';
 import classNames from 'classnames';
+import PageMenu from './PageMenu';
 
 interface IProps {
     match: {params: {[name: string]: string}};
@@ -28,9 +27,6 @@ const renderShares = (detail: ITransactionDetail) => {
 const dummyRender = () => '';
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
-    const menuItems = [
-        <Link key='home' to='/finances/' className='menu-item'>{translate('menu.accounts')}</Link>
-    ];
     const {accountStore, categoryStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => {
         accountStore.loadAccounts();
@@ -68,7 +64,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     ], [renderCategory]);
     return (
         <>
-            <TopAppBar title={account ? account.displayName : ''} menuItems={menuItems} />
+            <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
             <HeaderDetailTable
                 className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
                 columns={columns}

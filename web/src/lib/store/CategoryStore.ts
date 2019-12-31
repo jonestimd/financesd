@@ -4,7 +4,7 @@ import {indexById, compareBy} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
 import {computed, flow, observable} from 'mobx';
 
-const query = '{categories {id code description amountType parentId security income version}}';
+const query = '{categories {id code description amountType parentId security income version transactionCount}}';
 
 interface ICategoryResponse {
     body: {data: {categories: ICategory[]}};
@@ -12,7 +12,7 @@ interface ICategoryResponse {
 
 const loadingCategories = 'Loading categories...';
 
-export default class CategoryStore implements ICategoryStore {
+export default class CategoryStore {
     private loading: boolean = false;
     @observable
     private categoriesById: {[id: string]: CategoryModel} = {};
@@ -24,7 +24,7 @@ export default class CategoryStore implements ICategoryStore {
 
     @computed
     get categories(): CategoryModel[] {
-        return Object.values(this.categoriesById).sort(compareBy(category => category.code));
+        return Object.values(this.categoriesById).sort(compareBy(category => category.displayName));
     }
 
     getCategory(id: string | number): CategoryModel {

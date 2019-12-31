@@ -6,6 +6,7 @@ import {RootStore, RootStoreContext} from '../store/RootStore';
 import ProgressMessage from './ProgressMessage';
 import AccountsPage from './AccountsPage';
 import TransactionsPage from './TransactionsPage';
+import CategoriesPage from './CategoriesPage';
 
 const history = createBrowserHistory();
 
@@ -21,6 +22,7 @@ const Routes: React.FC<{}> = () => {
                     <Switch>
                         <Route exact path='/finances' component={AccountsPage} />
                         <Route exact path='/finances/account/:accountId' component={TransactionsPage} />
+                        <Route exact path='/finances/categories' component={CategoriesPage} />
                         <Route component={NotFound} />
                     </Switch>
                 </Router>

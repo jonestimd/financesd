@@ -8,6 +8,7 @@ import Table, {IColumn} from './Table';
 import {AccountModel} from '../model/AccountModel';
 import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';
+import PageMenu from './PageMenu';
 
 const columns: IColumn<AccountModel>[] = [
     {key: 'account.company', render: (account) => account.companyName},
@@ -21,13 +22,12 @@ const columns: IColumn<AccountModel>[] = [
 ];
 
 const AccountsPage: React.FC<{}> = observer(() => {
-    const menuItems = [translate('menu.categories'), translate('menu.payees'), translate('menu.securities')];
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
     React.useEffect(() => accountStore.loadAccounts(), []);
     return (
         <div className='account-list'>
-            <TopAppBar title={translate('menu.accounts')} menuItems={menuItems} />
+            <TopAppBar title={translate('menu.accounts')} menuItems={<PageMenu currentPage='menu.accounts' />} />
             <Table columns={columns} data={accounts} />
         </div>
     );

@@ -2,11 +2,11 @@ import React from 'react';
 import IconButton from '@material/react-icon-button';
 import MaterialIcon from '@material/react-material-icon';
 import MDCAppBar, {TopAppBarRow, TopAppBarSection, TopAppBarTitle} from '@material/react-top-app-bar';
-import Menu, {MenuList, MenuListItem, MenuListItemText} from '@material/react-menu';
+import Menu, {MenuList} from '@material/react-menu';
 
 export interface ITopAppBarProps {
     title: string;
-    menuItems: React.ReactNode[];
+    menuItems: React.ReactNode;
 }
 
 const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems}) => {
@@ -22,13 +22,7 @@ const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems}) => {
             </TopAppBarRow>
             <div ref={menuAnchor} className='mdc-menu-surface--anchor'>
                 <Menu open={showMenu} onClose={() => setShowMenu(false)} onSelected={() => setShowMenu(false)} anchorElement={menuAnchor.current}>
-                    <MenuList>
-                        {menuItems.map((item, index) =>
-                            <MenuListItem key={index}>
-                                <MenuListItemText primaryText={item} />
-                            </MenuListItem>
-                        )}
-                    </MenuList>
+                    <MenuList>{menuItems}</MenuList>
                 </Menu>
             </div>
         </MDCAppBar>

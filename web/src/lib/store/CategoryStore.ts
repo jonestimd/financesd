@@ -4,7 +4,7 @@ import {indexById, compareBy} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
 import {computed, flow, observable} from 'mobx';
 
-const query = '{categories {id code description amountType parentId security transactionCount income version}}';
+const query = '{categories {id code description amountType parentId security income version transactionCount}}';
 
 interface ICategoryResponse {
     body: {data: {categories: ICategory[]}}
@@ -29,7 +29,7 @@ export class CategoryStore implements ICategoryStore {
 
     @computed
     get categories(): CategoryModel[] {
-        return Object.values(this.categoriesById).sort(compareBy(category => category.code));
+        return Object.values(this.categoriesById).sort(compareBy(category => category.displayName));
     }
 
     getCategory(id: string | number): CategoryModel {

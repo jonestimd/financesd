@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import {translate} from '../i18n/localize';
 import {IColumn, IRow, getClassName} from './Table';
 import IMixedRowTableModel from '../model/IMixedRowTableModel';
-import ScrollViewport from './ScrollViewport';
+import ScrollViewport, {IScrollableProps} from './ScrollViewport';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;
@@ -27,56 +27,59 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
     const rowHeight = getHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
     const headerHeight = getHeight(tableRef.current, 'thead');
-    const scrollHeight = tableRef.current ? tableRef.current.parentElement.clientHeight - headerHeight : 0;
     // React.useEffect(() => {
     //     if (tableRef.current && model.groups.length > 0) gotoBottom();
     // }, [model, tableRef.current, rowHeight]);
     const startGroup = model.getGroupIndex(startRow);
     const leadingHeight = model.precedingRows[startGroup] * rowHeight;
-    const endGroup = model.getGroupIndex(startRow + Math.ceil(scrollHeight / rowHeight));
     const height = model.rowCount * rowHeight + headerHeight;
-    const trailingHeight = model.getRowsAfter(endGroup) * rowHeight;
     const onScroll = React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
         const {scrollTop} = currentTarget;
         setStartRow(Math.floor(scrollTop / rowHeight));
     }, [rowHeight]);
     return (
         <ScrollViewport onScroll={onScroll}>
-            <table ref={tableRef} className={classNames('table header-detail', className)} style={{height}}>
-                <thead>
-                    <tr>
-                        {columns.map(({key, className: colClass, colspan, header = translate}) =>
-                            <th key={key} className={getClassName(colClass)} colSpan={colspan}>{header(key)}</th>
-                        )}
-                    </tr>
-                    <tr className='detail'>
-                        {subColumns.map(({key, className: colClass, colspan, header = translate}) =>
-                            <th key={key} className={getClassName(colClass)} colSpan={colspan}>{header(key)}</th>
-                        )}
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr className='prototype'><td>0</td></tr>
-                    {leadingHeight > 0 ? <tr style={{height: leadingHeight}}><td /></tr> : null}
-                    {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
-                        <React.Fragment key={row.id}>
-                            <tr className={classNames({even: (startGroup + index) % 2})}>
-                                {columns.map(({key, className: colClass, render, colspan}) =>
-                                    <td key={key} className={getClassName(colClass, row)} colSpan={colspan}>{render(row)}</td>
+            {({scrollHeight}: IScrollableProps) => {
+                const endGroup = model.getGroupIndex(startRow + Math.ceil(scrollHeight / rowHeight));
+                const trailingHeight = model.getRowsAfter(endGroup) * rowHeight;
+                return (
+                    <table ref={tableRef} className={classNames('table header-detail', className)} style={{height}}>
+                        <thead>
+                            <tr>
+                                {columns.map(({key, className: colClass, colspan, header = translate}) =>
+                                    <th key={key} className={getClassName(colClass)} colSpan={colspan}>{header(key)}</th>
                                 )}
                             </tr>
-                            {subrows(row).map(subrow =>
-                                <tr key={subrow.id} className={classNames('detail', {even: (startGroup + index) % 2})}>
-                                    {subColumns.map(({key, className: colClass, render, colspan}) =>
-                                        <td key={key} className={getClassName(colClass, subrow)} colSpan={colspan}>{render(subrow)}</td>
+                            <tr className='detail'>
+                                {subColumns.map(({key, className: colClass, colspan, header = translate}) =>
+                                    <th key={key} className={getClassName(colClass)} colSpan={colspan}>{header(key)}</th>
+                                )}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr className='prototype'><td>0</td></tr>
+                            {leadingHeight > 0 ? <tr style={{height: leadingHeight}}><td /></tr> : null}
+                            {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
+                                <React.Fragment key={row.id}>
+                                    <tr className={classNames({even: (startGroup + index) % 2})}>
+                                        {columns.map(({key, className: colClass, render, colspan}) =>
+                                            <td key={key} className={getClassName(colClass, row)} colSpan={colspan}>{render(row)}</td>
+                                        )}
+                                    </tr>
+                                    {subrows(row).map(subrow =>
+                                        <tr key={subrow.id} className={classNames('detail', {even: (startGroup + index) % 2})}>
+                                            {subColumns.map(({key, className: colClass, render, colspan}) =>
+                                                <td key={key} className={getClassName(colClass, subrow)} colSpan={colspan}>{render(subrow)}</td>
+                                            )}
+                                        </tr>
                                     )}
-                                </tr>
+                                </React.Fragment>
                             )}
-                        </React.Fragment>
-                    )}
-                    {trailingHeight > 0 ? <tr style={{height: trailingHeight}}><td /></tr> : null}
-                </tbody>
-            </table>
+                            {trailingHeight > 0 ? <tr style={{height: trailingHeight}}><td /></tr> : null}
+                        </tbody>
+                    </table>
+                );
+            }}
         </ScrollViewport>
     );
 });

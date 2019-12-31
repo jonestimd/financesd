@@ -11,11 +11,11 @@ const menuItems = [
 ];
 
 interface IProps {
-    currentPage: string;
+    currentPage?: string;
 }
 
 const PageMenu: React.FC<IProps> = ({currentPage}) => {
-    const items = menuItems.filter(([key]) => currentPage !== key);
+    const items = currentPage ? menuItems.filter(([key]) => currentPage !== key) : menuItems;
     return <>{items.map(([key, url]) => (
         <MenuListItem key={key}>
             <MenuListItemText primaryText={<Link to={url}>{translate(key)}</Link>} />

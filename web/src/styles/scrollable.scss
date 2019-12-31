@@ -1,0 +1,51 @@
+$scroll-bar-size: 15px !default;
+
+div.scroll-container {
+    overflow-y: scroll;
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    &.hide-scroll {
+        overflow-y: hidden;
+        .scrollable {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: $scroll-bar-size;
+        }
+        .scroll-bar {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            padding: 15px 0;
+            width: $scroll-bar-size;
+            background: hsl(0, 0, 95);
+            .arrow {
+                position: absolute;
+                right: 4px;
+                width: 0;
+                height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                &.up {
+                    top: 6px;
+                    border-bottom: 4px solid black;
+                }
+                &.down {
+                    bottom: 6px;
+                    border-top: 4px solid black;
+                }
+            }
+            .scroll-handle {
+                position: relative;
+                background: hsl(0, 0, 76);
+                margin: 0 2px;
+            }
+        }
+    }
+}

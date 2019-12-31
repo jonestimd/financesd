@@ -1,4 +1,4 @@
-import {computed} from "mobx";
+import {computed} from 'mobx';
 
 export interface ICategory {
     id: string;

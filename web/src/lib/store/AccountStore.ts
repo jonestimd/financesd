@@ -19,7 +19,7 @@ interface IAccountsResponse {
 
 const loadingAccounts = 'Loading accounts...';
 
-export class AccountStore {
+export default class AccountStore {
     private loading: boolean = false;
     @observable
     private companiesById: {[id: string]: ICompany} = {};
@@ -52,7 +52,7 @@ export class AccountStore {
         }
     }
 
-    private _loadAccounts = flow(function* () {
+    private _loadAccounts = flow(function*() {
         this.loading = true;
         try {
             const {body: {data}}: IAccountsResponse = yield agent.post('/finances/api/v1/graphql').send({query});

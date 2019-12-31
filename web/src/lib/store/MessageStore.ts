@@ -6,7 +6,7 @@ export interface IMessageStore {
     readonly progressMessage: string | undefined;
 }
 
-export class MessageStore implements IMessageStore {
+export default class MessageStore implements IMessageStore {
     @observable
     private progressMessages: string[] = [];
 

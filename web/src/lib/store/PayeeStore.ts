@@ -11,12 +11,12 @@ const query = `{
 }`;
 
 interface IPayeesResponse {
-    body: {data: {payees: IPayee[]}}
+    body: {data: {payees: IPayee[]}};
 }
 
 const loadingPayees = 'Loading payees...';
 
-export class PayeeStore {
+export default class PayeeStore {
     private loading: boolean = false;
     @observable
     private payeesById: {[id: string]: PayeeModel} = {};
@@ -42,10 +42,10 @@ export class PayeeStore {
         }
     }
 
-    private _loadPayees = flow(function* () {
+    private _loadPayees = flow(function*() {
         this.loading = true;
         try {
-            const {body: {data}}: IPayeesResponse = yield agent.post('/finances/api/v1/graphql').send({query: query});
+            const {body: {data}}: IPayeesResponse = yield agent.post('/finances/api/v1/graphql').send({query});
             this.payeesById = indexById(data.payees.map(payee => new PayeeModel(payee)));
         } catch (err) {
             console.error('error gettting payees', err); // TODO show toast

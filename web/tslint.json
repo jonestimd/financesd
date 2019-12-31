@@ -8,6 +8,7 @@
         "array-type": [true, "array"],
         "arrow-parens": false,
         "curly": [true, "ignore-same-line"],
+        "indent": [true, "spaces"],
         "member-access": [true, "no-public"],
         "member-ordering": false,
         "object-literal-sort-keys": false,

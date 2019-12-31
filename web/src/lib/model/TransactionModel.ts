@@ -1,5 +1,5 @@
-import {computed, observable} from 'mobx';
-import {CategoryStore} from '../store/CategoryStore';
+import {observable} from 'mobx';
+import CategoryStore from '../store/CategoryStore';
 
 export interface IRelatedTransaction {
     id: string;
@@ -55,7 +55,7 @@ export default class TransactionModel implements ITransaction {
     balance: number;
     categoryStore: CategoryStore;
 
-    constructor(transaction: ITransaction, categoryStore:  CategoryStore) {
+    constructor(transaction: ITransaction, categoryStore: CategoryStore) {
         Object.assign(this, transaction);
         this.categoryStore = categoryStore;
         this.subtotal = this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);

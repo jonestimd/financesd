@@ -12,7 +12,7 @@ interface ICategoryResponse {
 
 const loadingCategories = 'Loading categories...';
 
-export default class CategoryStore implements ICategoryStore {
+export default class CategoryStore {
     private loading: boolean = false;
     @observable
     private categoriesById: {[id: string]: CategoryModel} = {};

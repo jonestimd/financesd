@@ -2,7 +2,7 @@ import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './Table';
+import Table, {IColumn} from './table/Table';
 import {CategoryModel} from '../model/CategoryModel';
 import amountType from '../i18n/amountType';
 import {translate} from '../i18n/localize';

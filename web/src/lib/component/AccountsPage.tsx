@@ -4,7 +4,7 @@ import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import * as formats from '../formats';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './Table';
+import Table, {IColumn} from './table/Table';
 import {AccountModel} from '../model/AccountModel';
 import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';

@@ -44,6 +44,11 @@ table.table {
                 background: $table-hover-background;
             }
         }
+        tr.selected {
+            td.selected {
+                background: #dfd0e0;
+            }
+        }
         td {
             border-top: 0;
         }

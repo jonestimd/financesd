@@ -9,17 +9,16 @@ window.onresize = (event: UIEvent) => {
     });
 };
 
-interface IProps {
+interface IProps extends React.DOMAttributes<HTMLDivElement> {
     className?: string;
-    children: React.ReactNode;
-    onScroll?: (event: React.UIEvent<HTMLElement>) => void;
+    tabIndex?: number;
 }
 
 export interface IScrollableProps {
     scrollHeight: number;
 }
 
-const ScrollViewport: React.FC<IProps> = ({children, className = 'scroll-container', onScroll}) => {
+const ScrollViewport: React.FC<IProps> = ({children, className = 'scroll-container', tabIndex = 0, ...attrs}) => {
     const ref: React.MutableRefObject<HTMLDivElement> = React.useRef(null);
     const [scrollHeight, setScrollHeight] = React.useState(0);
     const onResize = React.useCallback(() => setScrollHeight(ref.current ? ref.current.clientHeight : 0), [ref.current]);
@@ -34,7 +33,7 @@ const ScrollViewport: React.FC<IProps> = ({children, className = 'scroll-contain
         };
     }, [onResize]);
     return (
-        <div ref={ref} className={className} onScroll={onScroll}>
+        <div ref={ref} className={className} {...attrs} tabIndex={tabIndex}>
             {typeof children === 'function' ? children({scrollHeight}) : children}
         </div>);
 };

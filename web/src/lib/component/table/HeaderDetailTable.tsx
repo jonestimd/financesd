@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import {HeaderRow, Row, IColumn, IRow} from './Table';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../ScrollViewport';
+import {useSelection} from './selection';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;
@@ -34,12 +35,6 @@ function useScroll() {
     };
 }
 
-function useSelection(initialRow: number) {
-    const [row, setRow] = React.useState(initialRow);
-    const [column, setColumn] = React.useState(0);
-    return {row, setRow, column, setColumn};
-}
-
 const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
     const scroll = useScroll();
@@ -49,9 +44,9 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     const startGroup = model.getGroupIndex(scroll.startRow);
     const leadingHeight = model.precedingRows[startGroup] * scroll.rowHeight;
     const height = model.rowCount * scroll.rowHeight + scroll.headerHeight;
-    const selection = useSelection(scroll.startRow);
+    const selection = useSelection(scroll.startRow, model.rowCount, columns.length);
     return (
-        <ScrollViewport onScroll={scroll.onScroll}>
+        <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {
                 const endGroup = model.getGroupIndex(scroll.startRow + Math.ceil(scrollHeight / scroll.rowHeight));
                 const trailingHeight = model.getRowsAfter(endGroup) * scroll.rowHeight;
@@ -66,7 +61,6 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                             <HeaderRow className='detail' columns={subColumns} />
                         </thead>
                         <tbody>
-                            <tr className='prototype'><td>0</td></tr>
                             {leadingHeight > 0 ? <tr style={{height: leadingHeight}}><td /></tr> : null}
                             {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
                                 <React.Fragment key={row.id}>
@@ -78,6 +72,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                                 </React.Fragment>
                             )}
                             {trailingHeight > 0 ? <tr style={{height: trailingHeight}}><td /></tr> : null}
+                            <tr className='prototype'><td>0</td></tr>
                         </tbody>
                     </table>
                 );

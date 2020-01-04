@@ -24,8 +24,16 @@ export interface IRow {
     id: string;
 }
 
-export function getClassName<T>(className: ClassSupplier<T>, row?: T, selected?: boolean) {
-    return classNames(typeof className === 'function' ? className(row) : className, {selected});
+function evalSupplier<T>(supplier: ClassSupplier<T>, row?: T): string {
+    return typeof supplier === 'function' ? supplier(row) : supplier;
+}
+
+function columnClasses<T>(columns: IColumn<T>[], selectedIndex: number = -1, row?: T): string[] {
+    return columns.reduce(({index, classes}, {className, colspan = 1}) => {
+        const selected = index <= selectedIndex && selectedIndex < index + colspan;
+        index += colspan;
+        return {index, classes: classes.concat(classNames(evalSupplier(className, row), {selected}))};
+    }, {index: 0, classes: []}).classes;
 }
 
 interface IHeaderProps<T> {
@@ -34,10 +42,11 @@ interface IHeaderProps<T> {
 }
 
 export const HeaderRow: React.FC<IHeaderProps<any>> = ({className, columns}) => {
+    const classes = columnClasses(columns);
     return (
         <tr className={className}>
-            {columns.map(({key, className: colClass, colspan, header = translate}) =>
-                <th key={key} className={getClassName(colClass)} colSpan={colspan}>{header(key)}</th>
+            {columns.map(({key, colspan, header = translate}, index) =>
+                <th key={key} className={classes[index]} colSpan={colspan}>{header(key)}</th>
             )}
         </tr>
     );
@@ -52,11 +61,11 @@ interface IRowProps<T> extends IHeaderProps<T> {
 }
 
 export const Row: React.FC<IRowProps<any>> = <T extends IRow>({row, className, columns, selection = {}}: IRowProps<T>) => {
+    const classes = columnClasses(columns, selection.column, row);
     return (
         <tr className={className}>
-            {columns.map(({key, className: colClass, render, colspan}, index) =>
-                <td key={key} className={getClassName(colClass, row, index === selection.column)}
-                    colSpan={colspan}>{render(row)}</td>
+            {columns.map(({key, render, colspan}, index) =>
+                <td key={key} className={classes[index]} colSpan={colspan}>{render(row)}</td>
             )}
         </tr>
     );

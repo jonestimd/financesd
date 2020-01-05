@@ -18,10 +18,14 @@ function getPageSize(container: HTMLElement) {
     return Math.floor(height / rowHeight);
 }
 
-function scrollTo(container: HTMLElement, row: number) {
+function scrollTo(container: HTMLElement, row: number, rowOffset: number = 0) {
     const headerHeight = container.querySelector('thead').clientHeight;
-    const tr = container.querySelector(`tbody tr:nth-child(${row + 1})`) as HTMLTableRowElement;
-    container.scrollTo({top: tr.offsetTop - headerHeight});
+    const tr = container.querySelector(`tbody tr:nth-child(${row + 1 - rowOffset})`) as HTMLTableRowElement;
+    if (tr) container.scrollTo({top: tr.offsetTop - headerHeight});
+    else {
+        const rowHeight = container.querySelector('tbody tr.selected').clientHeight;
+        container.scrollTo({top: rowHeight * row});
+    }
     return row;
 }
 
@@ -46,11 +50,11 @@ export function useSelection(initialRow: number, rows: number, columns: number, 
                     break;
                 case 'PageUp':
                     event.preventDefault();
-                    setRow(r => scrollTo(currentTarget, Math.max(0, r - pageSize)));
+                    setRow(r => scrollTo(currentTarget, Math.max(0, r - pageSize), rowOffset));
                     break;
                 case 'PageDown':
                     event.preventDefault();
-                    if (rows > 0) setRow(r => scrollTo(currentTarget, Math.min(r + pageSize, rows - 1)));
+                    if (rows > 0) setRow(r => scrollTo(currentTarget, Math.min(r + pageSize, rows - 1), rowOffset));
                     break;
                 case 'Home':
                     event.preventDefault();

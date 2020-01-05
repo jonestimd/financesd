@@ -44,7 +44,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     const startGroup = model.getGroupIndex(scroll.startRow);
     const leadingHeight = model.precedingRows[startGroup] * scroll.rowHeight;
     const height = model.rowCount * scroll.rowHeight + scroll.headerHeight;
-    const selection = useSelection(scroll.startRow, model.rowCount, columns.length);
+    const selection = useSelection(scroll.startRow, model.rowCount, columns.length, Math.max(0, model.precedingRows[startGroup] - 1));
     return (
         <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {

@@ -25,7 +25,7 @@ function scrollTo(container: HTMLElement, row: number) {
     return row;
 }
 
-export function useSelection(initialRow: number, rows: number, columns: number) {
+export function useSelection(initialRow: number, rows: number, columns: number, rowOffset: number = 0) {
     const [row, setRow] = React.useState(initialRow);
     const [column, setColumn] = React.useState(0);
     return {
@@ -73,8 +73,11 @@ export function useSelection(initialRow: number, rows: number, columns: number) 
         onMouseDown(event: React.MouseEvent<HTMLElement>) {
             if (event.target instanceof HTMLTableCellElement) {
                 const tr = event.target.parentElement as HTMLTableRowElement;
-                setRow(tr.sectionRowIndex);
-                setColumn(event.target.cellIndex);
+                const cellIndex = Array.from(tr.querySelectorAll('td'))
+                    .slice(0, event.target.cellIndex)
+                    .reduce((count, cell) => count + (cell.colSpan || 1), 0);
+                setRow(tr.sectionRowIndex + rowOffset);
+                setColumn(cellIndex);
             }
         },
     };

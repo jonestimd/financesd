@@ -16,7 +16,7 @@
     "transaction.payee": "Payee",
     "transaction.security": "Security",
     "transaction.memo": "Description",
-    "transaction.cleared": "\ud83d\uddf8",
+    "transaction.cleared": "\u2713",
     "transaction.subtotal": "Subtotal",
     "transaction.balance": "Balance",
     "detail.group": "Group",

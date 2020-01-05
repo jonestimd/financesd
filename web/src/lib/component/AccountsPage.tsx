@@ -16,7 +16,7 @@ const columns: IColumn<AccountModel>[] = [
     {key: 'account.type', render: (account) => accountType(account.type), className: 'enum'},
     {key: 'account.description', render: (account) => account.description},
     {key: 'account.number', render: (account) => account.accountNo},
-    {key: 'account.closed', render: (account) => account.closed ? <span>&#x1f5f8;</span> : null, className: 'boolean'},
+    {key: 'account.closed', render: (account) => account.closed ? <span>&#x2713;</span> : null, className: 'boolean'},
     {key: 'account.transactions', render: (account) => account.transactionCount, className: 'number'},
     {key: 'account.balance', render: (account) => formats.currency.format(account.balance), className: 'number'},
 ];

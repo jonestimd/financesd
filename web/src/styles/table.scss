@@ -1,5 +1,5 @@
 $table-border: #c0c0c0 !default;
-$table-even-background: #eeeeee !default;
+$table-even-background: #e0f0f5 !default;
 $table-hover-background: #dddddd !default;
 
 table.table {
@@ -80,7 +80,7 @@ table.table {
 
     &.header-detail tbody {
         tr.detail td {
-            color: #505486;
+            color: #666666;
             &.number.negative {
                 color: rgba(255, 0, 0, 0.7);
             }

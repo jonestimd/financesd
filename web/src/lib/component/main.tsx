@@ -5,7 +5,7 @@ import {Route, Router, Switch} from 'react-router';
 import {RootStore, RootStoreContext} from '../store/RootStore';
 import ProgressMessage from './ProgressMessage';
 import AccountsPage from './AccountsPage';
-import TransactionsPage from './TransactionsPage';
+import TransactionsPage from './transaction/TransactionsPage';
 import CategoriesPage from './CategoriesPage';
 
 const history = createBrowserHistory();

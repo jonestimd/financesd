@@ -1,11 +1,11 @@
 $mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
 $mdc-theme-secondary: rgb(84, 110, 122) !default;
 
-@import "@material/react-typography/index";
+@import '@material/react-typography/index';
 @import '@material/react-button/index';
 @import '@material/react-icon-button/index';
-@import "@material/react-material-icon/index";
-@import "@material/react-top-app-bar/index";
+@import '@material/react-material-icon/index';
+@import '@material/react-top-app-bar/index';
 @import '@material/react-list/index';
 @import '@material/react-menu-surface/index';
 @import '@material/react-menu/index';
@@ -50,6 +50,92 @@ table.security-transactions {
     }
 }
 
-@import "scrollable.scss";
-@import "table.scss";
-@import "progress.scss";
+.number {
+    font-style: unset;
+}
+.number.negative {
+    color: red;
+}
+
+.chip {
+    border-radius: 1em;
+    border: 1px solid darkgray;
+    display: inline-block;
+    margin: 3px;
+    padding: 2px 6px;
+    i.material-icons {
+        vertical-align: text-top;
+        padding-right: 5px;
+    }
+}
+
+.transaction {
+    display: flex;
+    align-items: baseline;
+    @media (max-width: 835px) {
+        display: block;
+    }
+    border-bottom: 1px solid darkgray;
+    &:nth-child(odd) {
+        background-color: #f0ffff;
+    }
+    .leading {
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+        // flex-basis: 8em;
+        white-space: nowrap;
+    }
+    .ref-number {
+        font-weight: bold;
+        color: white;
+        background: #333333;
+        padding: 2px 6px 0;
+        border-radius: 1em;
+        margin-left: 3px;
+        @media (max-width: 835px) {
+            margin-left: auto;
+        }
+    }
+    .detail.chip {
+        display: inline-block;
+        background: lightgray;
+        span + span {
+            padding-left: 5px;
+        }
+    }
+    .details {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        flex-grow: 1;
+        .number {
+            flex-basis: 8em;
+            text-align: right;
+            flex-grow: 1;
+        }
+        span.payee {
+            background: lightyellow;
+        }
+        span.security {
+            background: #dbfadb;
+        }
+        span.memo {
+            background: white;
+        }
+    }
+    .trailing {
+        display: flex;
+        flex-basis: 16em;
+        flex-shrink: 0;
+        .number {
+            flex-grow: 1;
+            text-align: right;
+        }
+    }
+}
+
+@import 'scrollable.scss';
+@import 'table.scss';
+@import 'progress.scss';
+@import 'icons.scss';

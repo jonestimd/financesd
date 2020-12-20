@@ -2,12 +2,13 @@ import React from 'react';
 import {RootStoreContext} from '../../store/RootStore';
 import {ITransactionDetail} from '../../model/TransactionModel';
 import {Currency, Shares} from '../../formats';
+import {observer} from 'mobx-react-lite';
 
 interface IProps {
     detail: ITransactionDetail;
 }
 
-const Category: React.FC<IProps> = ({detail: {relatedDetail, transactionCategoryId}}) => {
+const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactionCategoryId}}) => {
     const {accountStore, categoryStore} = React.useContext(RootStoreContext);
     if (relatedDetail) {
         return <>
@@ -22,7 +23,7 @@ const Category: React.FC<IProps> = ({detail: {relatedDetail, transactionCategory
         </>;
     }
     return null;
-};
+});
 
 // TODO group and memo
 

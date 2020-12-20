@@ -12,6 +12,7 @@
     "account.transactions": "Transactions",
     "account.balance": "Balance",
     "transaction.date": "Date",
+    "transaction.details": "Details",
     "transaction.referenceNumber": "Ref #",
     "transaction.payee": "Payee",
     "transaction.security": "Security",

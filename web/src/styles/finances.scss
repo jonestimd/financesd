@@ -79,6 +79,16 @@ table.security-transactions {
     &:nth-child(odd) {
         background-color: #f0ffff;
     }
+    &.header {
+        font-weight: 500;
+        .leading {
+            flex-basis: 10ex;
+            justify-content: space-around;
+        }
+        .details {
+            justify-content: space-around;
+        }
+    }
     .leading {
         display: flex;
         flex-direction: row;

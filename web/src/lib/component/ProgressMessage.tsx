@@ -1,12 +1,13 @@
 import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
+import Typography from '@material-ui/core/Typography';
 
 const ProgressMessage: React.FC<{}> = observer(() => {
     const rootStore = React.useContext(RootStoreContext);
     const message = rootStore.messageStore.progressMessage;
     return (
-        <div className={'progress-overlay' + (message ? '' : ' hidden')}>
+        <Typography className={'progress-overlay' + (message ? '' : ' hidden')}>
             <div className='progress-circular'>
                 <div className='message'><p>{message}</p></div>
                 <div className='progress-circular-wrapper'>
@@ -20,7 +21,7 @@ const ProgressMessage: React.FC<{}> = observer(() => {
                     </div>
                 </div>
             </div>
-        </div>
+        </Typography>
     );
 });
 

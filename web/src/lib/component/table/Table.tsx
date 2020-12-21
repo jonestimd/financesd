@@ -3,6 +3,11 @@ import classNames from 'classnames';
 import {translate} from '../../i18n/localize';
 import {useSelection} from './selection';
 import ScrollViewport from '../ScrollViewport';
+import MuiTable from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
 
 type ClassSupplier<T> = string | ((row?: T) => string);
 
@@ -44,11 +49,11 @@ interface IHeaderProps<T> {
 export const HeaderRow: React.FC<IHeaderProps<any>> = ({className, columns}) => {
     const classes = columnClasses(columns);
     return (
-        <tr className={className}>
+        <TableRow className={className}>
             {columns.map(({key, colspan, header = translate}, index) =>
-                <th key={key} className={classes[index]} colSpan={colspan}>{header(key)}</th>
+                <TableCell key={key} className={classes[index]} colSpan={colspan}>{header(key)}</TableCell>
             )}
-        </tr>
+        </TableRow>
     );
 };
 
@@ -63,11 +68,11 @@ interface IRowProps<T> extends IHeaderProps<T> {
 export const Row: React.FC<IRowProps<any>> = <T extends IRow>({row, className, columns, selection = {}}: IRowProps<T>) => {
     const classes = columnClasses(columns, selection.column, row);
     return (
-        <tr className={className}>
+        <TableRow className={className}>
             {columns.map(({key, render, colspan}, index) =>
-                <td key={key} className={classes[index]} colSpan={colspan}>{render(row)}</td>
+                <TableCell key={key} className={classes[index]} colSpan={colspan}>{render(row)}</TableCell>
             )}
-        </tr>
+        </TableRow>
     );
 };
 
@@ -80,14 +85,14 @@ const Table: React.FC<ITableProps<any>> = <T extends IRow>({columns, data, class
     const selection = useSelection(0, data.length, columns.length);
     return (
         <ScrollViewport onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
-            <table className={classNames('table', className)}>
-                <thead><HeaderRow columns={columns}/></thead>
-                <tbody>
+            <MuiTable className={classNames('table', className)}>
+                <TableHead><HeaderRow columns={columns} /></TableHead>
+                <TableBody>
                     {data.map((row, index) =>
                         <Row key={row.id} row={row} className={rowClass(index, selection)} columns={columns} selection={selection} />
                     )}
-                </tbody>
-            </table>
+                </TableBody>
+            </MuiTable>
         </ScrollViewport>
     );
 };

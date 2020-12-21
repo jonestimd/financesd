@@ -8,7 +8,8 @@ table.table {
     top: 0;
     width: 100%;
 
-    th, td {
+    th,
+    td {
         border: 1px solid $table-border;
         &:not(:last-child) {
             border-right: 0;
@@ -16,9 +17,9 @@ table.table {
     }
 
     thead {
-        color: $mdc-theme-on-secondary;
         font-weight: 500;
         th {
+            color: $mdc-theme-on-secondary;
             background: $mdc-theme-secondary;
             position: sticky;
         }
@@ -54,11 +55,19 @@ table.table {
         }
     }
 
-    td, th {
+    td,
+    th {
         padding: 1px 3px;
     }
 
-    td.boolean, th.boolean, td.number, th.number, td.enum, th.enum, td.date, th.date {
+    td.boolean,
+    th.boolean,
+    td.number,
+    th.number,
+    td.enum,
+    th.enum,
+    td.date,
+    th.date {
         width: 1px;
     }
 

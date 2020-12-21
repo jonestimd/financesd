@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {MenuListItem, MenuListItemText} from '@material/react-menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import {translate} from '../i18n/localize';
 
 const menuItems = [
@@ -17,9 +17,7 @@ interface IProps {
 const PageMenu: React.FC<IProps> = ({currentPage}) => {
     const items = currentPage ? menuItems.filter(([key]) => currentPage !== key) : menuItems;
     return <>{items.map(([key, url]) => (
-        <MenuListItem key={key}>
-            <MenuListItemText primaryText={<Link to={url}>{translate(key)}</Link>} />
-        </MenuListItem>
+        <MenuItem key={key}><Link to={url}>{translate(key)}</Link></MenuItem>
     ))}</>;
 };
 

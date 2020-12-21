@@ -11,6 +11,7 @@ import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
 import {translate} from '../../i18n/localize';
+import {Typography} from '@material-ui/core';
 
 interface IProps {
     match: {params: {[name: string]: string}};
@@ -21,7 +22,7 @@ function numberClass(value: number, classes?: string) {
 }
 
 const Header: React.FC = () => (
-    <div className='transaction header'>
+    <Typography className='transaction header'>
         <div className='leading'><span className='date'>{translate('transaction.date')}</span></div>
         <div className='details'>{translate('transaction.details')}</div>
         <div className='trailing'>
@@ -29,11 +30,11 @@ const Header: React.FC = () => (
             <span className='number'>{translate('transaction.subtotal')}</span>
             <span className='number'>{translate('transaction.balance')}</span>
         </div>
-    </div>
+    </Typography>
 );
 
 const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
-    <div className='transaction'>
+    <Typography className='transaction'>
         <div className='leading'>
             <span className='date'>{tx.date}</span>
             {tx.referenceNumber ? <span className='ref-number'>{tx.referenceNumber}</span> : null}
@@ -49,7 +50,7 @@ const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
             <span className={numberClass(tx && tx.subtotal)}>{formats.currency.format(tx.subtotal)}</span>
             <span className={numberClass(tx && tx.balance)}>{formats.currency.format(tx.balance)}</span>
         </div>
-    </div>
+    </Typography>
 ));
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {

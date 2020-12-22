@@ -16,6 +16,7 @@
         ["@babel/plugin-proposal-decorators", {"legacy": true}],
         // "istanbul",
         ["@babel/plugin-proposal-class-properties", {"loose": true}],
+        ["@babel/plugin-proposal-private-methods", { "loose": true }],
         // "@babel/plugin-transform-async-to-generator",
         "@babel/plugin-proposal-optional-chaining",
         "@babel/plugin-proposal-nullish-coalescing-operator"

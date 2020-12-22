@@ -63,12 +63,13 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
         transactionStore.loadTransactions(accountId);
     }, []);
     const account = accountStore.getAccount(accountId);
+    const tableModel = transactionStore.getTransactionsModel(accountId);
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
             <div className='scroll-container'>
                 <Header />
-                {transactionStore.getTransactionsModel(accountId).transactions.map(tx => <Transaction key={tx.id} tx={tx} />)}
+                {tableModel.transactions.map(tx => <Transaction key={tx.id} tx={tx} />)}
             </div>
         </>
     );

@@ -16,14 +16,18 @@ export function compareByName(v1: IName, v2: IName): number {
     return v2 === undefined ? 1 : v1.name.toLocaleLowerCase().localeCompare(v2.name.toLocaleLowerCase());
 }
 
-export function sortByName<T extends IName>(itemMap: {[id: string]: T}): T[] {
-    return Object.values(itemMap).sort(compareByName);
+export function sortValuesByName<T extends IName>(itemMap: Map<string, T>): T[] {
+    return sortValues<T>(itemMap, compareByName);
+}
+
+export function sortValues<T>(itemMap: Map<string, T>, comparator: (v1: T, v2: T) => number): T[] {
+    return Array.from(itemMap.values()).sort(comparator);
 }
 
 export interface IStringId {
     id: string;
 }
 
-export function indexById<T extends IStringId>(items: T[]): {[id: string]: T} {
-    return items.reduce((byId, company) => ({...byId, [company.id]: company}), {});
+export function addToMap<T extends IStringId>(byId: Map<string, T>, items: T[]): void {
+    items.forEach((item) => byId.set(item.id, item));
 }

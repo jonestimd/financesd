@@ -1,6 +1,6 @@
 import TransactionModel, {ITransaction} from './TransactionModel';
 import CategoryStore from '../store/CategoryStore';
-import {computed, observable} from 'mobx';
+import {computed, makeObservable, observable} from 'mobx';
 import IMixedRowTableModel from './IMixedRowTableModel';
 import sortedIndex from 'lodash/sortedIndex';
 
@@ -10,6 +10,7 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
     static EMPTY: TransactionTableModel;
 
     constructor(transactions: ITransaction[], categoryStore: CategoryStore) {
+        makeObservable(this);
         this.transactions = transactions.map(tx => new TransactionModel(tx, categoryStore)).sort(TransactionModel.compare);
         let balance = 0;
         for (const transaction of this.transactions) {

@@ -1,4 +1,4 @@
-import {action, observable} from 'mobx';
+import {action, makeObservable, observable} from 'mobx';
 
 export interface IMessageStore {
     addProgressMessage(message: string): void;
@@ -9,6 +9,10 @@ export interface IMessageStore {
 export default class MessageStore implements IMessageStore {
     @observable
     private progressMessages: string[] = [];
+
+    constructor() {
+        makeObservable(this);
+    }
 
     @action
     addProgressMessage(message: string) {

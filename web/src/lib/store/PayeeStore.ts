@@ -1,8 +1,8 @@
 import agent from 'superagent';
 import {PayeeModel, IPayee} from '../model/PayeeModel';
-import {indexById, compareByName} from '../model/entityUtils';
+import {addToMap, sortValuesByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
-import {computed, flow, observable} from 'mobx';
+import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 
 const query = `{
     payees {
@@ -18,35 +18,35 @@ const loadingPayees = 'Loading payees...';
 
 export default class PayeeStore {
     private loading: boolean = false;
-    @observable
-    private payeesById: {[id: string]: PayeeModel} = {};
+    private payeesById = new ObservableMap<string, PayeeModel>();
     private messageStore: IMessageStore;
 
     constructor(messageStore: IMessageStore) {
+        makeObservable(this);
         this.messageStore = messageStore;
     }
 
     @computed
     get payees(): PayeeModel[] {
-        return Object.values(this.payeesById).sort(compareByName);
+        return sortValuesByName(this.payeesById);
     }
 
     getPayee(id: string | number): PayeeModel {
-        return this.payeesById['' + id] || {} as PayeeModel;
+        return this.payeesById.get('' + id) || {} as PayeeModel;
     }
 
     loadPayees(): void {
-        if (!this.loading && Object.keys(this.payeesById).length === 0) {
+        if (!this.loading && this.payeesById.size === 0) {
             this.messageStore.addProgressMessage(loadingPayees);
             this._loadPayees();
         }
     }
 
-    private _loadPayees = flow(function*() {
+    private _loadPayees = flow(function* () {
         this.loading = true;
         try {
             const {body: {data}}: IPayeesResponse = yield agent.post('/finances/api/v1/graphql').send({query});
-            this.payeesById = indexById(data.payees.map(payee => new PayeeModel(payee)));
+            addToMap(this.payeesById, data.payees.map(payee => new PayeeModel(payee)));
         } catch (err) {
             console.error('error gettting payees', err); // TODO show toast
         } finally {

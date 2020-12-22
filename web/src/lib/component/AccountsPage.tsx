@@ -24,7 +24,7 @@ const columns: IColumn<AccountModel>[] = [
 const AccountsPage: React.FC<{}> = observer(() => {
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
-    React.useEffect(() => accountStore.loadAccounts(), []);
+    React.useEffect(() => accountStore.loadAccounts(), [accountStore]);
     return (
         <div className='account-list'>
             <TopAppBar title={translate('menu.accounts')} menuItems={<PageMenu currentPage='menu.accounts' />} />

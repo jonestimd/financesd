@@ -3,6 +3,7 @@
         "module": "commonjs",
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
+        "useDefineForClassFields": true,
         "lib": ["esnext", "dom"],
         "allowJs": true,
         "jsx": "preserve",

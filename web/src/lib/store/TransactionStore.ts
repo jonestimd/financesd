@@ -1,6 +1,6 @@
 import agent from 'superagent';
 import {ITransaction} from '../model/TransactionModel';
-import {flow, observable} from 'mobx';
+import {flow, ObservableMap} from 'mobx';
 import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
 
@@ -22,31 +22,31 @@ const loadingTransactions = 'Loading transactions...';
 
 export default class TransactionStore {
     private pendingAccounts: string[] = [];
-    @observable
-    private transactionsByAccountId: {[accountId: string]: TransactionTableModel} = {};
+    private transactionsByAccountId = new ObservableMap<string, TransactionTableModel>();
     private rootStore: RootStore;
 
     constructor(rootStore: RootStore) {
+        // makeObservable(this);
         this.rootStore = rootStore;
     }
 
     getTransactionsModel(accountId: string): TransactionTableModel {
-        return this.transactionsByAccountId[accountId] || TransactionTableModel.EMPTY;
+        return this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
     }
 
     loadTransactions(accountId: string): void {
-        if (!this.transactionsByAccountId[accountId] && this.pendingAccounts.indexOf(accountId) < 0) {
+        if (!this.transactionsByAccountId.has(accountId) && this.pendingAccounts.indexOf(accountId) < 0) {
             this.rootStore.messageStore.addProgressMessage(loadingTransactions);
             this._loadTransactions(accountId);
         }
     }
 
-    private _loadTransactions = flow(function*(accountId: string) {
+    private _loadTransactions = flow(function* (accountId: string) {
         this.pendingAccounts.push(accountId);
         try {
             const variables = {accountId};
             const {body: {data}}: ITransactionsResponse = yield agent.post('/finances/api/v1/graphql').send({query, variables});
-            this.transactionsByAccountId[accountId] = new TransactionTableModel(data.transactions, this.rootStore.categoryStore);
+            this.transactionsByAccountId.set(accountId, new TransactionTableModel(data.transactions, this.rootStore.categoryStore));
         } catch (err) {
             console.error('error gettting transactions', err);
         } finally {

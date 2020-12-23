@@ -10,8 +10,8 @@ import Payee from './Payee';
 import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
-import {translate} from '../../i18n/localize';
 import {Typography} from '@material-ui/core';
+import VirtualList from '../VirtualList';
 
 interface IProps {
     match: {params: {[name: string]: string}};
@@ -20,18 +20,6 @@ interface IProps {
 function numberClass(value: number, classes?: string) {
     return classNames(classes, 'number', {negative: value < 0});
 }
-
-const Header: React.FC = () => (
-    <Typography className='transaction header'>
-        <div className='leading'><span className='date'>{translate('transaction.date')}</span></div>
-        <div className='details'>{translate('transaction.details')}</div>
-        <div className='trailing'>
-            <i className='material-icons md-18'>check_box</i>
-            <span className='number'>{translate('transaction.subtotal')}</span>
-            <span className='number'>{translate('transaction.balance')}</span>
-        </div>
-    </Typography>
-);
 
 const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
     <Typography className='transaction'>
@@ -67,10 +55,9 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
-            <div className='scroll-container'>
-                <Header />
-                {tableModel.transactions.map(tx => <Transaction key={tx.id} tx={tx} />)}
-            </div>
+            <VirtualList items={tableModel.transactions}
+                itemSelector='.transaction'
+                renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} />
         </>
     );
 });

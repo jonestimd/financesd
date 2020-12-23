@@ -12,13 +12,12 @@ const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactio
     const {accountStore, categoryStore} = React.useContext(RootStoreContext);
     if (relatedDetail) {
         return <>
-            <i className='material-icons md-18'>send</i>
+            <i className='material-icons md-18'>forward</i>
             <span>{accountStore.getAccount(relatedDetail.transaction.accountId).name}</span>
         </>;
     }
     if (transactionCategoryId) {
         return <>
-            <i className='material-icons md-18'>payment</i>
             <span>{categoryStore.getCategory(transactionCategoryId).displayName}</span>
         </>;
     }
@@ -30,8 +29,8 @@ const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactio
 const TxDetail: React.FC<IProps> = ({detail}) => {
     return (
         <div className='detail chip' id={detail.id}>
-            <Category detail={detail} />
             <span><Currency>{detail.amount}</Currency></span>
+            <Category detail={detail} />
             {detail.assetQuantity ? <span>(<Shares>{detail.assetQuantity}</Shares>)</span> : null}
         </div>
     );

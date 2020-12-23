@@ -3,10 +3,12 @@ $mdc-theme-secondary: rgb(84, 110, 122) !default; // #54647a
 $mdc-theme-on-primary: #ffffff !default;
 $mdc-theme-on-secondary: #ffffff !default;
 
+$app-margin: 0 !default;
+$app-bar-height: 48px !default;
+
 .hidden {
     display: none;
 }
-$app-margin: 0 !default;
 
 body {
     margin: $app-margin;
@@ -58,7 +60,7 @@ table.security-transactions {
     padding: 2px 6px;
     i.material-icons {
         vertical-align: text-top;
-        padding-right: 5px;
+        // padding-right: 5px; // TODO removed for tx detail.  Any other uses?
     }
 }
 
@@ -102,7 +104,7 @@ table.security-transactions {
     }
     .detail.chip {
         display: inline-block;
-        background: lightgray;
+        background: #ececec;
         span + span {
             padding-left: 5px;
         }
@@ -110,8 +112,10 @@ table.security-transactions {
     .details {
         display: flex;
         align-items: baseline;
-        flex-wrap: wrap;
+        // flex-wrap: wrap; TODO (removed for single line list item)
         flex-grow: 1;
+        // TODO (for single line list item)
+        overflow: hidden;
         .number {
             flex-basis: 8em;
             text-align: right;
@@ -125,6 +129,12 @@ table.security-transactions {
         }
         span.memo {
             background: white;
+        }
+        .chip {
+            // TODO (for single line list item)
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
         }
     }
     .trailing {

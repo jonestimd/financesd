@@ -1,9 +1,10 @@
 $scroll-bar-size: 15px !default;
 
 div.scroll-container {
+    overflow-anchor: none;
     overflow-y: scroll;
     position: absolute;
-    top: 48px;
+    top: $app-bar-height;
     bottom: 0;
     left: 0;
     right: 0;

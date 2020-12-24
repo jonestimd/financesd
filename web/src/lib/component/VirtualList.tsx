@@ -5,9 +5,10 @@ import ScrollViewport, {IScrollableProps} from './ScrollViewport';
 
 interface IProps<T> {
     className?: string;
-    itemSelector: string;
+    prototypeSelector?: string;
     items: T[];
-    renderItem: (props: T, index: number, selected: boolean) => React.ReactElement | null;
+    renderItem: (item: T, index: number, selected: boolean) => React.ReactElement | null;
+    children?: React.ReactNode;
 }
 
 const defaultRowHeight = 22;
@@ -16,10 +17,10 @@ const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: numbe
     return list?.querySelector(itemSelector)?.clientHeight ?? defaultHeight;
 };
 
-function useScroll(itemSelector: string) {
+function useScroll(prototypeSelector = '*') {
     const [startRow, setStartRow] = React.useState(0);
     const listRef = React.useRef<HTMLDivElement>(null);
-    const rowHeight = getHeight(listRef.current, itemSelector, defaultRowHeight);
+    const rowHeight = getHeight(listRef.current, prototypeSelector, defaultRowHeight);
     return {
         startRow, listRef, rowHeight,
         onScroll: React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
@@ -31,8 +32,8 @@ function useScroll(itemSelector: string) {
 }
 
 const VirtualList = observer(<T extends {id: number | string}>(props: IProps<T>) => {
-    const {items, className, itemSelector, renderItem} = props;
-    const scroll = useScroll(itemSelector);
+    const {items, className, prototypeSelector, renderItem, children} = props;
+    const scroll = useScroll(prototypeSelector);
     const leadingHeight = scroll.startRow * scroll.rowHeight;
     const height = items.length * scroll.rowHeight;
     // const selection = useSelection(scroll.startRow, items.length, 1, Math.max(0, scroll.startRow - 1));
@@ -43,6 +44,7 @@ const VirtualList = observer(<T extends {id: number | string}>(props: IProps<T>)
                 const endRow = scroll.startRow + Math.ceil(scrollHeight / scroll.rowHeight) * 3;
                 return (
                     <div ref={scroll.listRef} className={className} style={{height}}>
+                        {children}
                         {leadingHeight > 0 ? <div style={{height: leadingHeight}} /> : null}
                         {items.slice(scroll.startRow, endRow + 1).map((row, index) =>
                             <React.Fragment key={row.id}>

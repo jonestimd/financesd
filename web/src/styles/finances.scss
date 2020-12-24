@@ -71,6 +71,10 @@ table.security-transactions {
         display: block;
     }
     border-bottom: 1px solid darkgray;
+    &.prototype {
+        position: absolute;
+        top: -400px;
+    }
     &:nth-child(odd) {
         background-color: #f0ffff;
     }

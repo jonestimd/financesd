@@ -21,6 +21,15 @@ function numberClass(value: number, classes?: string) {
     return classNames(classes, 'number', {negative: value < 0});
 }
 
+const TransactionPrototype: React.FC = () => (
+    <Typography className='transaction prototype'>
+        <div className='leading'>
+            <span className='date'>0000-00-00</span>
+            <Memo text='Prototype' />
+        </div>
+    </Typography>
+);
+
 const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
     <Typography className='transaction'>
         <div className='leading'>
@@ -55,9 +64,9 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
-            <VirtualList items={tableModel.transactions}
-                itemSelector='.transaction'
-                renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} />
+            <VirtualList items={tableModel.transactions} renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} >
+                <TransactionPrototype />
+            </VirtualList>
         </>
     );
 });

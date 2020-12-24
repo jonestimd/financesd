@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import {HeaderRow, Row, IColumn, IRow} from './Table';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
+import {useScroll} from '../scroll/scrollHooks';
 import {useSelection} from './selection';
 
 export interface IHeaderDetailTableProps<T, S> {
@@ -15,29 +16,17 @@ export interface IHeaderDetailTableProps<T, S> {
 }
 
 type TableType = React.FC<IHeaderDetailTableProps<any, any>>;
-const defaultRowHeight = 22;
 
-const getHeight = (tableRef: HTMLTableElement, selector: string, defaultHeight: number = 0) => {
-    return tableRef ? tableRef.querySelector(selector).clientHeight : defaultHeight;
-};
-
-function useScroll() {
-    const [startRow, setStartRow] = React.useState(0);
-    const tableRef: React.MutableRefObject<HTMLTableElement> = React.useRef(null);
-    const rowHeight = getHeight(tableRef.current, 'tbody tr.prototype', defaultRowHeight);
-    const headerHeight = getHeight(tableRef.current, 'thead');
-    return {
-        startRow, tableRef, rowHeight, headerHeight,
-        onScroll: React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
-            const {clientHeight, scrollTop} = currentTarget;
-            setStartRow(Math.max(0, Math.floor(scrollTop / rowHeight) - Math.ceil(clientHeight / rowHeight)));
-        }, [rowHeight])
-    };
+const scrollOptions = {
+    prototypeSelector: 'tbody tr.prototype',
+    defaultRowHeight: 22,
+    headerSelector: 'thead',
+    defaultHeaderHeight: 22,
 }
 
 const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
-    const scroll = useScroll();
+    const scroll = useScroll<HTMLTableElement>(scrollOptions);
     // React.useEffect(() => {
     //     if (tableRef.current && model.groups.length > 0) gotoBottom();
     // }, [model, tableRef.current, rowHeight]);
@@ -55,7 +44,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                     selected: model.precedingRows[startGroup + index] + subIndex === selection.row,
                 });
                 return (
-                    <table ref={scroll.tableRef} className={classNames('table header-detail', className)} style={{height}}>
+                    <table ref={scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
                         <thead>
                             <HeaderRow columns={columns} />
                             <HeaderRow className='detail' columns={subColumns} />
@@ -67,7 +56,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                                     <Row row={row} className={rowClassNames(index)} columns={columns} selection={selection} />
                                     {subrows(row).map((subrow, subIndex) =>
                                         <Row key={subrow.id} row={subrow} className={rowClassNames(index, subIndex + 1, 'detail')}
-                                                  columns={subColumns} selection={selection} />
+                                            columns={subColumns} selection={selection} />
                                     )}
                                 </React.Fragment>
                             )}

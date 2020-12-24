@@ -15,7 +15,7 @@ interface IProps<T> {
 
 const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>) => {
     const {items, className, defaultRowHeight, prototypeSelector, renderItem, children} = props;
-    const scroll = useScroll(defaultRowHeight, prototypeSelector);
+    const scroll = useScroll<HTMLDivElement>({defaultRowHeight, prototypeSelector});
     const leadingHeight = scroll.startRow * scroll.rowHeight;
     const height = items.length * scroll.rowHeight;
     // const selection = useSelection(scroll.startRow, items.length, 1, Math.max(0, scroll.startRow - 1));

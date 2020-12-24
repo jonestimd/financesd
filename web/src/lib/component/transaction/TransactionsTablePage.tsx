@@ -1,13 +1,13 @@
 import React, {useCallback, useMemo} from 'react';
-import TopAppBar from './TopAppBar';
+import TopAppBar from '../TopAppBar';
 import {observer} from 'mobx-react-lite';
-import {RootStoreContext} from '../store/RootStore';
-import {IColumn} from './table/Table';
-import HeaderDetailTable from './table/HeaderDetailTable';
-import TransactionModel, {ITransactionDetail} from '../model/TransactionModel';
-import * as formats from '../formats';
+import {RootStoreContext} from '../../store/RootStore';
+import {IColumn} from '../table/Table';
+import HeaderDetailTable from '../table/HeaderDetailTable';
+import TransactionModel, {ITransactionDetail} from '../../model/TransactionModel';
+import * as formats from '../../formats';
 import classNames from 'classnames';
-import PageMenu from './PageMenu';
+import PageMenu from '../PageMenu';
 
 interface IProps {
     match: {params: {[name: string]: string}};

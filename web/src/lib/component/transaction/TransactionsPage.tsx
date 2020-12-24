@@ -11,7 +11,7 @@ import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
 import {Typography} from '@material-ui/core';
-import VirtualList from '../VirtualList';
+import ListViewPort from '../ListViewPort';
 
 interface IProps {
     match: {params: {[name: string]: string}};
@@ -64,9 +64,9 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
-            <VirtualList items={tableModel.transactions} renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} >
+            <ListViewPort items={tableModel.transactions} renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} >
                 <TransactionPrototype />
-            </VirtualList>
+            </ListViewPort>
         </>
     );
 });

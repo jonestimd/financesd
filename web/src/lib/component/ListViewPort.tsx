@@ -31,7 +31,7 @@ function useScroll(prototypeSelector = '*') {
     };
 }
 
-const VirtualList = observer(<T extends {id: number | string}>(props: IProps<T>) => {
+const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>) => {
     const {items, className, prototypeSelector, renderItem, children} = props;
     const scroll = useScroll(prototypeSelector);
     const leadingHeight = scroll.startRow * scroll.rowHeight;
@@ -59,4 +59,4 @@ const VirtualList = observer(<T extends {id: number | string}>(props: IProps<T>)
     );
 });
 
-export default VirtualList;
+export default ListViewPort;

@@ -4,7 +4,7 @@ const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: numbe
     return list?.querySelector(itemSelector)?.clientHeight ?? defaultHeight;
 };
 
-export function useScroll(defaultRowHeight = 0, prototypeSelector = '*') {
+export function useScroll(defaultRowHeight = 24, prototypeSelector = '*') {
     const [startRow, setStartRow] = React.useState(0);
     const listRef = React.useRef<HTMLDivElement>(null);
     const rowHeight = getHeight(listRef.current, prototypeSelector, defaultRowHeight);

@@ -23,6 +23,7 @@ const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>
         // <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
         <ScrollViewport onScroll={scroll.onScroll}>
             {({scrollHeight}: IScrollableProps) => {
+                if (scrollHeight === 0) return null;
                 const endRow = scroll.startRow + Math.ceil(scrollHeight / scroll.rowHeight) * 3;
                 return (
                     <div ref={scroll.listRef} className={className} style={{height}}>

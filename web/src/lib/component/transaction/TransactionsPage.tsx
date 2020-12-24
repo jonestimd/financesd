@@ -11,7 +11,7 @@ import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
 import {Typography} from '@material-ui/core';
-import ListViewPort from '../ListViewPort';
+import ListViewPort from '../scroll/ListViewPort';
 
 interface IProps {
     match: {params: {[name: string]: string}};

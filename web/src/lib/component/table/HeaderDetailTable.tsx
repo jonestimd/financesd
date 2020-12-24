@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import classNames from 'classnames';
 import {HeaderRow, Row, IColumn, IRow} from './Table';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
-import ScrollViewport, {IScrollableProps} from '../ScrollViewport';
+import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useSelection} from './selection';
 
 export interface IHeaderDetailTableProps<T, S> {

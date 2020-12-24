@@ -1,39 +1,21 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import ScrollViewport, {IScrollableProps} from './ScrollViewport';
+import {useScroll} from './scrollHooks';
 // import {useSelection} from './table/selection';
 
 interface IProps<T> {
     className?: string;
+    defaultRowHeight?: number;
     prototypeSelector?: string;
     items: T[];
     renderItem: (item: T, index: number, selected: boolean) => React.ReactElement | null;
     children?: React.ReactNode;
 }
 
-const defaultRowHeight = 22;
-
-const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: number = 0) => {
-    return list?.querySelector(itemSelector)?.clientHeight ?? defaultHeight;
-};
-
-function useScroll(prototypeSelector = '*') {
-    const [startRow, setStartRow] = React.useState(0);
-    const listRef = React.useRef<HTMLDivElement>(null);
-    const rowHeight = getHeight(listRef.current, prototypeSelector, defaultRowHeight);
-    return {
-        startRow, listRef, rowHeight,
-        onScroll: React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
-            const {clientHeight, scrollTop} = currentTarget;
-            const overscan = Math.ceil(clientHeight / rowHeight);
-            setStartRow(Math.max(0, Math.floor(scrollTop / rowHeight) - overscan));
-        }, [rowHeight])
-    };
-}
-
 const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>) => {
-    const {items, className, prototypeSelector, renderItem, children} = props;
-    const scroll = useScroll(prototypeSelector);
+    const {items, className, defaultRowHeight, prototypeSelector, renderItem, children} = props;
+    const scroll = useScroll(defaultRowHeight, prototypeSelector);
     const leadingHeight = scroll.startRow * scroll.rowHeight;
     const height = items.length * scroll.rowHeight;
     // const selection = useSelection(scroll.startRow, items.length, 1, Math.max(0, scroll.startRow - 1));

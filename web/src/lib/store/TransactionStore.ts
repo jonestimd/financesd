@@ -1,8 +1,9 @@
-import agent from 'superagent';
+import * as agent from '../agent';
 import {ITransaction} from '../model/TransactionModel';
 import {flow, ObservableMap} from 'mobx';
 import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
+import {LoadResult} from './interfaces'
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
@@ -14,9 +15,7 @@ const query = `query($accountId: ID) {
     }
 }`;
 
-interface ITransactionsResponse {
-    body: {data: {transactions: ITransaction[]}};
-}
+type TransactionsResponse = agent.IGraphqlResponse<{transactions: ITransaction[]}>;
 
 const loadingTransactions = 'Loading transactions...';
 
@@ -37,15 +36,15 @@ export default class TransactionStore {
     loadTransactions(accountId: string): void {
         if (!this.transactionsByAccountId.has(accountId) && this.pendingAccounts.indexOf(accountId) < 0) {
             this.rootStore.messageStore.addProgressMessage(loadingTransactions);
-            this._loadTransactions(accountId);
+            void this._loadTransactions(accountId);
         }
     }
 
-    private _loadTransactions = flow(function* (accountId: string) {
+    private _loadTransactions = flow(function* (this: TransactionStore, accountId: string): LoadResult<TransactionsResponse> {
         this.pendingAccounts.push(accountId);
         try {
             const variables = {accountId};
-            const {body: {data}}: ITransactionsResponse = yield agent.post('/finances/api/v1/graphql').send({query, variables});
+            const {data} = yield agent.graphql('/finances/api/v1/graphql', query, variables);
             this.transactionsByAccountId.set(accountId, new TransactionTableModel(data.transactions, this.rootStore.categoryStore));
         } catch (err) {
             console.error('error gettting transactions', err);

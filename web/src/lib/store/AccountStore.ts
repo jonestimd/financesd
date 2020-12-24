@@ -1,8 +1,9 @@
-import agent from 'superagent';
+import * as agent from '../agent';
 import {AccountModel, ICompany, IAccount} from '../model/AccountModel';
 import {addToMap, sortValues, sortValuesByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
+import {LoadResult} from './interfaces';
 
 const query = `{
     accounts {
@@ -13,14 +14,12 @@ const query = `{
     }
 }`;
 
-interface IAccountsResponse {
-    body: {data: {accounts: IAccount[], companies: ICompany[]}};
-}
+type AccountsResponse = agent.IGraphqlResponse<{accounts: IAccount[], companies: ICompany[]}>;
 
 const loadingAccounts = 'Loading accounts...';
 
 export default class AccountStore {
-    private loading: boolean = false;
+    private loading = false;
     private companiesById = new ObservableMap<string, ICompany>();
     private accountsById = new ObservableMap<string, AccountModel>();
     private messageStore: IMessageStore;
@@ -47,14 +46,14 @@ export default class AccountStore {
     loadAccounts(): void {
         if (!this.loading && Object.keys(this.accounts).length === 0) {
             this.messageStore.addProgressMessage(loadingAccounts);
-            this._loadAccounts();
+            void this._loadAccounts();
         }
     }
 
-    private _loadAccounts = flow(function* () {
+    private _loadAccounts = flow(function* (this: AccountStore): LoadResult<AccountsResponse> {
         this.loading = true;
         try {
-            const {body: {data}}: IAccountsResponse = yield agent.post('/finances/api/v1/graphql').send({query});
+            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
             addToMap(this.companiesById, data.companies);
             addToMap(this.accountsById, data.accounts.map((account) => new AccountModel(account, this.companiesById.get('' + account.companyId))));
         } catch (err) {

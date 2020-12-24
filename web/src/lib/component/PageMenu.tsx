@@ -14,11 +14,11 @@ interface IProps {
     currentPage?: string;
 }
 
-const PageMenu: React.FC<IProps> = ({currentPage}) => {
+const PageMenu: React.FC<IProps> = React.forwardRef(({currentPage}) => {
     const items = currentPage ? menuItems.filter(([key]) => currentPage !== key) : menuItems;
     return <>{items.map(([key, url]) => (
         <MenuItem key={key}><Link to={url}>{translate(key)}</Link></MenuItem>
     ))}</>;
-};
+});
 
 export default PageMenu;

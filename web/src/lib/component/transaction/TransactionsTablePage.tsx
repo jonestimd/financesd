@@ -27,10 +27,11 @@ const renderShares = (detail: ITransactionDetail) => {
 const dummyRender = () => '';
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
-    const {accountStore, categoryStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, categoryStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => {
         accountStore.loadAccounts();
         categoryStore.loadCategories();
+        groupStore.loadGroups();
         payeeStore.loadPayees();
         securityStore.loadSecurities();
         transactionStore.loadTransactions(accountId);
@@ -52,10 +53,13 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
         if (detail.relatedDetail) {
             return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId).name}</span>;
         }
-        return <span>{categoryStore.getCategory(detail.transactionCategoryId).displayName}</span>;
+        return <span>{categoryStore.getCategory(detail.transactionCategoryId).displayName ?? ''}</span>;
     }, [accountStore, categoryStore]);
+    const renderGroup = useCallback(({transactionGroupId}: ITransactionDetail) => {
+        return <span className='group'>{groupStore.getGroup(transactionGroupId).name ?? ''}</span>;
+    }, [groupStore]);
     const subcolumns: IColumn<ITransactionDetail>[] = useMemo(() => [
-        {key: 'detail.group', colspan: 2, render: detail => detail.transactionGroupId},
+        {key: 'detail.group', colspan: 2, render: renderGroup, className: 'group'},
         {key: 'detail.category', render: renderCategory, className: 'category'},
         {key: 'detail.memo', render: detail => detail.memo},
         {key: 'detail.shares', render: renderShares, className: (detail) => numberClass(detail && detail.assetQuantity, 'security')},

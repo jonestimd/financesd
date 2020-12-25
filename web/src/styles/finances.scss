@@ -111,6 +111,18 @@ table.security-transactions {
         background: #ececec;
         span + span {
             padding-left: 5px;
+            &.transfer {
+                padding-left: 2px;
+            }
+        }
+        .transfer i.material-icons {
+            background-image: linear-gradient(darkgreen, lightgreen);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .group {
+            color: darkcyan;
         }
     }
     .details {

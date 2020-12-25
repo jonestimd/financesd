@@ -51,10 +51,11 @@ const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
 ));
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
-    const {accountStore, categoryStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, categoryStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => {
         accountStore.loadAccounts();
         categoryStore.loadCategories();
+        groupStore.loadGroups();
         payeeStore.loadPayees();
         securityStore.loadSecurities();
         transactionStore.loadTransactions(accountId);

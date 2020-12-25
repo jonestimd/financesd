@@ -5,9 +5,9 @@ import CategoryStore from './CategoryStore';
 import PayeeStore from './PayeeStore';
 import TransactionStore from './TransactionStore';
 import SecurityStore from './SecurityStore';
+import GroupStore from './GroupStore';
 
 declare global {
-    // tslint:disable-next-line: interface-name
     interface Window {
         rootStore: RootStore;
     }
@@ -17,6 +17,7 @@ export class RootStore {
     messageStore = new MessageStore();
     accountStore = new AccountStore(this.messageStore);
     categoryStore = new CategoryStore(this.messageStore);
+    groupStore = new GroupStore(this.messageStore);
     payeeStore = new PayeeStore(this.messageStore);
     securityStore = new SecurityStore(this.messageStore);
     transactionStore = new TransactionStore(this);

@@ -11,26 +11,28 @@ interface IProps {
 const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactionCategoryId}}) => {
     const {accountStore, categoryStore} = React.useContext(RootStoreContext);
     if (relatedDetail) {
-        return <>
+        return <span className='transfer'>
             <i className='material-icons md-18'>forward</i>
-            <span>{accountStore.getAccount(relatedDetail.transaction.accountId).name}</span>
-        </>;
+            {accountStore.getAccount(relatedDetail.transaction.accountId).name}
+        </span>;
     }
     if (transactionCategoryId) {
-        return <>
-            <span>{categoryStore.getCategory(transactionCategoryId).displayName}</span>
-        </>;
+        return <span className='category'>{categoryStore.getCategory(transactionCategoryId).displayName}</span>;
     }
     return null;
 });
 
-// TODO group
+const Group: React.FC<{id?: number}> = observer(({id}) => {
+    const {groupStore} = React.useContext(RootStoreContext);
+    return typeof id === 'number' ? <span className='group'>{groupStore.getGroup(id).name}</span> : null;
+});
 
 const TxDetail: React.FC<IProps> = ({detail}) => {
     return (
         <div className='detail chip' id={detail.id}>
             <span><Currency>{detail.amount}</Currency></span>
             <Category detail={detail} />
+            <Group id={detail.transactionGroupId} />
             {detail.assetQuantity ? <span className='shares'><Shares>{detail.assetQuantity}</Shares></span> : null}
             {detail.memo ? <span className='memo'>{detail.memo}</span> : null}
         </div>

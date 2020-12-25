@@ -31,7 +31,7 @@ const TxDetail: React.FC<IProps> = ({detail}) => {
         <div className='detail chip' id={detail.id}>
             <span><Currency>{detail.amount}</Currency></span>
             <Category detail={detail} />
-            {detail.assetQuantity ? <span>(<Shares>{detail.assetQuantity}</Shares>)</span> : null}
+            {detail.assetQuantity ? <span className='shares'><Shares>{detail.assetQuantity}</Shares></span> : null}
             {detail.memo ? <span className='memo'>{detail.memo}</span> : null}
         </div>
     );

@@ -125,6 +125,11 @@ table.security-transactions {
             text-align: right;
             flex-grow: 1;
         }
+        span.shares {
+            em {
+                text-shadow: 0 0 2px #008a00;
+            }
+        }
         span.payee {
             background: lightyellow;
         }
@@ -136,12 +141,6 @@ table.security-transactions {
         }
         span.memo:not(.chip) {
             font-style: italic;
-            &::before {
-                content: '(';
-            }
-            &::after {
-                content: ')';
-            }
         }
         .chip {
             // TODO (for single line list item)

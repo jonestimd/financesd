@@ -24,7 +24,7 @@ const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactio
     return null;
 });
 
-// TODO group and memo
+// TODO group
 
 const TxDetail: React.FC<IProps> = ({detail}) => {
     return (
@@ -32,6 +32,7 @@ const TxDetail: React.FC<IProps> = ({detail}) => {
             <span><Currency>{detail.amount}</Currency></span>
             <Category detail={detail} />
             {detail.assetQuantity ? <span>(<Shares>{detail.assetQuantity}</Shares>)</span> : null}
+            {detail.memo ? <span className='memo'>{detail.memo}</span> : null}
         </div>
     );
 };

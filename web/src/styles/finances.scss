@@ -131,8 +131,17 @@ table.security-transactions {
         span.security {
             background: #dbfadb;
         }
-        span.memo {
+        span.memo.chip {
             background: white;
+        }
+        span.memo:not(.chip) {
+            font-style: italic;
+            &::before {
+                content: '(';
+            }
+            &::after {
+                content: ')';
+            }
         }
         .chip {
             // TODO (for single line list item)

@@ -18,7 +18,7 @@ const columns: IColumn<CategoryModel>[] = [
     {key: 'category.transactionCount', render: (category) => category.transactionCount, className: 'number'},
 ];
 
-const CategoriesPage: React.FC<{}> = observer(() => {
+const CategoriesPage: React.FC = observer(() => {
     const {categoryStore} = React.useContext(RootStoreContext);
     const categories = categoryStore.categories;
     React.useEffect(() => categoryStore.loadCategories(), []);

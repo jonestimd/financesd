@@ -11,7 +11,7 @@ export interface IBundle {
 }
 
 const defaultBundle = {
-    [defaultKey]: defaultTranslations
+    [defaultKey]: defaultTranslations,
 };
 
 export function translate(key: string, bundle: IBundle = defaultBundle) {

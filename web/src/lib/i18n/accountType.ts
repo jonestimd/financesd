@@ -8,7 +8,7 @@ const bundle: IBundle = {
         CREDIT: 'Credit',
         LOAN: 'Loan',
         _401K: '401(K)',
-    }
+    },
 };
 
 export default function get(code: string) {

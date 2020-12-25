@@ -23,12 +23,12 @@ const myTheme = createMuiTheme({
             variantMapping: {
                 body1: 'div',
                 body2: 'div',
-            }
-        }
-    }
+            },
+        },
+    },
 });
 
-const Routes: React.FC<{}> = () => {
+const Routes: React.FC = () => {
     const rootStore = (window.rootStore = window.rootStore || new RootStore());
     return (
         <RootStoreContext.Provider value={rootStore}>

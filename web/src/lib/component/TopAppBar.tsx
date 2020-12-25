@@ -12,7 +12,7 @@ export interface ITopAppBarProps {
 }
 
 const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems}) => {
-    const menuAnchor = React.useRef(null);
+    const menuAnchor = React.useRef<HTMLDivElement>(null);
     const [showMenu, setShowMenu] = React.useState(false);
     const toggleMenu = React.useCallback(() => setShowMenu(!showMenu), [showMenu]);
     const hideMenu = React.useCallback(() => setShowMenu(false), []);

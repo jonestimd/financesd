@@ -18,9 +18,9 @@ function getPageSize(container: HTMLElement) {
     return Math.floor(height / rowHeight);
 }
 
-function scrollTo(container: HTMLElement, row: number, rowOffset: number = 0) {
+function scrollTo(container: HTMLElement, row: number, rowOffset = 0) {
     const headerHeight = container.querySelector('thead').clientHeight;
-    const tr = container.querySelector(`tbody tr:nth-child(${row + 1 - rowOffset})`) as HTMLTableRowElement;
+    const tr = container.querySelector<HTMLTableRowElement>(`tbody tr:nth-child(${row + 1 - rowOffset})`);
     if (tr) container.scrollTo({top: tr.offsetTop - headerHeight});
     else {
         const rowHeight = container.querySelector('tbody tr.selected').clientHeight;
@@ -29,7 +29,7 @@ function scrollTo(container: HTMLElement, row: number, rowOffset: number = 0) {
     return row;
 }
 
-export function useSelection(initialRow: number, rows: number, columns: number, rowOffset: number = 0) {
+export function useSelection(initialRow: number, rows: number, columns: number, rowOffset = 0) {
     const [row, setRow] = React.useState(initialRow);
     const [column, setColumn] = React.useState(0);
     return {

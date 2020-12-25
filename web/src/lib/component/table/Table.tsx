@@ -33,12 +33,12 @@ function evalSupplier<T>(supplier: ClassSupplier<T>, row?: T): string {
     return typeof supplier === 'function' ? supplier(row) : supplier;
 }
 
-function columnClasses<T>(columns: IColumn<T>[], selectedIndex: number = -1, row?: T): string[] {
+function columnClasses<T>(columns: IColumn<T>[], selectedIndex = -1, row?: T): string[] {
     return columns.reduce(({index, classes}, {className, colspan = 1}) => {
         const selected = index <= selectedIndex && selectedIndex < index + colspan;
         index += colspan;
         return {index, classes: classes.concat(classNames(evalSupplier(className, row), {selected}))};
-    }, {index: 0, classes: []}).classes;
+    }, {index: 0, classes: [] as string[]}).classes;
 }
 
 interface IHeaderProps<T> {
@@ -46,7 +46,7 @@ interface IHeaderProps<T> {
     columns: IColumn<T>[];
 }
 
-export const HeaderRow: React.FC<IHeaderProps<any>> = ({className, columns}) => {
+export const HeaderRow: React.FC<IHeaderProps<unknown>> = ({className, columns}) => {
     const classes = columnClasses(columns);
     return (
         <TableRow className={className}>
@@ -65,7 +65,7 @@ interface IRowProps<T> extends IHeaderProps<T> {
     };
 }
 
-export const Row: React.FC<IRowProps<any>> = <T extends IRow>({row, className, columns, selection = {}}: IRowProps<T>) => {
+export const Row = <T extends IRow>({row, className, columns, selection = {}}: IRowProps<T>) => {
     const classes = columnClasses(columns, selection.column, row);
     return (
         <TableRow className={className}>
@@ -78,10 +78,10 @@ export const Row: React.FC<IRowProps<any>> = <T extends IRow>({row, className, c
 
 const rowClass = (index: number, selection: {row: number}) => classNames({
     even: index % 2,
-    selected: index === selection.row
+    selected: index === selection.row,
 });
 
-const Table: React.FC<ITableProps<any>> = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
+const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
     const selection = useSelection(0, data.length, columns.length);
     return (
         <ScrollViewport onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>

@@ -21,7 +21,7 @@ const columns: IColumn<AccountModel>[] = [
     {key: 'account.balance', render: (account) => formats.currency.format(account.balance), className: 'number'},
 ];
 
-const AccountsPage: React.FC<{}> = observer(() => {
+const AccountsPage: React.FC = observer(() => {
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
     React.useEffect(() => accountStore.loadAccounts(), [accountStore]);

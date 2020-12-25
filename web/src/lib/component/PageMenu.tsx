@@ -14,6 +14,7 @@ interface IProps {
     currentPage?: string;
 }
 
+// TODO doesn't work: accounts -> categories -> accounts
 const PageMenu: React.FC<IProps> = React.forwardRef(({currentPage}) => {
     const items = currentPage ? menuItems.filter(([key]) => currentPage !== key) : menuItems;
     return <>{items.map(([key, url]) => (

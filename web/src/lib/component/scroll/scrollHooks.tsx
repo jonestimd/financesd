@@ -23,6 +23,6 @@ export function useScroll<T extends HTMLElement>(options: IScrollOptions) {
             const {clientHeight, scrollTop} = currentTarget;
             const overscan = Math.ceil(clientHeight / rowHeight);
             setStartRow(Math.max(0, Math.floor(scrollTop / rowHeight) - overscan));
-        }, [rowHeight])
+        }, [rowHeight]),
     };
 }

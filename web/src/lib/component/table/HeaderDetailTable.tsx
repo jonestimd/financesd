@@ -15,6 +15,7 @@ export interface IHeaderDetailTableProps<T, S> {
     model: IMixedRowTableModel<T>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TableType = React.FC<IHeaderDetailTableProps<any, any>>;
 
 const scrollOptions = {
@@ -22,7 +23,7 @@ const scrollOptions = {
     defaultRowHeight: 22,
     headerSelector: 'thead',
     defaultHeaderHeight: 22,
-}
+};
 
 const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
@@ -39,7 +40,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
             {({scrollHeight}: IScrollableProps) => {
                 const endGroup = model.getGroupIndex(scroll.startRow + Math.ceil(scrollHeight / scroll.rowHeight) * 3);
                 const trailingHeight = model.getRowsAfter(endGroup) * scroll.rowHeight;
-                const rowClassNames = (index: number, subIndex: number = 0, classes?: string) => classNames(classes, {
+                const rowClassNames = (index: number, subIndex = 0, classes?: string) => classNames(classes, {
                     even: (startGroup + index) % 2,
                     selected: model.precedingRows[startGroup + index] + subIndex === selection.row,
                 });

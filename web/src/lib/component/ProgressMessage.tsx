@@ -3,7 +3,7 @@ import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import Typography from '@material-ui/core/Typography';
 
-const ProgressMessage: React.FC<{}> = observer(() => {
+const ProgressMessage: React.FC = observer(() => {
     const rootStore = React.useContext(RootStoreContext);
     const message = rootStore.messageStore.progressMessage;
     return (

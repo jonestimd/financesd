@@ -3,7 +3,7 @@ import {ITransaction} from '../model/TransactionModel';
 import {flow, ObservableMap} from 'mobx';
 import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
-import {LoadResult} from './interfaces'
+import {LoadResult} from './interfaces';
 
 const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {

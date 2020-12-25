@@ -17,8 +17,8 @@ var payeeSchema = graphql.NewObject(graphql.ObjectConfig{
 var payeeQueryFields = &graphql.Field{
 	Type: graphql.NewList(payeeSchema),
 	Args: map[string]*graphql.ArgumentConfig{
-		"id":   &graphql.ArgumentConfig{Type: graphql.ID, Description: "payee ID"},
-		"name": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique payee name"},
+		"id":   {Type: graphql.ID, Description: "payee ID"},
+		"name": {Type: graphql.String, Description: "unique payee name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB)

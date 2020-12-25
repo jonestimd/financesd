@@ -54,7 +54,7 @@ func preload(association string) prepareDb {
 var transactionQueryFields = &graphql.Field{
 	Type: graphql.NewList(transactionSchema),
 	Args: map[string]*graphql.ArgumentConfig{
-		"accountId": &graphql.ArgumentConfig{Type: graphql.ID, Description: "account ID"},
+		"accountId": {Type: graphql.ID, Description: "account ID"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		if _, ok := p.Args["accountId"]; ok {

@@ -20,8 +20,8 @@ var securitySchema = graphql.NewObject(graphql.ObjectConfig{
 var securityQueryFields = &graphql.Field{
 	Type: graphql.NewList(securitySchema),
 	Args: map[string]*graphql.ArgumentConfig{
-		"id":     &graphql.ArgumentConfig{Type: graphql.ID, Description: "security ID"},
-		"symbol": &graphql.ArgumentConfig{Type: graphql.String, Description: "unique security symbol"},
+		"id":     {Type: graphql.ID, Description: "security ID"},
+		"symbol": {Type: graphql.String, Description: "unique security symbol"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(*gorm.DB).Preload("Asset")

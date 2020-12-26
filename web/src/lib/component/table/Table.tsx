@@ -1,7 +1,7 @@
 import React, {ReactNode} from 'react';
 import classNames from 'classnames';
 import {translate} from '../../i18n/localize';
-import {useSelection} from './selectionHooks';
+import {useSelection} from '../scroll/selectionHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';

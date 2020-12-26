@@ -5,7 +5,7 @@ import {HeaderRow, Row, IColumn, IRow} from './Table';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useScroll} from '../scroll/scrollHooks';
-import {useSelection} from './selection';
+import {useSelection} from './selectionHooks';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;

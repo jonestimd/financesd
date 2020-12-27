@@ -81,8 +81,13 @@ const rowClass = (index: number, selection: {row: number}) => classNames({
     selected: index === selection.row,
 });
 
+export const selectionOptions = {
+    rowSelector: 'tbody tr',
+    headerSelector: 'thead',
+};
+
 const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
-    const selection = useSelection(0, data.length, columns.length);
+    const selection = useSelection({rows: data.length, columns: columns.length, ...selectionOptions});
     return (
         <ScrollViewport onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             <MuiTable className={classNames('table', className)}>

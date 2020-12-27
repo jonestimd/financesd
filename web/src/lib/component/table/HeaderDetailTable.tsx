@@ -1,7 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import classNames from 'classnames';
-import {HeaderRow, Row, IColumn, IRow} from './Table';
+import {HeaderRow, Row, IColumn, IRow, selectionOptions} from './Table';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useScroll} from '../scroll/scrollHooks';
@@ -34,7 +34,8 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     const startGroup = model.getGroupIndex(scroll.startRow);
     const leadingHeight = model.precedingRows[startGroup] * scroll.rowHeight;
     const height = model.rowCount * scroll.rowHeight + scroll.headerHeight;
-    const selection = useSelection(scroll.startRow, model.rowCount, columns.length, Math.max(0, model.precedingRows[startGroup] - 1));
+    const rowOffset = Math.max(0, model.precedingRows[startGroup] - 1);
+    const selection = useSelection({initialRow: scroll.startRow, rows: model.rowCount, columns: columns.length, rowOffset, ...selectionOptions});
     return (
         <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {

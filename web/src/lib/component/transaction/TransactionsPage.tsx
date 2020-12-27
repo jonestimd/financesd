@@ -30,8 +30,8 @@ const TransactionPrototype: React.FC = () => (
     </Typography>
 );
 
-const Transaction: React.FC<{tx: TransactionModel}> = observer(({tx}) => (
-    <Typography className='transaction'>
+const Transaction: React.FC<{tx: TransactionModel, selected: boolean}> = observer(({tx, selected}) => (
+    <Typography className={classNames('transaction', {selected})}>
         <div className='leading'>
             <span className='date'>{tx.date}</span>
             {tx.referenceNumber ? <span className='ref-number'>{tx.referenceNumber}</span> : null}
@@ -65,7 +65,8 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     return (
         <>
             <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
-            <ListViewPort items={tableModel.transactions} renderItem={(tx: TransactionModel) => <Transaction tx={tx} />} >
+            <ListViewPort items={tableModel.transactions} rowSelector='div.transaction:not(.prototype)' prototypeSelector='.prototype'
+                renderItem={(tx, _index, selected) => <Transaction tx={tx} selected={selected} />} >
                 <TransactionPrototype />
             </ListViewPort>
         </>

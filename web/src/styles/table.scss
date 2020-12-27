@@ -47,7 +47,7 @@ table.table {
         }
         tr.selected {
             td.selected {
-                background: #dfd0e0;
+                background: $selection-background;
             }
         }
         td {

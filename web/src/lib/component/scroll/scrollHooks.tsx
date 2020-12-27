@@ -8,7 +8,7 @@ interface IScrollOptions {
 }
 
 const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: number) => {
-    return list?.querySelector(itemSelector)?.clientHeight ?? defaultHeight;
+    return list?.querySelector(itemSelector)?.getBoundingClientRect().height ?? defaultHeight;
 };
 
 export function useScroll<T extends HTMLElement>(options: IScrollOptions) {

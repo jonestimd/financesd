@@ -6,6 +6,8 @@ $mdc-theme-on-secondary: #ffffff !default;
 $app-margin: 0 !default;
 $app-bar-height: 48px !default;
 
+$selection-background: #dfd0e0 !default;
+
 .hidden {
     display: none;
 }
@@ -77,6 +79,9 @@ table.security-transactions {
     }
     &:nth-child(odd) {
         background-color: #f0ffff;
+    }
+    &.selected {
+        background: $selection-background;
     }
     &.header {
         font-weight: 500;

@@ -1,6 +1,5 @@
 $table-border: #c0c0c0 !default;
 $table-even-background: #e0f0f5 !default;
-$table-hover-background: #dddddd !default;
 
 table.table {
     border-spacing: 0;
@@ -37,12 +36,12 @@ table.table {
             top: -1000px;
         }
         tr:hover {
-            background: $table-hover-background;
+            background: $transaction-hover-background;
         }
         tr.even {
             background: $table-even-background;
             &:hover {
-                background: $table-hover-background;
+                background: $transaction-hover-background;
             }
         }
         tr.selected {

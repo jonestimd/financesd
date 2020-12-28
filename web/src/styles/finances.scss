@@ -3,6 +3,8 @@ $mdc-theme-secondary: rgb(84, 110, 122) !default; // #54647a
 $mdc-theme-on-primary: #ffffff !default;
 $mdc-theme-on-secondary: #ffffff !default;
 
+$transaction-hover-background: #dddddd !default;
+
 $app-margin: 0 !default;
 $app-bar-height: 48px !default;
 
@@ -96,6 +98,12 @@ table.security-transactions {
     }
     &.selected {
         background: $selection-background;
+        &:hover {
+            background-color: darken($color: $selection-background, $amount: 10%);
+        }
+    }
+    &:hover {
+        background-color: $transaction-hover-background;
     }
     &.header {
         font-weight: 500;

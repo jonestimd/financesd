@@ -39,7 +39,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     return (
         <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {
-                const endGroup = model.getGroupIndex(scroll.startRow + Math.ceil(scrollHeight / scroll.rowHeight) * 3);
+                const endGroup = model.getGroupIndex(scroll.endRow(scrollHeight));
                 const trailingHeight = model.getRowsAfter(endGroup) * scroll.rowHeight;
                 const rowClassNames = (index: number, subIndex = 0, classes?: string) => classNames(classes, {
                     even: (startGroup + index) % 2,

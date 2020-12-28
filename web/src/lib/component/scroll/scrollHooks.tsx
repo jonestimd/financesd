@@ -21,6 +21,7 @@ export function useScroll<T extends HTMLElement>(options: IScrollOptions) {
     const headerHeight = headerSelector ? getHeight(listRef.current, headerSelector, defaultHeaderHeight) : 0;
     return {
         startRow, listRef, rowHeight, headerHeight,
+        endRow: (scrollHeight: number) => startRow + Math.ceil(scrollHeight / rowHeight) * 3,
         onScroll: React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
             const {clientHeight, scrollTop} = currentTarget;
             const overscan = Math.ceil(clientHeight / rowHeight);

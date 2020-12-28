@@ -4,32 +4,19 @@ function getHeight(container: HTMLElement, selector: string) {
     return container.querySelector(selector).getBoundingClientRect().height;
 }
 
-function isPreviousRowVisible(container: HTMLElement, rowSelector: string, headerSelector?: string) {
-    const headerHeight = headerSelector ? getHeight(container, headerSelector) : 0;
-    const rect = container.querySelector(`${rowSelector}.selected`).getBoundingClientRect();
-    return rect.top - rect.height >= container.getBoundingClientRect().top + headerHeight;
-}
-
-function isNextRowVisible(container: HTMLElement, rowSelector: string) {
-    const {top, height} = container.getBoundingClientRect();
-    const rect = container.querySelector(`${rowSelector}.selected`).getBoundingClientRect();
-    return rect.top + rect.height * 2 <= top + height;
-}
-
 function getPageSize(container: HTMLElement, rowSelector: string) {
     const {height} = container.getBoundingClientRect();
-    const rowHeight = getHeight(container, `${rowSelector}.selected`); // TODO why selected row?
+    const rowHeight = getHeight(container, rowSelector);
     return Math.floor(height / rowHeight);
 }
 
-function scrollTo(container: HTMLElement, row: number, rowOffset: number, rowSelector: string, headerSelector?: string) {
+function ensureVisible(container: HTMLElement, row: number, rowSelector: string, headerSelector?: string) {
+    const {clientHeight, scrollTop} = container;
     const headerHeight = headerSelector ? getHeight(container, headerSelector) : 0;
-    const tr = container.querySelector<HTMLTableRowElement>(`${rowSelector}:nth-child(${row + 1 - rowOffset})`);
-    if (tr) container.scrollTo({top: tr.offsetTop - headerHeight});
-    else {
-        const rowHeight = getHeight(container, `${rowSelector}.selected`);
-        container.scrollTo({top: rowHeight * row});
-    }
+    const rowHeight = getHeight(container, rowSelector);
+    const rowTop = row * rowHeight;
+    if (rowTop < scrollTop + headerHeight) container.scrollTo({top: rowTop - headerHeight});
+    else if (rowTop + rowHeight > scrollTop + clientHeight) container.scrollTo({top: rowTop - clientHeight + rowHeight});
     return row;
 }
 
@@ -56,29 +43,30 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
         onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
             const {currentTarget, key, ctrlKey} = event;
             const pageSize = getPageSize(currentTarget, rowSelector);
+            // TODO always make new selection visible
             switch (key) {
                 case 'ArrowRight': setColumn(c => c === columns - 1 ? 0 : c + 1); break;
                 case 'ArrowLeft': setColumn(c => c === 0 ? columns - 1 : c - 1); break;
                 case 'ArrowUp':
-                    if (isPreviousRowVisible(currentTarget, rowSelector, headerSelector)) event.preventDefault();
-                    setRow(r => Math.max(0, r - 1));
+                    event.preventDefault();
+                    setRow(r => ensureVisible(currentTarget, Math.max(0, r - 1), rowSelector, headerSelector));
                     break;
                 case 'ArrowDown':
-                    if (isNextRowVisible(currentTarget, rowSelector)) event.preventDefault();
-                    setRow(r => Math.min(r + 1, rows - 1));
+                    event.preventDefault();
+                    setRow(r => ensureVisible(currentTarget, Math.min(r + 1, rows - 1), rowSelector, headerSelector));
                     break;
                 case 'PageUp':
                     event.preventDefault();
-                    setRow(r => scrollTo(currentTarget, Math.max(0, r - pageSize), rowOffset, rowSelector, headerSelector));
+                    setRow(r => ensureVisible(currentTarget, Math.max(0, r - pageSize), rowSelector, headerSelector));
                     break;
                 case 'PageDown':
                     event.preventDefault();
-                    if (rows > 0) setRow(r => scrollTo(currentTarget, Math.min(r + pageSize, rows - 1), rowOffset, rowSelector, headerSelector));
+                    if (rows > 0) setRow(r => ensureVisible(currentTarget, Math.min(r + pageSize, rows - 1), rowSelector, headerSelector));
                     break;
                 case 'Home':
                     event.preventDefault();
                     if (ctrlKey) {
-                        scrollTo(currentTarget, 0, 0, rowSelector, headerSelector);
+                        currentTarget.scrollTo({top: 0});
                         setRow(0);
                     }
                     else setColumn(0);
@@ -86,7 +74,7 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
                 case 'End':
                     event.preventDefault();
                     if (ctrlKey && rows > 0) {
-                        scrollTo(currentTarget, rows - 1, 0, rowSelector, headerSelector);
+                        ensureVisible(currentTarget, rows - 1, rowSelector, headerSelector);
                         setRow(rows - 1);
                     }
                     else setColumn(columns - 1);

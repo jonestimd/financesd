@@ -68,7 +68,7 @@ table.security-transactions {
 
 .transaction {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     @media (max-width: 835px) {
         display: block;
     }
@@ -96,7 +96,6 @@ table.security-transactions {
     .leading {
         display: flex;
         flex-direction: row;
-        align-items: baseline;
         // flex-basis: 8em;
         white-space: nowrap;
     }
@@ -132,7 +131,6 @@ table.security-transactions {
     }
     .details {
         display: flex;
-        align-items: baseline;
         // flex-wrap: wrap; TODO (removed for single line list item)
         flex-grow: 1;
         // TODO (for single line list item)
@@ -170,9 +168,13 @@ table.security-transactions {
         display: flex;
         flex-basis: 16em;
         flex-shrink: 0;
+        .MuiCheckbox-root {
+            padding: 0;
+        }
         .number {
             flex-grow: 1;
             text-align: right;
+            flex-basis: 50%;
         }
     }
 }

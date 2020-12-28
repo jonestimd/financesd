@@ -10,7 +10,7 @@ import Payee from './Payee';
 import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
-import {Typography} from '@material-ui/core';
+import {Checkbox, Typography} from '@material-ui/core';
 import ListViewPort from '../scroll/ListViewPort';
 
 interface IProps {
@@ -23,9 +23,12 @@ function numberClass(value: number, classes?: string) {
 
 const TransactionPrototype: React.FC = () => (
     <Typography className='transaction prototype'>
-        <div className='leading'>
-            <span className='date'>0000-00-00</span>
-            <Memo text='Prototype' />
+        <div className='leading'><span className='date'>0000-00-00</span></div>
+        <div className='details'><Memo text='Prototype' /></div>
+        <div className='trailing'>
+            <Checkbox checked disabled />
+            <span className='number'>0.00</span>
+            <span className='number'>0.00</span>
         </div>
     </Typography>
 );
@@ -43,7 +46,7 @@ const Transaction: React.FC<{tx: TransactionModel, selected: boolean}> = observe
             {tx.details.map(detail => <TxDetail key={detail.id} detail={detail} />)}
         </div>
         <div className='trailing'>
-            <input type='checkbox' checked={tx.cleared} readOnly />
+            <Checkbox disabled checked={tx.cleared} />
             <span className={numberClass(tx && tx.subtotal)}>{formats.currency.format(tx.subtotal)}</span>
             <span className={numberClass(tx && tx.balance)}>{formats.currency.format(tx.balance)}</span>
         </div>

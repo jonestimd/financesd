@@ -30,6 +30,13 @@ const myTheme = createMuiTheme({
 
 const Routes: React.FC = () => {
     const rootStore = (window.rootStore = window.rootStore || new RootStore());
+    React.useEffect(() => {
+        rootStore.accountStore.loadAccounts();
+        rootStore.categoryStore.loadCategories();
+        rootStore.groupStore.loadGroups();
+        rootStore.payeeStore.loadPayees();
+        rootStore.securityStore.loadSecurities();
+    }, []);
     return (
         <RootStoreContext.Provider value={rootStore}>
             <ThemeProvider theme={myTheme}>

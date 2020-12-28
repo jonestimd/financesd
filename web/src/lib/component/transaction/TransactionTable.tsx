@@ -1,5 +1,4 @@
 import React, {useCallback, useMemo} from 'react';
-import TopAppBar from '../TopAppBar';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
 import {IColumn} from '../table/Table';
@@ -7,10 +6,9 @@ import HeaderDetailTable from '../table/HeaderDetailTable';
 import TransactionModel, {ITransactionDetail} from '../../model/TransactionModel';
 import * as formats from '../../formats';
 import classNames from 'classnames';
-import PageMenu from '../PageMenu';
 
 interface IProps {
-    match: {params: {[name: string]: string}};
+    accountId?: string;
 }
 
 const securityAccountTypes = ['BROKERAGE', '_401K'];
@@ -26,16 +24,12 @@ const renderShares = (detail: ITransactionDetail) => {
 };
 const dummyRender = () => '';
 
-const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
+// TODO make header sticky
+// TODO fix keyboard scrolling
+// - slowness
+// - always display selected row
+const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     const {accountStore, categoryStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
-    React.useEffect(() => {
-        accountStore.loadAccounts();
-        categoryStore.loadCategories();
-        groupStore.loadGroups();
-        payeeStore.loadPayees();
-        securityStore.loadSecurities();
-        transactionStore.loadTransactions(accountId);
-    }, []);
     const account = accountStore.getAccount(accountId);
     const renderSecurity = useCallback((tx: TransactionModel) => securityStore.getSecurity(tx.securityId).name, [securityStore]);
     // TODO filter security columns on non-security account
@@ -68,16 +62,13 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
         {key: 'dummy2', header: dummyRender, render: dummyRender},
     ], [renderCategory]);
     return (
-        <>
-            <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />} />
-            <HeaderDetailTable
-                className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
-                columns={columns}
-                subColumns={subcolumns}
-                model={transactionStore.getTransactionsModel(accountId)}
-                subrows={getDetails} />
-        </>
+        <HeaderDetailTable
+            className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
+            columns={columns}
+            subColumns={subcolumns}
+            model={transactionStore.getTransactionsModel(accountId)}
+            subrows={getDetails} />
     );
 });
 
-export default TransactionsPage;
+export default TransactionTable;

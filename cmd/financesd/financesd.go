@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/felixge/httpsnoop"
 	"github.com/go-akka/configuration"
 	_ "github.com/go-sql-driver/mysql" // register the driver
 	"github.com/graphql-go/handler"
@@ -50,9 +51,15 @@ func main() {
 		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
 		http.Handle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
 		http.Handle("/finances/", loadHtml(cwd, config))
+		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
+			log.Printf("%d %-5s %s %s %d %v %s", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
+				snoop.Duration.Truncate(time.Millisecond), r.UserAgent())
+		})
 		host := config.GetString("listen.host", "localhost")
 		port := config.GetInt32("listen.port", 8080)
-		log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), nil))
+		log.Printf("Listening at %s:%d/finances", host, port)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router))
 	}
 }
 

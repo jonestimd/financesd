@@ -43,6 +43,7 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
         onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
             const {currentTarget, key, ctrlKey} = event;
             const pageSize = getPageSize(currentTarget, rowSelector);
+            event.stopPropagation();
             // TODO always make new selection visible
             switch (key) {
                 case 'ArrowRight': setColumn(c => c === columns - 1 ? 0 : c + 1); break;

@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface IScrollOptions {
+    overscan?: number;
     defaultRowHeight?: number;
     prototypeSelector?: string;
     headerSelector?: string;
@@ -13,19 +14,22 @@ const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: numbe
 
 const nextEven = (num: number) => num % 2 === 0 ? num : num + 1;
 
+export const defaultOverscan = 0.25;
+
 export function useScroll<T extends HTMLElement>(options: IScrollOptions) {
-    const {defaultRowHeight = 24, prototypeSelector = '*', headerSelector, defaultHeaderHeight} = options;
+    const {overscan = defaultOverscan, defaultRowHeight = 24, prototypeSelector = '*', headerSelector, defaultHeaderHeight} = options;
     const [startRow, setStartRow] = React.useState(0);
     const listRef = React.useRef<T>(null);
     const rowHeight = getHeight(listRef.current, prototypeSelector, defaultRowHeight);
     const headerHeight = headerSelector ? getHeight(listRef.current, headerSelector, defaultHeaderHeight) : 0;
     return {
         startRow, listRef, rowHeight, headerHeight,
-        endRow: (scrollHeight: number) => startRow + Math.ceil(scrollHeight / rowHeight) * 3,
+        endRow: (scrollHeight: number) => startRow + Math.ceil(scrollHeight / rowHeight * (1 + 2 * overscan)),
         onScroll: React.useCallback(({currentTarget}: React.UIEvent<HTMLElement>) => {
             const {clientHeight, scrollTop} = currentTarget;
-            const overscan = Math.ceil(clientHeight / rowHeight);
-            setStartRow(nextEven(Math.max(0, Math.floor(scrollTop / rowHeight) - overscan)));
-        }, [rowHeight]),
+            const visibleRows = clientHeight / rowHeight;
+            const leadingRows = Math.floor(visibleRows * overscan);
+            setStartRow(nextEven(Math.max(0, Math.floor(scrollTop / rowHeight) - leadingRows)));
+        }, [overscan, rowHeight]),
     };
 }

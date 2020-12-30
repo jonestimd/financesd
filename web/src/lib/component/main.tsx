@@ -18,6 +18,22 @@ const myTheme = createMuiTheme({
         primary: {main: '#6200ee'},
         secondary: {main: 'rgb(84, 110, 122)'},
     },
+    overrides: {
+        MuiTable: {
+            root: {
+                borderCollapse: 'separate',
+            },
+        },
+        MuiTableCell: {
+            root: {
+                padding: '1px 3px',
+                lineHeight: 1.5,
+            },
+            head: {
+                lineHeight: 1.5,
+            },
+        },
+    },
     props: {
         MuiTypography: {
             variantMapping: {

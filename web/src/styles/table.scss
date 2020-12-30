@@ -2,16 +2,13 @@ $table-border: #c0c0c0 !default;
 $table-even-background: #e0f0f5 !default;
 
 table.table {
-    border-spacing: 0;
     position: relative;
     top: 0;
-    width: 100%;
 
     th,
     td {
-        border: 1px solid $table-border;
         &:not(:last-child) {
-            border-right: 0;
+            border-right: 1px solid $table-border;
         }
     }
 
@@ -26,7 +23,7 @@ table.table {
             top: 0;
         }
         tr:nth-child(2) th {
-            top: 23px;
+            top: 24px;
         }
     }
 
@@ -49,14 +46,6 @@ table.table {
                 background: $selection-background;
             }
         }
-        td {
-            border-top: 0;
-        }
-    }
-
-    td,
-    th {
-        padding: 1px 3px;
     }
 
     td.boolean,

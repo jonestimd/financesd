@@ -14,8 +14,8 @@ function ensureVisible(container: HTMLElement, row: number, rowSelector: string,
     const {clientHeight, scrollTop} = container;
     const headerHeight = headerSelector ? getHeight(container, headerSelector) : 0;
     const rowHeight = getHeight(container, rowSelector);
-    const rowTop = row * rowHeight;
-    if (rowTop < scrollTop + headerHeight) container.scrollTo({top: rowTop - headerHeight});
+    const rowTop = row * rowHeight + headerHeight;
+    if (rowTop < scrollTop) container.scrollTo({top: rowTop});
     else if (rowTop + rowHeight > scrollTop + clientHeight) container.scrollTo({top: rowTop - clientHeight + rowHeight});
     return row;
 }

@@ -55,7 +55,7 @@ const TransactionList: React.FC<IProps> = observer(({accountId}) => {
     const {transactionStore} = React.useContext(RootStoreContext);
     const tableModel = transactionStore.getTransactionsModel(accountId);
     return (
-        <ListViewPort items={tableModel.transactions} rowSelector='div.transaction:not(.prototype)' prototypeSelector='.prototype'
+        <ListViewPort items={tableModel.transactions} rowSelector='div.transaction' prototypeSelector='.prototype'
             renderItem={(tx, _index, selected) => <Transaction tx={tx} selected={selected} />} >
             <TransactionPrototype />
         </ListViewPort>

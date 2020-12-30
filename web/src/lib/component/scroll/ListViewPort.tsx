@@ -27,13 +27,13 @@ const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>
                 const endRow = scroll.endRow(scrollHeight);
                 return (
                     <div ref={scroll.listRef} className={className} style={{height}}>
-                        {children}
                         {leadingHeight > 0 ? <div style={{height: leadingHeight}} /> : null}
                         {items.slice(scroll.startRow, endRow + 1).map((row, index) =>
                             <React.Fragment key={row.id}>
                                 {renderItem(row, scroll.startRow + index, scroll.startRow + index === selection.row)}
                             </React.Fragment>
                         )}
+                        {children}
                     </div>
                 );
             }}

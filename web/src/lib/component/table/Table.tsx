@@ -82,7 +82,7 @@ const rowClass = (index: number, selection: {row: number}) => classNames({
 });
 
 export const selectionOptions = {
-    rowSelector: 'tbody tr',
+    rowSelector: 'tbody tr.MuiTableRow-root',
     headerSelector: 'thead',
 };
 

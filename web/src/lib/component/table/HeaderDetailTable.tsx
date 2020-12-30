@@ -6,6 +6,11 @@ import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useScroll} from '../scroll/scrollHooks';
 import {useSelection} from '../scroll/selectionHooks';
+import Table from '@material-ui/core/Table';
+import TableRow from '@material-ui/core/TableRow';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableBody from '@material-ui/core/TableBody';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;
@@ -36,6 +41,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
     const height = model.rowCount * scroll.rowHeight + scroll.headerHeight;
     const rowOffset = Math.max(0, model.precedingRows[startGroup] - 1);
     const selection = useSelection({initialRow: scroll.startRow, rows: model.rowCount, columns: columns.length, rowOffset, ...selectionOptions});
+    console.log(selection.row, height, model.rowCount, scroll.rowHeight, scroll.headerHeight);
     return (
         <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {
@@ -46,12 +52,12 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                     selected: model.precedingRows[startGroup + index] + subIndex === selection.row,
                 });
                 return (
-                    <table ref={scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
-                        <thead>
+                    <Table ref={scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
+                        <TableHead>
                             <HeaderRow columns={columns} />
                             <HeaderRow className='detail' columns={subColumns} />
-                        </thead>
-                        <tbody>
+                        </TableHead>
+                        <TableBody>
                             {leadingHeight > 0 ? <tr style={{height: leadingHeight}}><td /></tr> : null}
                             {model.groups.slice(startGroup, endGroup + 1).map((row, index) =>
                                 <React.Fragment key={row.id}>
@@ -63,9 +69,9 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                                 </React.Fragment>
                             )}
                             {trailingHeight > 0 ? <tr style={{height: trailingHeight}}><td /></tr> : null}
-                            <tr className='prototype'><td>0</td></tr>
-                        </tbody>
-                    </table>
+                            <TableRow className='prototype'><TableCell>0</TableCell></TableRow>
+                        </TableBody>
+                    </Table>
                 );
             }}
         </ScrollViewport>

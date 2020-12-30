@@ -21,7 +21,7 @@ const columns: IColumn<CategoryModel>[] = [
 const CategoriesPage: React.FC = observer(() => {
     const {categoryStore} = React.useContext(RootStoreContext);
     const categories = categoryStore.categories;
-    React.useEffect(() => categoryStore.loadCategories(), []);
+    React.useEffect(() => categoryStore.loadCategories(), [categoryStore]);
     return (
         <div className='category-list'>
             <TopAppBar title={translate('menu.categories')} menuItems={<PageMenu currentPage='menu.categories' />} />

@@ -21,10 +21,10 @@ export interface IScrollableProps {
 const ScrollViewport: React.FC<IProps> = ({children, className = 'scroll-container', tabIndex = 0, ...attrs}) => {
     const ref = React.useRef<HTMLDivElement>(null);
     const [scrollHeight, setScrollHeight] = React.useState(0);
-    const onResize = React.useCallback(() => setScrollHeight(ref.current ? ref.current.clientHeight : 0), [ref.current]);
+    const onResize = React.useCallback(() => setScrollHeight(ref.current ? ref.current.clientHeight : 0), [ref]);
     React.useEffect(() => {
         if (ref.current) setScrollHeight(ref.current.clientHeight);
-    }, [ref.current]);
+    }, [ref]);
     React.useEffect(() => {
         resizeListeners.push(onResize);
         return () => {

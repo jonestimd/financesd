@@ -60,7 +60,7 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
         {key: 'detail.amount', render: renderAmount, className: (detail) => numberClass(detail && detail.amount)},
         {key: 'dummy1', header: dummyRender, render: dummyRender},
         {key: 'dummy2', header: dummyRender, render: dummyRender},
-    ], [renderCategory]);
+    ], [renderCategory, renderGroup]);
     return (
         <HeaderDetailTable
             className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}

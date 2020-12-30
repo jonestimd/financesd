@@ -17,7 +17,7 @@ type ViewMode = 'list' | 'table';
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
     const {accountStore, transactionStore} = React.useContext(RootStoreContext);
-    React.useEffect(() => transactionStore.loadTransactions(accountId), []);
+    React.useEffect(() => transactionStore.loadTransactions(accountId), [transactionStore, accountId]);
     const account = accountStore.getAccount(accountId);
     const [mode, setMode] = React.useState<ViewMode>('list');
     return (

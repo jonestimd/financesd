@@ -6,6 +6,7 @@
     "plugins": ["@typescript-eslint"],
     "extends": [
         "eslint:recommended",
+        "plugin:eslint-plugin-react-hooks/recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
     ],

@@ -24,10 +24,10 @@ export interface ITransactionDetail {
 export interface ITransaction {
     id: string;
     date: string;
-    referenceNumber: string;
-    payeeId: number;
-    securityId: number;
-    memo: string;
+    referenceNumber?: string;
+    payeeId?: number;
+    securityId?: number;
+    memo?: string;
     cleared: boolean;
     details: ITransactionDetail[];
 }

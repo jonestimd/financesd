@@ -25,7 +25,7 @@ const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems, children}) => {
                 {children}
             </Toolbar>
             <div ref={menuAnchor} className='mdc-menu-surface--anchor' />
-            <Menu open={showMenu} onClose={hideMenu} anchorEl={menuAnchor.current}>
+            <Menu open={showMenu} onClose={hideMenu} getContentAnchorEl={null} anchorEl={menuAnchor.current}>
                 {menuItems}
             </Menu>
         </AppBar>

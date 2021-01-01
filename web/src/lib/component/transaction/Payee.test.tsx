@@ -1,28 +1,20 @@
 import React from 'react';
-import Payee from './Payee';
 import {shallow} from 'enzyme';
-import TransactionModel, {ITransaction} from 'src/lib/model/TransactionModel';
-import CategoryStore from 'src/lib/store/CategoryStore';
+import TransactionModel from 'src/lib/model/TransactionModel';
 import MessageStore from 'src/lib/store/MessageStore';
-import {CategoryModel} from 'src/lib/model/CategoryModel';
 import PayeeStore from 'src/lib/store/PayeeStore';
 import {PayeeModel} from 'src/lib/model/PayeeModel';
+import Payee from './Payee';
+import {newTx} from 'src/test/transactionFactory';
 
-const txData: ITransaction = {
-    id: '1',
-    date: '2020-01-01',
-    details: [],
-    cleared: false,
-};
+const txData = newTx();
 
 describe('Payee', () => {
     const messageStore = new MessageStore();
-    const categoryStore = new CategoryStore(messageStore);
     const payeeStore = new PayeeStore(messageStore);
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({payeeStore});
-        jest.spyOn(categoryStore, 'getCategory').mockReturnValue({isAssetValue: false} as CategoryModel);
     });
     it('returns null if no payee', () => {
         const tx = new TransactionModel(txData, null);

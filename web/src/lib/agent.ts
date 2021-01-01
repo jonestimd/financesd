@@ -2,8 +2,7 @@
 export async function post<T>(url: string, body: BodyInit): Promise<T> {
     const response = await fetch(url, {method: 'POST', body});
     if (!response.ok) throw new Error(`Fetch failed: ${response.status} - ${response.statusText}`);
-    const json = await response.json() as T;
-    return json;
+    return response.json() as Promise<T>;
 }
 
 interface IGraphqlLocation {

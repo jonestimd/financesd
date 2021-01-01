@@ -2,7 +2,7 @@ export interface IAsset {
     id: string;
     name: string;
     scale: number;
-    symbol: string;
+    symbol?: string;
     version: number;
 }
 

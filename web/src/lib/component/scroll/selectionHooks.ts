@@ -20,6 +20,10 @@ function ensureVisible(container: HTMLElement, row: number, rowSelector: string,
     return row;
 }
 
+function isTableCell(elem: EventTarget): elem is HTMLTableCellElement {
+    return elem instanceof Element && elem.tagName === 'td';
+}
+
 export interface ISelectionOptions {
     /** initial selection */
     initialRow?: number;
@@ -83,7 +87,7 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
             }
         },
         onMouseDown(event: React.MouseEvent<HTMLElement>) {
-            if (event.target instanceof HTMLTableCellElement) {
+            if (isTableCell(event.target)) {
                 const tr = event.target.parentElement as HTMLTableRowElement;
                 const cellIndex = Array.from(tr.querySelectorAll('td'))
                     .slice(0, event.target.cellIndex)

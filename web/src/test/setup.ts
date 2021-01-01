@@ -5,4 +5,10 @@ import {clearTimers} from 'mobx-react-lite';
 
 configure({adapter: new Adapter()});
 
+global.navigator = {
+    language: 'en-US',
+} as Navigator;
+
+global.fetch = jest.fn();
+
 afterAll(() => clearTimers());

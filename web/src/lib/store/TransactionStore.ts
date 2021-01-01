@@ -33,10 +33,10 @@ export default class TransactionStore {
         return this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
     }
 
-    loadTransactions(accountId: string): void {
+    async loadTransactions(accountId: string): Promise<void> {
         if (!this.transactionsByAccountId.has(accountId) && this.pendingAccounts.indexOf(accountId) < 0) {
             this.rootStore.messageStore.addProgressMessage(loadingTransactions);
-            void this._loadTransactions(accountId);
+            await this._loadTransactions(accountId);
         }
     }
 

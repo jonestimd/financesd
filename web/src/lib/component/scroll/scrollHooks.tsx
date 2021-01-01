@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface IScrollOptions {
+export interface IScrollOptions {
     overscan?: number;
     defaultRowHeight?: number;
     prototypeSelector?: string;

@@ -15,10 +15,6 @@ interface IProps {
     accountId?: string;
 }
 
-function numberClass(value: number, classes?: string) {
-    return classNames(classes, 'number', {negative: value < 0});
-}
-
 const TransactionPrototype: React.FC = () => (
     <Typography className='transaction prototype'>
         <div className='leading'><span className='date'>0000-00-00</span></div>
@@ -45,8 +41,8 @@ const Transaction: React.FC<{tx: TransactionModel, selected: boolean}> = observe
         </div>
         <div className='trailing'>
             <Checkbox disabled checked={tx.cleared} />
-            <span className={numberClass(tx && tx.subtotal)}>{formats.currency.format(tx.subtotal)}</span>
-            <span className={numberClass(tx && tx.balance)}>{formats.currency.format(tx.balance)}</span>
+            <span className={formats.numberClass(tx.subtotal)}>{formats.currency.format(tx.subtotal)}</span>
+            <span className={formats.numberClass(tx.balance)}>{formats.currency.format(tx.balance)}</span>
         </div>
     </Typography>
 ));

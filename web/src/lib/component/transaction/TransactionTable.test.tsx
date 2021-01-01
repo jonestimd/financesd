@@ -1,0 +1,186 @@
+import React from 'react';
+import {shallow, ShallowWrapper} from 'enzyme';
+import TransactionTable from './TransactionTable';
+import {RootStore} from 'src/lib/store/RootStore';
+import {newAccount} from 'src/test/accountFactory';
+import HeaderDetailTable from '../table/HeaderDetailTable';
+import TransactionTableModel from 'src/lib/model/TransactionTableModel';
+import {newTxModel} from 'src/test/transactionFactory';
+import {newPayeeModel} from 'src/test/payeeFactory';
+import {newSecurityModel} from 'src/test/securityFactory';
+import {newDetail} from 'src/test/detailFactory';
+import {newGroupModel} from 'src/test/groupFactory';
+import {newCategoryModel} from 'src/test/categoryFactory';
+import TransactionModel, {ITransactionDetail} from 'src/lib/model/TransactionModel';
+
+const account = newAccount();
+
+const getTxColumns = (component: ShallowWrapper) => component.find(HeaderDetailTable).prop('columns');
+const getTxColumn = (component: ShallowWrapper, key: string) => getTxColumns(component).find((col) => col.key === key);
+const getDetailColumns = (component: ShallowWrapper) => component.find(HeaderDetailTable).prop('subColumns');
+const getDetailColumn = (component: ShallowWrapper, key: string) => getDetailColumns(component).find((col) => col.key === key);
+
+describe('TransactionTable', () => {
+    const rootStore = new RootStore();
+    const transactionsModel = new TransactionTableModel([], rootStore.categoryStore);
+    const payee = newPayeeModel();
+    const security = newSecurityModel();
+    const txModel = newTxModel({
+        payeeId: parseInt(payee.id),
+        securityId: parseInt(security.id),
+        referenceNumber: '123',
+        memo: 'tx memo',
+        details: [newDetail()],
+        balance: 987.23,
+    });
+
+    beforeEach(() => {
+        jest.spyOn(React, 'useContext').mockReturnValue(rootStore);
+        jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(account);
+        jest.spyOn(rootStore.transactionStore, 'getTransactionsModel').mockReturnValue(transactionsModel);
+        jest.spyOn(rootStore.payeeStore, 'getPayee').mockReturnValue(payee);
+        jest.spyOn(rootStore.securityStore, 'getSecurity').mockReturnValue(security);
+    });
+    it('displays transactions in a header/detail table', () => {
+        const component = shallow(<TransactionTable accountId={account.id} />);
+
+        expect(component.find(HeaderDetailTable)).toEqual(component);
+        expect(component).toHaveClassName('transactions');
+        expect(component).toHaveProp('model', transactionsModel);
+        expect(component.find(HeaderDetailTable).prop('subrows')(txModel)).toEqual(txModel.details);
+    });
+    describe('transaction row', () => {
+        it('displays date', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.date')?.render;
+
+            expect(renderer(txModel)).toEqual(txModel.date);
+        });
+        it('displays reference number', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.referenceNumber')?.render;
+
+            expect(renderer(txModel)).toEqual(txModel.referenceNumber);
+        });
+        it('displays payee', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.payee')?.render;
+
+            expect(renderer(txModel)).toEqual(payee.name);
+
+            expect(rootStore.payeeStore.getPayee).toBeCalledWith(txModel.payeeId);
+        });
+        it('displays security', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.security')?.render;
+
+            expect(renderer(txModel)).toEqual(security.name);
+
+            expect(rootStore.securityStore.getSecurity).toBeCalledWith(txModel.securityId);
+        });
+        it('displays memo', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.memo')?.render;
+
+            expect(renderer(txModel)).toEqual(txModel.memo);
+        });
+        it('displays subtotal', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const {render: renderer, ...rest} = getTxColumn(component, 'transaction.subtotal')!;
+
+            expect(renderer(txModel)).toEqual(`$${txModel.subtotal}`);
+            const className = rest.className as (tx: Partial<TransactionModel>) => string;
+            expect(className({subtotal: 0})).toEqual('number');
+            expect(className({subtotal: -1})).toEqual('number negative');
+        });
+        it('displays balance', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const {render: renderer, ...rest} = getTxColumn(component, 'transaction.balance')!;
+
+            expect(renderer(txModel)).toEqual(`$${txModel.balance}`);
+            const className = rest.className as (tx: Partial<TransactionModel>) => string;
+            expect(className({balance: 0})).toEqual('number');
+            expect(className({balance: -1})).toEqual('number negative');
+        });
+        it('displays cleared status', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.cleared')?.render;
+
+            expect(renderer(txModel)).toBeNull();
+            expect(renderer({cleared: true})).toEqual(<span>&#x2713;</span>);
+        });
+    });
+    describe('detail row', () => {
+        const group = newGroupModel();
+        const category = newCategoryModel();
+        const detail = newDetail({
+            transactionGroupId: parseInt(group.id),
+            transactionCategoryId: parseInt(category.id),
+            memo: 'detail memo',
+            assetQuantity: 9.234567,
+            amount: 456.23,
+        });
+
+        it('displays group', () => {
+            jest.spyOn(rootStore.groupStore, 'getGroup').mockReturnValue(group);
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.group')?.render;
+
+            expect(renderer(detail)).toEqual(<span className='group'>{group.name}</span>);
+
+            expect(rootStore.groupStore.getGroup).toBeCalledWith(detail.transactionGroupId);
+        });
+        it('displays category', () => {
+            jest.spyOn(rootStore.categoryStore, 'getCategory').mockReturnValue(category);
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.category')?.render;
+
+            expect(renderer(detail)).toEqual(<span>{category.displayName}</span>);
+
+            expect(rootStore.categoryStore.getCategory).toBeCalledWith(detail.transactionCategoryId);
+        });
+        it('displays transfer account', () => {
+            const relatedAccount = newAccount();
+            const relatedTx = {accountId: parseInt(relatedAccount.id)};
+            const relatedDetail = {transaction: relatedTx};
+            jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(relatedAccount);
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.category')?.render;
+
+            expect(renderer({relatedDetail})).toEqual(<span className='transfer'>{relatedAccount.name}</span>);
+
+            expect(rootStore.accountStore.getAccount).toBeCalledWith(relatedTx.accountId);
+        });
+        it('displays memo', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.memo')?.render;
+
+            expect(renderer(detail)).toEqual(detail.memo);
+        });
+        it('displays shares', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const {render: renderer, ...rest} = getDetailColumn(component, 'detail.shares')!;
+
+            expect(renderer(detail)).toEqual(`${detail.assetQuantity}`);
+            expect(renderer({})).toEqual('');
+            const className = rest.className as (detail: Partial<ITransactionDetail>) => string;
+            expect(className({assetQuantity: 0})).toEqual('security number');
+            expect(className({assetQuantity: -1})).toEqual('security number negative');
+        });
+        it('displays amount', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const {render: renderer, ...rest} = getDetailColumn(component, 'detail.amount')!;
+
+            expect(renderer(detail)).toEqual(`$${detail.amount}`);
+            const className = rest.className as (detail: Partial<ITransactionDetail>) => string;
+            expect(className({amount: 0})).toEqual('number');
+            expect(className({amount: -1})).toEqual('number negative');
+        });
+        it('displays filler columns', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+
+            expect(getDetailColumn(component, 'dummy1')?.render({})).toEqual('');
+            expect(getDetailColumn(component, 'dummy2')?.render({})).toEqual('');
+        });
+    });
+});

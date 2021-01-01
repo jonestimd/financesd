@@ -4,6 +4,7 @@
         "esModuleInterop": true,
         "jsx": "react",
         "noUnusedLocals": false,
-        "noUnusedParameters": false
+        "noUnusedParameters": false,
+        "typeRoots": ["../node_modules/@types", "src/test"]
     }
 }

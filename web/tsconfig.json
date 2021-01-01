@@ -13,7 +13,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "sourceMap": true,
-        "target": "esnext",
+        "target": "es2019",
         "outDir": "dist",
         "baseUrl": ".",
         "paths": {}

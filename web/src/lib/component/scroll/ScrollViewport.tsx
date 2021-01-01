@@ -9,7 +9,8 @@ window.onresize = (event: UIEvent) => {
     });
 };
 
-interface IProps extends React.DOMAttributes<HTMLDivElement> {
+interface IProps extends Omit<React.DOMAttributes<HTMLDivElement>, 'children'> {
+    children: (size: IScrollableProps) => React.ReactNode;
     className?: string;
     tabIndex?: number;
 }
@@ -34,7 +35,7 @@ const ScrollViewport: React.FC<IProps> = ({children, className = 'scroll-contain
     }, [onResize]);
     return (
         <div ref={ref} className={className} {...attrs} tabIndex={tabIndex}>
-            {typeof children === 'function' ? children({scrollHeight}) : children}
+            {children({scrollHeight})}
         </div>);
 };
 

@@ -52,7 +52,7 @@ const Routes: React.FC = () => {
         rootStore.groupStore.loadGroups();
         rootStore.payeeStore.loadPayees();
         rootStore.securityStore.loadSecurities();
-    }, []);
+    }, [rootStore.accountStore, rootStore.categoryStore, rootStore.groupStore, rootStore.payeeStore, rootStore.securityStore]);
     return (
         <RootStoreContext.Provider value={rootStore}>
             <ThemeProvider theme={myTheme}>

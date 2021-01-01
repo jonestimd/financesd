@@ -1,4 +1,4 @@
-import {makeObservable, observable} from 'mobx';
+import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 
 export interface IRelatedTransaction {
@@ -13,12 +13,12 @@ export interface IRelatedDetail {
 
 export interface ITransactionDetail {
     id: string;
-    transactionCategoryId: number;
-    transactionGroupId: number;
-    memo: string;
+    transactionCategoryId?: number;
+    transactionGroupId?: number;
+    memo?: string;
     amount: number;
-    assetQuantity: number;
-    relatedDetail: IRelatedDetail;
+    assetQuantity?: number;
+    relatedDetail?: IRelatedDetail;
 }
 
 export interface ITransaction {
@@ -50,8 +50,6 @@ export default class TransactionModel implements ITransaction {
     @observable
     details: ITransactionDetail[];
     @observable
-    subtotal: number;
-    @observable
     balance: number;
     categoryStore: CategoryStore;
 
@@ -59,10 +57,14 @@ export default class TransactionModel implements ITransaction {
         makeObservable(this);
         Object.assign(this, transaction);
         this.categoryStore = categoryStore;
-        this.subtotal = this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
     }
 
-    private isAssetValue(detail: ITransactionDetail) {
-        return this.categoryStore.getCategory(detail.transactionCategoryId).isAssetValue;
+    @computed
+    get subtotal(): number {
+        return this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
+    }
+
+    private isAssetValue({transactionCategoryId}: ITransactionDetail): boolean {
+        return typeof transactionCategoryId === 'number' && this.categoryStore.getCategory(transactionCategoryId).isAssetValue;
     }
 }

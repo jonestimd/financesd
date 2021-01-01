@@ -8,11 +8,11 @@ export interface ICompany {
 
 export interface IAccount {
     id: string;
-    companyId: number;
+    companyId?: number;
     type: string;
     name: string;
-    description: string;
-    accountNo: string;
+    description?: string;
+    accountNo?: string;
     closed: boolean;
     version: number;
     transactionCount: number;

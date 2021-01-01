@@ -17,5 +17,11 @@
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/semi": ["error", "always", {"omitLastInOneLineBlock": true}],
         "@typescript-eslint/unbound-method": ["off", {"ignoreStatic": true}]
-    }
+    },
+    "overrides": [{
+        "files": ["**/*.test.{ts,tsx}"],
+        "rules": {
+            "@typescript-eslint/no-non-null-assertion": "off"
+        }
+    }]
 }

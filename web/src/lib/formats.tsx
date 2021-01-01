@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 
-function numberClass(value: number, classes?: string) {
+export function numberClass(value: number, classes?: string) {
     return classNames(classes, 'number', {negative: value < 0});
 }
 

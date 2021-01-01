@@ -1,0 +1,16 @@
+import {IGroup, GroupModel} from "src/lib/model/GroupModel";
+
+let nextId = 0;
+
+export function newGroup(overrides: Partial<IGroup> = {}): IGroup {
+    return {
+        id: `${++nextId}`,
+        name: `Group ${nextId}`,
+        version: 1,
+        ...overrides,
+    };
+}
+
+export function newGroupModel(overrides: Partial<IGroup> = {}): GroupModel {
+    return new GroupModel(newGroup(overrides));
+}

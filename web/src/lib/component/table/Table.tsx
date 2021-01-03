@@ -2,7 +2,6 @@ import React, {ReactNode} from 'react';
 import classNames from 'classnames';
 import {translate} from '../../i18n/localize';
 import {useSelection} from '../scroll/selectionHooks';
-import ScrollViewport from '../scroll/ScrollViewport';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
@@ -77,7 +76,7 @@ export const Row = <T extends IRow>({row, className, columns, selection = {}}: I
 };
 
 const rowClass = (index: number, selection: {row: number}) => classNames({
-    even: index % 2,
+    odd: index % 2,
     selected: index === selection.row,
 });
 
@@ -89,7 +88,7 @@ export const selectionOptions = {
 const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
     const selection = useSelection({rows: data.length, columns: columns.length, ...selectionOptions});
     return (
-        <ScrollViewport onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
+        <div className='scroll-container' onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0}>
             <MuiTable className={classNames('table', className)}>
                 <TableHead><HeaderRow columns={columns} /></TableHead>
                 <TableBody>
@@ -98,7 +97,7 @@ const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
                     )}
                 </TableBody>
             </MuiTable>
-        </ScrollViewport>
+        </div>
     );
 };
 

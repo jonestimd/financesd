@@ -46,10 +46,12 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
             {({scrollHeight}: IScrollableProps) => {
                 const endGroup = model.getGroupIndex(scroll.endRow(scrollHeight));
                 const trailingHeight = model.getRowsAfter(endGroup) * scroll.rowHeight;
-                const rowClassNames = (index: number, subIndex = 0, classes?: string) => classNames(classes, {
-                    even: (startGroup + index) % 2,
-                    selected: model.precedingRows[startGroup + index] + subIndex === selection.row,
-                });
+                const rowClassNames = (index: number, subIndex = 0, classes?: string) => {
+                    return classNames(classes, {
+                        odd: (startGroup + index) % 2,
+                        selected: model.precedingRows[startGroup + index] + subIndex === selection.row,
+                    });
+                };
                 return (
                     <Table ref={scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
                         <TableHead>

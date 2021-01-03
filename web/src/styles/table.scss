@@ -1,5 +1,5 @@
 $table-border: #c0c0c0 !default;
-$table-even-background: #e0f0f5 !default;
+$table-odd-background: #e0f0f5 !default;
 
 table.table {
     position: relative;
@@ -35,8 +35,8 @@ table.table {
         tr:hover {
             background: $transaction-hover-background;
         }
-        tr.even {
-            background: $table-even-background;
+        tr.odd {
+            background: $table-odd-background;
             &:hover {
                 background: $transaction-hover-background;
             }

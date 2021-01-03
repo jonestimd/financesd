@@ -1,32 +1,8 @@
 import React from 'react';
 import {shallow} from 'enzyme';
+import {mockHooks} from 'src/test/mockHooks';
 import ListViewport from './ListViewport';
 import ScrollViewport from './ScrollViewport';
-import * as scrollHooks from './scrollHooks';
-import * as selectionHooks from './selectionHooks';
-
-type ScrollHook = Pick<ReturnType<typeof scrollHooks['useScroll']>, 'startRow' | 'rowHeight' | 'headerHeight'>;
-
-function mockHooks(overrides: Partial<ScrollHook> = {}) {
-    const scroll = {
-        startRow: 0,
-        rowHeight: 0,
-        headerHeight: 0,
-        listRef: {current: null} as React.MutableRefObject<HTMLElement>,
-        endRow: jest.fn<number, [number]>(),
-        onScroll: jest.fn<void, [React.UIEvent<HTMLElement>]>(),
-        ...overrides,
-    };
-    jest.spyOn(scrollHooks, 'useScroll').mockReturnValue(scroll);
-    const selection = {
-        row: 0,
-        column: 0,
-        onKeyDown: jest.fn(),
-        onMouseDown: jest.fn(),
-    };
-    jest.spyOn(selectionHooks, 'useSelection').mockReturnValue(selection);
-    return {scroll, selection};
-}
 
 describe('ListViewport', () => {
     const rowHeight = 10;

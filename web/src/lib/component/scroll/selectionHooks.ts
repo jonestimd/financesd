@@ -21,7 +21,7 @@ function ensureVisible(container: HTMLElement, row: number, rowSelector: string,
 }
 
 function isTableCell(elem: EventTarget): elem is HTMLTableCellElement {
-    return elem instanceof Element && elem.tagName === 'td';
+    return elem instanceof Element && elem.tagName.toLocaleLowerCase() === 'td';
 }
 
 export interface ISelectionOptions {

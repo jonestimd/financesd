@@ -14,7 +14,7 @@ interface IProps<T> {
     children?: React.ReactNode;
 }
 
-const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>) => {
+const ListViewport = observer(<T extends {id: number | string}>(props: IProps<T>) => {
     const {items, className, defaultRowHeight, rowSelector, prototypeSelector, renderItem, children} = props;
     const scroll = useScroll<HTMLDivElement>({defaultRowHeight, prototypeSelector});
     const leadingHeight = scroll.startRow * scroll.rowHeight;
@@ -41,4 +41,4 @@ const ListViewPort = observer(<T extends {id: number | string}>(props: IProps<T>
     );
 });
 
-export default ListViewPort;
+export default ListViewport;

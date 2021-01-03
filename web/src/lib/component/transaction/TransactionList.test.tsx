@@ -3,7 +3,7 @@ import {shallow} from 'enzyme';
 import TransactionList from './TransactionList';
 import {RootStore} from 'src/lib/store/RootStore';
 import TransactionTableModel from 'src/lib/model/TransactionTableModel';
-import ListViewPort from '../scroll/ListViewPort';
+import ListViewport from '../scroll/ListViewport';
 import {newTxModel} from 'src/test/transactionFactory';
 import Memo from './Memo';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -12,7 +12,7 @@ import Security from './Security';
 import TxDetail from './TxDetail';
 import {newDetail} from 'src/test/detailFactory';
 
-type RenderItem = Parameters<typeof ListViewPort>[0]['renderItem'];
+type RenderItem = Parameters<typeof ListViewport>[0]['renderItem'];
 
 describe('TransactionList', () => {
     const {categoryStore, transactionStore} = new RootStore();
@@ -27,7 +27,7 @@ describe('TransactionList', () => {
     it('displays list in ListViewPort', () => {
         const component = shallow(<TransactionList />);
 
-        expect(component.find(ListViewPort).props()).toEqual(expect.objectContaining({
+        expect(component.find(ListViewport).props()).toEqual(expect.objectContaining({
             items: transactionsModel.transactions,
             rowSelector: 'div.transaction',
             prototypeSelector: '.prototype',
@@ -46,7 +46,7 @@ describe('TransactionList', () => {
         let renderItem: RenderItem;
 
         beforeEach(() => {
-            renderItem = shallow(<TransactionList />).find(ListViewPort).prop('renderItem');
+            renderItem = shallow(<TransactionList />).find(ListViewport).prop('renderItem');
         });
         it('displays transaction date, payee, memo, security, details and cleared', () => {
             const tx = shallow(renderItem(txModel, undefined, false));

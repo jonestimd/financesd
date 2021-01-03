@@ -9,7 +9,7 @@ import Security from './Security';
 import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
 import {Checkbox, Typography} from '@material-ui/core';
-import ListViewPort from '../scroll/ListViewPort';
+import ListViewport from '../scroll/ListViewport';
 
 interface IProps {
     accountId?: string;
@@ -51,10 +51,10 @@ const TransactionList: React.FC<IProps> = observer(({accountId}) => {
     const {transactionStore} = React.useContext(RootStoreContext);
     const tableModel = transactionStore.getTransactionsModel(accountId);
     return (
-        <ListViewPort items={tableModel.transactions} rowSelector='div.transaction' prototypeSelector='.prototype'
+        <ListViewport items={tableModel.transactions} rowSelector='div.transaction' prototypeSelector='.prototype'
             renderItem={(tx, _index, selected) => <Transaction tx={tx} selected={selected} />} >
             <TransactionPrototype />
-        </ListViewPort>
+        </ListViewport>
     );
 });
 

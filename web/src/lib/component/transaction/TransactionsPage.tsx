@@ -22,7 +22,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     const [mode, setMode] = React.useState<ViewMode>('list');
     return (
         <>
-            <TopAppBar title={account ? account.displayName : ''} menuItems={<PageMenu />}>
+            <TopAppBar title={account?.displayName ?? ''} menuItems={<PageMenu />}>
                 <ToggleButtonGroup value={mode} exclusive size='small'
                     onChange={(_event: React.MouseEvent, value: ViewMode) => setMode(value ?? mode)}>
                     <ToggleButton value='list'><Icon>list</Icon></ToggleButton>

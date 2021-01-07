@@ -1,19 +1,20 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {RootStore} from 'src/lib/store/RootStore';
-import {newAccount} from 'src/test/accountFactory';
+import {newAccountModel} from 'src/test/accountFactory';
 import TransactionsPage from './TransactionsPage';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import TopAppBar from '../TopAppBar';
+import {mockUseEffect} from 'src/test/mockHooks';
 
 const accountId = '123';
 
 describe('TransactionsPage', () => {
     const {accountStore, transactionStore} = new RootStore();
-    const account = newAccount();
+    const account = newAccountModel();
     const props = {
         match: {params: {accountId}},
     };
@@ -22,7 +23,7 @@ describe('TransactionsPage', () => {
         jest.spyOn(React, 'useContext').mockReturnValue({accountStore, transactionStore});
         jest.spyOn(transactionStore, 'loadTransactions').mockResolvedValue();
         jest.spyOn(accountStore, 'getAccount').mockReturnValue(account);
-        jest.spyOn(React, 'useEffect').mockImplementation((cb) => cb());
+        mockUseEffect();
     });
     it('loads account transactions', () => {
         shallow(<TransactionsPage {...props} />);

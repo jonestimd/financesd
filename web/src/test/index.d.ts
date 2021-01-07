@@ -7,3 +7,11 @@ declare module 'enzyme' {
         rerender(props: P): void;
     }
 }
+
+declare global {
+    namespace jest {
+        interface Matchers<R, T> {
+            toHaveProps(props: Record<string, unknown>): R;
+        }
+    }
+}

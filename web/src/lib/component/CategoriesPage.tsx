@@ -9,7 +9,7 @@ import {translate} from '../i18n/localize';
 import PageMenu from './PageMenu';
 
 const columns: IColumn<CategoryModel>[] = [
-    {key: 'category.parent', render: (category) => category.parent && category.parent.displayName},
+    {key: 'category.parent', render: (category) => category.parent?.displayName ?? null},
     {key: 'category.code', render: (category) => category.code},
     {key: 'category.description', render: (category) => category.description},
     {key: 'category.amountType', render: (category) => amountType(category.amountType)},
@@ -21,7 +21,6 @@ const columns: IColumn<CategoryModel>[] = [
 const CategoriesPage: React.FC = observer(() => {
     const {categoryStore} = React.useContext(RootStoreContext);
     const categories = categoryStore.categories;
-    React.useEffect(() => categoryStore.loadCategories(), [categoryStore]);
     return (
         <div className='category-list'>
             <TopAppBar title={translate('menu.categories')} menuItems={<PageMenu currentPage='menu.categories' />} />

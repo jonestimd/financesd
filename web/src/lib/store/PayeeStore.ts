@@ -5,7 +5,7 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-const query = `{
+export const query = `{
     payees {
         id name version
     }
@@ -13,7 +13,7 @@ const query = `{
 
 type PayeesResponse = agent.IGraphqlResponse<{payees: IPayee[]}>;
 
-const loadingPayees = 'Loading payees...';
+export const loadingPayees = 'Loading payees...';
 
 export default class PayeeStore {
     private loading = false;
@@ -31,13 +31,13 @@ export default class PayeeStore {
     }
 
     getPayee(id: string | number): PayeeModel {
-        return this.payeesById.get('' + id) || {} as PayeeModel;
+        return this.payeesById.get('' + id);
     }
 
-    loadPayees(): void {
+    loadPayees(): Promise<void> | undefined {
         if (!this.loading && this.payeesById.size === 0) {
             this.messageStore.addProgressMessage(loadingPayees);
-            void this._loadPayees();
+            return this._loadPayees();
         }
     }
 

@@ -45,7 +45,7 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     ], [payeeStore, renderSecurity]);
     const renderCategory = useCallback((detail: ITransactionDetail) => {
         if (detail.relatedDetail) {
-            return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId).name}</span>;
+            return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId)?.name}</span>;
         }
         return <span>{categoryStore.getCategory(detail.transactionCategoryId).displayName ?? ''}</span>;
     }, [accountStore, categoryStore]);
@@ -63,7 +63,7 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     ], [renderCategory, renderGroup]);
     return (
         <HeaderDetailTable
-            className={securityAccountTypes.includes(account.type) ? 'security-transactions' : 'transactions'}
+            className={securityAccountTypes.includes(account?.type) ? 'security-transactions' : 'transactions'}
             columns={columns}
             subColumns={subcolumns}
             model={transactionStore.getTransactionsModel(accountId)}

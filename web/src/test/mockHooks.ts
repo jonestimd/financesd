@@ -1,3 +1,4 @@
+import React from 'react';
 import * as scrollHooks from '../lib/component/scroll/scrollHooks';
 import * as selectionHooks from '../lib/component/scroll/selectionHooks';
 
@@ -33,3 +34,22 @@ export function mockHooks(scrollOverrides: Partial<ScrollHook> = {}) {
     const selection = mockSelectionHook();
     return {scroll, selection};
 }
+
+const effects: string[] = [];
+const disposers: (() => void)[] = [];
+
+export function mockUseEffect() {
+    jest.spyOn(React, 'useEffect').mockImplementation((effect) => {
+        if (!effects.includes(effect.toString())) {
+            const disposer = effect();
+            if (disposer) disposers.push(disposer);
+            effects.push(effect.toString());
+        }
+    });
+}
+
+afterEach(() => {
+    disposers.forEach((disposer) => disposer());
+    disposers.splice(0, disposers.length);
+    effects.splice(0, effects.length);
+});

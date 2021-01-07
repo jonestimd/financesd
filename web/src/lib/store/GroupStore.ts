@@ -5,13 +5,13 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-const query = `{
+export const query = `{
     groups {id name description version}
 }`;
 
 type GroupsResponse = agent.IGraphqlResponse<{groups: IGroup[]}>;
 
-const loadingGroups = 'Loading groups...';
+export const loadingGroups = 'Loading groups...';
 
 export default class GroupStore {
     private loading = false;
@@ -28,14 +28,14 @@ export default class GroupStore {
         return sortValuesByName(this.groupsById);
     }
 
-    getGroup(id: string | number): GroupModel {
-        return this.groupsById.get('' + id) || {} as GroupModel;
+    getGroup(id: string | number): GroupModel | undefined {
+        return this.groupsById.get('' + id);
     }
 
-    loadGroups(): void {
+    loadGroups(): Promise<void> | undefined {
         if (!this.loading && this.groupsById.size === 0) {
             this.messageStore.addProgressMessage(loadingGroups);
-            void this._loadGroups();
+            return this._loadGroups();
         }
     }
 

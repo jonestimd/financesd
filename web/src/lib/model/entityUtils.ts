@@ -2,7 +2,9 @@ export interface IName {
     name: string;
 }
 
-export function compareBy<T, P>(getter: (item: T) => P): (v1: T, v2: T) => number {
+export type Comparator<T> = (v1: T, v2: T) => number;
+
+export function compareBy<T, P>(getter: (item: T) => P): Comparator<T> {
     return (v1: T, v2: T) => {
         const p1 = getter(v1);
         const p2 = getter(v2);
@@ -20,7 +22,7 @@ export function sortValuesByName<T extends IName>(itemMap: Map<string, T>): T[] 
     return sortValues<T>(itemMap, compareByName);
 }
 
-export function sortValues<T>(itemMap: Map<string, T>, comparator: (v1: T, v2: T) => number): T[] {
+export function sortValues<T>(itemMap: Map<string, T>, comparator: Comparator<T>): T[] {
     return Array.from(itemMap.values()).sort(comparator);
 }
 

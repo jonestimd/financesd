@@ -5,7 +5,7 @@ import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
 import {LoadResult} from './interfaces';
 
-const query = `query($accountId: ID) {
+export const query = `query($accountId: ID) {
     transactions(accountId: $accountId) {
         id date referenceNumber payeeId securityId memo cleared
         details {
@@ -17,7 +17,7 @@ const query = `query($accountId: ID) {
 
 type TransactionsResponse = agent.IGraphqlResponse<{transactions: ITransaction[]}>;
 
-const loadingTransactions = 'Loading transactions...';
+export const loadingTransactions = 'Loading transactions...';
 
 export default class TransactionStore {
     private pendingAccounts: string[] = [];

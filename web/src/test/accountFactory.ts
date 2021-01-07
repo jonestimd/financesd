@@ -11,8 +11,8 @@ export function newCompany(overrides: Partial<ICompany> = {}): ICompany {
     };
 }
 
-export function newAccount(overrides: Partial<IAccount> = {}, company?: ICompany): AccountModel {
-    return new AccountModel({
+export function newAccount(overrides: Partial<IAccount> = {}): IAccount {
+    return {
         id: `${++nextId}`,
         name: `Account ${nextId}`,
         type: 'Bank',
@@ -21,5 +21,9 @@ export function newAccount(overrides: Partial<IAccount> = {}, company?: ICompany
         transactionCount: 555,
         balance: 1234.78,
         ...overrides,
-    }, company);
+    };
+}
+
+export function newAccountModel(overrides: Partial<IAccount> = {}, company?: ICompany) {
+    return new AccountModel(newAccount({...overrides, companyId: company && parseInt(company.id)}), company);
 }

@@ -12,7 +12,7 @@ const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactio
     if (relatedDetail) {
         return <span className='transfer'>
             <i className='material-icons md-18'>forward</i>
-            {accountStore.getAccount(relatedDetail.transaction.accountId).name}
+            {accountStore.getAccount(relatedDetail.transaction.accountId)?.name}
         </span>;
     }
     if (transactionCategoryId) {

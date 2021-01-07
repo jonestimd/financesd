@@ -5,11 +5,11 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-const query = '{categories {id code description amountType parentId security income version transactionCount}}';
+export const query = '{categories {id code description amountType parentId security income version transactionCount}}';
 
 type CategoryResponse = agent.IGraphqlResponse<{categories: ICategory[]}>;
 
-const loadingCategories = 'Loading categories...';
+export const loadingCategories = 'Loading categories...';
 
 export default class CategoryStore {
     private loading = false;
@@ -26,14 +26,14 @@ export default class CategoryStore {
         return sortValues(this.categoriesById, compareBy((category) => category.displayName));
     }
 
-    getCategory(id: string | number): CategoryModel {
-        return this.categoriesById.get('' + id) || {} as CategoryModel;
+    getCategory(id: string | number): CategoryModel | undefined {
+        return this.categoriesById.get('' + id);
     }
 
-    loadCategories(): void {
+    loadCategories(): Promise<void> | undefined {
         if (!this.loading && Object.keys(this.categories).length === 0) {
             this.messageStore.addProgressMessage(loadingCategories);
-            void this._loadCategories();
+            return this._loadCategories();
         }
     }
 

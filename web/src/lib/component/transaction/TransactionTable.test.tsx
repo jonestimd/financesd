@@ -2,7 +2,7 @@ import React from 'react';
 import {shallow, ShallowWrapper} from 'enzyme';
 import TransactionTable from './TransactionTable';
 import {RootStore} from 'src/lib/store/RootStore';
-import {newAccount} from 'src/test/accountFactory';
+import {newAccountModel} from 'src/test/accountFactory';
 import HeaderDetailTable from '../table/HeaderDetailTable';
 import TransactionTableModel from 'src/lib/model/TransactionTableModel';
 import {newTxModel} from 'src/test/transactionFactory';
@@ -13,7 +13,7 @@ import {newGroupModel} from 'src/test/groupFactory';
 import {newCategoryModel} from 'src/test/categoryFactory';
 import TransactionModel, {ITransactionDetail} from 'src/lib/model/TransactionModel';
 
-const account = newAccount();
+const account = newAccountModel();
 
 const getTxColumns = (component: ShallowWrapper) => component.find(HeaderDetailTable).prop('columns');
 const getTxColumn = (component: ShallowWrapper, key: string) => getTxColumns(component).find((col) => col.key === key);
@@ -140,7 +140,7 @@ describe('TransactionTable', () => {
             expect(rootStore.categoryStore.getCategory).toBeCalledWith(detail.transactionCategoryId);
         });
         it('displays transfer account', () => {
-            const relatedAccount = newAccount();
+            const relatedAccount = newAccountModel();
             const relatedTx = {accountId: parseInt(relatedAccount.id)};
             const relatedDetail = {transaction: relatedTx};
             jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(relatedAccount);

@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import ScrollViewport, {IScrollableProps} from './ScrollViewport';
+import {mockUseEffect} from 'src/test/mockHooks';
 
 describe('ScrollViewport', () => {
     const document = new Document();
-    const disposers: (() => void)[] = [];
     const capture = {
         height: -1,
         setHeight: ({scrollHeight}: IScrollableProps): React.ReactNode => {
@@ -14,18 +14,7 @@ describe('ScrollViewport', () => {
     };
 
     beforeEach(() => {
-        const effects: string[] = [];
-        jest.spyOn(React, 'useEffect').mockImplementation((effect) => {
-            if (!effects.includes(effect.toString())) {
-                const disposer = effect();
-                if (disposer) disposers.push(disposer);
-                effects.push(effect.toString());
-            }
-        });
-    });
-    afterEach(() => {
-        disposers.forEach((disposer) => disposer());
-        disposers.splice(0, disposers.length);
+        mockUseEffect();
     });
     it('defaults height to 0 if not mounted', () => {
         shallow(<ScrollViewport>{capture.setHeight}</ScrollViewport>);

@@ -35,7 +35,7 @@ export interface ITransaction {
 export default class TransactionModel implements ITransaction {
     static compare(t1: ITransaction, t2: ITransaction): number {
         if (t1.date === undefined) return t2.date === undefined ? 0 : 1;
-        if (t1.date === undefined) return -1;
+        if (t2.date === undefined) return -1;
         if (t1.date === t2.date) return Number(t1.id) - Number(t2.id);
         return t1.date < t2.date ? -1 : 1;
     }

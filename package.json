@@ -73,7 +73,7 @@
     "collectCoverage": true,
     "collectCoverageFrom": ["<rootDir>/web/src/lib/**/*.{ts,tsx}"],
     "coverageDirectory": "coverage",
-    "coverageProvider": "v8",
+    "coverageProvider": "babel",
     "testEnvironment": "jsdom",
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/web/src/$1"

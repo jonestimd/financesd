@@ -1,0 +1,58 @@
+import {newAccount, newAccountModel, newCompany} from "src/test/accountFactory";
+import {AccountModel} from "./AccountModel";
+
+describe('AccountModel', () => {
+    const account = newAccount();
+    const company = newCompany();
+
+    describe('constructor', () => {
+        it('populates account properties', () => {
+            const model = new AccountModel(account);
+
+            expect(model).toEqual(account);
+        });
+        it('sets company', () => {
+            const model = new AccountModel(account, company);
+
+            expect(model.company).toBe(company);
+        });
+    });
+    describe('companyName', () => {
+        it('returns empty string for no company', () => {
+            const model = new AccountModel(account);
+
+            expect(model.companyName).toEqual('');
+        });
+        it('returns company name', () => {
+            const model = new AccountModel(account, company);
+
+            expect(model.companyName).toEqual(company.name);
+        });
+    });
+    describe('displayName', () => {
+        it('returns name if no company', () => {
+            const model = new AccountModel(account);
+
+            expect(model.displayName).toEqual(account.name);
+        });
+        it('returns company name and name', () => {
+            const model = new AccountModel(account, company);
+
+            expect(model.displayName).toEqual(`${company.name}: ${account.name}`);
+        });
+    });
+    describe('compare', () => {
+        it('sorts by company name then account name', () => {
+            const account1 = newAccountModel({}, company);
+            const account2 = newAccountModel({}, company);
+            const company2 = newCompany();
+            const account3 = newAccountModel({name: account1.name}, company2);
+
+            expect(AccountModel.compare(account1, account3)).toBeLessThan(0);
+            expect(AccountModel.compare(account3, account1)).toBeGreaterThan(0);
+            expect(AccountModel.compare(account1, account1)).toEqual(0);
+            expect(AccountModel.compare(account1, account2)).toBeLessThan(0);
+            expect(AccountModel.compare(account2, account1)).toBeGreaterThan(0);
+        });
+    });
+});

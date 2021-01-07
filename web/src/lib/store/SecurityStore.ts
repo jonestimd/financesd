@@ -5,11 +5,11 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-const query = '{securities {id name scale symbol type version}}';
+export const query = '{securities {id name scale symbol type version}}';
 
 type SecurityResponse = agent.IGraphqlResponse<{securities: ISecurity[]}>;
 
-const loadingSecurities = 'Loading securities...';
+export const loadingSecurities = 'Loading securities...';
 
 export interface ISecurityStore {
     getSecurity: (id: string | number) => SecurityModel;
@@ -32,13 +32,13 @@ export default class SecurityStore {
     }
 
     getSecurity(id: string | number): SecurityModel {
-        return this.securitiesById.get('' + id) || {} as SecurityModel;
+        return this.securitiesById.get('' + id);
     }
 
-    loadSecurities(): void {
+    loadSecurities(): Promise<void> | undefined {
         if (!this.loading && this.securitiesById.size === 0) {
             this.messageStore.addProgressMessage(loadingSecurities);
-            void this._loadSecurities();
+            return this._loadSecurities();
         }
     }
 

@@ -44,14 +44,14 @@ const myTheme = createMuiTheme({
     },
 });
 
-const Routes: React.FC = () => {
+export const Routes: React.FC = () => {
     const rootStore = (window.rootStore = window.rootStore || new RootStore());
     React.useEffect(() => {
-        rootStore.accountStore.loadAccounts();
-        rootStore.categoryStore.loadCategories();
-        rootStore.groupStore.loadGroups();
-        rootStore.payeeStore.loadPayees();
-        rootStore.securityStore.loadSecurities();
+        void rootStore.accountStore.loadAccounts();
+        void rootStore.categoryStore.loadCategories();
+        void rootStore.groupStore.loadGroups();
+        void rootStore.payeeStore.loadPayees();
+        void rootStore.securityStore.loadSecurities();
     }, [rootStore.accountStore, rootStore.categoryStore, rootStore.groupStore, rootStore.payeeStore, rootStore.securityStore]);
     return (
         <RootStoreContext.Provider value={rootStore}>

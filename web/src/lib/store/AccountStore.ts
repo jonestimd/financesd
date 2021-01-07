@@ -5,7 +5,7 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-const query = `{
+export const query = `{
     accounts {
         id name type accountNo description closed companyId version transactionCount balance
     }
@@ -16,7 +16,7 @@ const query = `{
 
 type AccountsResponse = agent.IGraphqlResponse<{accounts: IAccount[], companies: ICompany[]}>;
 
-const loadingAccounts = 'Loading accounts...';
+export const loadingAccounts = 'Loading accounts...';
 
 export default class AccountStore {
     private loading = false;
@@ -40,13 +40,13 @@ export default class AccountStore {
     }
 
     getAccount(id: string | number) {
-        return this.accountsById.get('' + id) || {} as AccountModel;
+        return this.accountsById.get('' + id);
     }
 
-    loadAccounts(): void {
+    loadAccounts(): Promise<void> | undefined {
         if (!this.loading && Object.keys(this.accounts).length === 0) {
             this.messageStore.addProgressMessage(loadingAccounts);
-            void this._loadAccounts();
+            return this._loadAccounts();
         }
     }
 

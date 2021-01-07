@@ -35,6 +35,15 @@ describe('agent', () => {
         });
     });
     describe('graphql', () => {
+        it('posts query', async () => {
+            const query = 'the graphql query';
+            mockFetch.mockResolvedValue(mockResponse({json: responseBody}));
+
+            const result = await agent.graphql(url, query);
+
+            expect(result).toBe(responseBody);
+            expect(fetch).toBeCalledWith(url, {method: 'POST', body: JSON.stringify({query, variables: {}})});
+        });
         it('posts query and variables', async () => {
             const query = 'the graphql query';
             const variables = {a: 123, b: 'some value'};

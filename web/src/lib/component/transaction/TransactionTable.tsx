@@ -34,14 +34,14 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     const renderSecurity = useCallback((tx: TransactionModel) => securityStore.getSecurity(tx.securityId).name, [securityStore]);
     // TODO filter security columns on non-security account
     const columns: IColumn<TransactionModel>[] = useMemo(() => [
-        {key: 'transaction.date', render: tx => tx.date, className: 'date'},
-        {key: 'transaction.referenceNumber', render: tx => tx.referenceNumber},
-        {key: 'transaction.payee', render: tx => payeeStore.getPayee(tx.payeeId).name},
-        {key: 'transaction.memo', render: tx => tx.memo},
+        {key: 'transaction.date', render: (tx) => tx.date, className: 'date'},
+        {key: 'transaction.referenceNumber', render: (tx) => tx.referenceNumber},
+        {key: 'transaction.payee', render: (tx) => payeeStore.getPayee(tx.payeeId).name},
+        {key: 'transaction.memo', render: (tx) => tx.memo},
         {key: 'transaction.security', render: renderSecurity, className: 'security'},
-        {key: 'transaction.subtotal', render: tx => formats.currency.format(tx.subtotal), className: (tx) => numberClass(tx && tx.subtotal)},
-        {key: 'transaction.cleared', render: tx => tx.cleared ? <span>&#x2713;</span> : null, className: 'boolean'},
-        {key: 'transaction.balance', render: tx => formats.currency.format(tx.balance), className: (tx) => numberClass(tx && tx.balance)},
+        {key: 'transaction.subtotal', render: (tx) => formats.currency.format(tx.subtotal), className: (tx) => numberClass(tx && tx.subtotal)},
+        {key: 'transaction.cleared', render: (tx) => tx.cleared ? <span>&#x2713;</span> : null, className: 'boolean'},
+        {key: 'transaction.balance', render: (tx) => formats.currency.format(tx.balance), className: (tx) => numberClass(tx && tx.balance)},
     ], [payeeStore, renderSecurity]);
     const renderCategory = useCallback((detail: ITransactionDetail) => {
         if (detail.relatedDetail) {
@@ -55,7 +55,7 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     const subcolumns: IColumn<ITransactionDetail>[] = useMemo(() => [
         {key: 'detail.group', colspan: 2, render: renderGroup, className: 'group'},
         {key: 'detail.category', render: renderCategory, className: 'category'},
-        {key: 'detail.memo', render: detail => detail.memo},
+        {key: 'detail.memo', render: (detail) => detail.memo},
         {key: 'detail.shares', render: renderShares, className: (detail) => numberClass(detail && detail.assetQuantity, 'security')},
         {key: 'detail.amount', render: renderAmount, className: (detail) => numberClass(detail && detail.amount)},
         {key: 'dummy1', header: dummyRender, render: dummyRender},

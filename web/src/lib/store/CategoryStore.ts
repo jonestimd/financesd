@@ -23,7 +23,7 @@ export default class CategoryStore {
 
     @computed
     get categories(): CategoryModel[] {
-        return sortValues(this.categoriesById, compareBy(category => category.displayName));
+        return sortValues(this.categoriesById, compareBy((category) => category.displayName));
     }
 
     getCategory(id: string | number): CategoryModel {
@@ -41,7 +41,7 @@ export default class CategoryStore {
         this.loading = true;
         try {
             const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
-            addToMap(this.categoriesById, data.categories.map(category => new CategoryModel(category, this)));
+            addToMap(this.categoriesById, data.categories.map((category) => new CategoryModel(category, this)));
         } catch (err) {
             console.error('error gettting categories', err); // TODO show toast
         } finally {

@@ -50,23 +50,23 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
             event.stopPropagation();
             // TODO always make new selection visible
             switch (key) {
-                case 'ArrowRight': setColumn(c => c === columns - 1 ? 0 : c + 1); break;
-                case 'ArrowLeft': setColumn(c => c === 0 ? columns - 1 : c - 1); break;
+                case 'ArrowRight': setColumn((c) => c === columns - 1 ? 0 : c + 1); break;
+                case 'ArrowLeft': setColumn((c) => c === 0 ? columns - 1 : c - 1); break;
                 case 'ArrowUp':
                     event.preventDefault();
-                    setRow(r => ensureVisible(currentTarget, Math.max(0, r - 1), rowSelector, headerSelector));
+                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - 1), rowSelector, headerSelector));
                     break;
                 case 'ArrowDown':
                     event.preventDefault();
-                    setRow(r => ensureVisible(currentTarget, Math.min(r + 1, rows - 1), rowSelector, headerSelector));
+                    setRow((r) => ensureVisible(currentTarget, Math.min(r + 1, rows - 1), rowSelector, headerSelector));
                     break;
                 case 'PageUp':
                     event.preventDefault();
-                    setRow(r => ensureVisible(currentTarget, Math.max(0, r - pageSize), rowSelector, headerSelector));
+                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - pageSize), rowSelector, headerSelector));
                     break;
                 case 'PageDown':
                     event.preventDefault();
-                    if (rows > 0) setRow(r => ensureVisible(currentTarget, Math.min(r + pageSize, rows - 1), rowSelector, headerSelector));
+                    if (rows > 0) setRow((r) => ensureVisible(currentTarget, Math.min(r + pageSize, rows - 1), rowSelector, headerSelector));
                     break;
                 case 'Home':
                     event.preventDefault();

@@ -37,7 +37,7 @@ const Transaction: React.FC<{tx: TransactionModel, selected: boolean}> = observe
             <Payee transaction={tx} />
             <Security transaction={tx} />
             <Memo text={tx.memo} />
-            {tx.details.map(detail => <TxDetail key={detail.id} detail={detail} />)}
+            {tx.details.map((detail) => <TxDetail key={detail.id} detail={detail} />)}
         </div>
         <div className='trailing'>
             <Checkbox disabled checked={tx.cleared} />

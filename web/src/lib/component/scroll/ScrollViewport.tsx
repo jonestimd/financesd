@@ -4,7 +4,7 @@ type ResizeListener = (event: UIEvent) => void;
 
 const resizeListeners: ResizeListener[] = [];
 window.onresize = (event: UIEvent) => {
-    resizeListeners.forEach(listener => {
+    resizeListeners.forEach((listener) => {
         listener(event);
     });
 };

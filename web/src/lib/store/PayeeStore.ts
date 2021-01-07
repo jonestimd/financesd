@@ -45,7 +45,7 @@ export default class PayeeStore {
         this.loading = true;
         try {
             const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
-            addToMap(this.payeesById, data.payees.map(payee => new PayeeModel(payee)));
+            addToMap(this.payeesById, data.payees.map((payee) => new PayeeModel(payee)));
         } catch (err) {
             console.error('error gettting payees', err); // TODO show toast
         } finally {

@@ -46,7 +46,7 @@ export default class SecurityStore {
         this.loading = true;
         try {
             const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
-            addToMap(this.securitiesById, data.securities.map(security => new SecurityModel(security)));
+            addToMap(this.securitiesById, data.securities.map((security) => new SecurityModel(security)));
         } catch (err) {
             console.error('error gettting securities', err); // TODO show toast
         } finally {

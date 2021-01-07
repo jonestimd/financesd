@@ -11,7 +11,7 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
 
     constructor(transactions: ITransaction[], categoryStore: CategoryStore) {
         makeObservable(this);
-        this.transactions = transactions.map(tx => new TransactionModel(tx, categoryStore)).sort(TransactionModel.compare);
+        this.transactions = transactions.map((tx) => new TransactionModel(tx, categoryStore)).sort(TransactionModel.compare);
         let balance = 0;
         for (const transaction of this.transactions) {
             transaction.balance = balance += transaction.subtotal;

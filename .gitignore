@@ -1,6 +1,7 @@
 /node_modules/
 /web/dist/
 /coverage/
+/cover.out
 
 __debug_bin
 financesd

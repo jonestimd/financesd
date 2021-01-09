@@ -71,7 +71,7 @@ type graphqlHandler struct {
 func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// start transaction
 	tx := h.db.Begin()
-	ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
+	ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx.CommonDB())
 	h.handler.ServeHTTP(w, r.WithContext(ctx))
 	// end transaction
 	if tx.Error == nil {

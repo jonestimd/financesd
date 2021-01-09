@@ -127,12 +127,12 @@ func getTableName(gt graphql.Type) string {
 	return toSnakeCase(unwrapList(gt).Name())
 }
 
-func (q *sqlData) Execute(db *gorm.DB) ([]interface{}, error) {
+func (q *sqlData) Execute(db gorm.SQLCommon) ([]interface{}, error) {
 	query := q.String()
 	if os.Getenv("SHOW_SQL") != "" {
 		log.Println(query)
 	}
-	if rows, err := db.CommonDB().Query(query, q.Args...); err != nil {
+	if rows, err := db.Query(query, q.Args...); err != nil {
 		return nil, err
 	} else {
 		results := make([]interface{}, 0)

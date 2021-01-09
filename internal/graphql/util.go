@@ -58,7 +58,7 @@ func findField(selections []ast.Selection, predicate selectionPredicate) *ast.Fi
 	return nil
 }
 
-// nestedResolver returns a resolver for a nested field
+// nestedResolver returns a resolver for the nested field of the source specified by the chain of fieldNames
 func nestedResolver(fieldNames ...string) graphql.FieldResolveFn {
 	return func(p graphql.ResolveParams) (interface{}, error) {
 		value := reflect.ValueOf(p.Source)

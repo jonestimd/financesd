@@ -9,6 +9,7 @@
     "build:dev": "rm -fr web/dist && mkdir -p web/dist && webpack -w",
     "pretest": "eslint --ext .ts,.tsx web",
     "test": "jest web/src",
+    "test:api": "go test --coverprofile cover.out ./internal/... # && go tool cover -html=cover.out",
     "publish": "echo 'not intended for publishing' && exit 1"
   },
   "license": "MIT",

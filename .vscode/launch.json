@@ -16,6 +16,18 @@
                 "SHOW_SQL": false
             },
             "args": []
+        },
+        {
+            "name": "jest",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node",
+            "console": "internalConsole",
+            "outputCapture": "std",
+            "args": ["--runInBand", "--coverage=false", ""]
         }
     ]
 }

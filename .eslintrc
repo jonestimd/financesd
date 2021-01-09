@@ -10,6 +10,7 @@
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
     ],
+    "ignorePatterns": ["webpack.config.js"],
     "rules": {
         "eol-last": "error",
         "arrow-parens": ["error", "always"],

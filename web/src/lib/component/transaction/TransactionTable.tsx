@@ -31,7 +31,7 @@ const dummyRender = () => '';
 const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
     const {accountStore, categoryStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     const account = accountStore.getAccount(accountId);
-    const renderSecurity = useCallback((tx: TransactionModel) => securityStore.getSecurity(tx.securityId).name, [securityStore]);
+    const renderSecurity = useCallback((tx: TransactionModel) => securityStore.getSecurity(tx.securityId)?.name ?? '', [securityStore]);
     // TODO filter security columns on non-security account
     const columns: IColumn<TransactionModel>[] = useMemo(() => [
         {key: 'transaction.date', render: (tx) => tx.date, className: 'date'},
@@ -47,10 +47,10 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
         if (detail.relatedDetail) {
             return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId)?.name}</span>;
         }
-        return <span>{categoryStore.getCategory(detail.transactionCategoryId).displayName ?? ''}</span>;
+        return <span>{categoryStore.getCategory(detail.transactionCategoryId)?.displayName ?? ''}</span>;
     }, [accountStore, categoryStore]);
     const renderGroup = useCallback(({transactionGroupId}: ITransactionDetail) => {
-        return <span className='group'>{groupStore.getGroup(transactionGroupId).name ?? ''}</span>;
+        return <span className='group'>{groupStore.getGroup(transactionGroupId)?.name ?? ''}</span>;
     }, [groupStore]);
     const subcolumns: IColumn<ITransactionDetail>[] = useMemo(() => [
         {key: 'detail.group', colspan: 2, render: renderGroup, className: 'group'},

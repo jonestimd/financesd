@@ -39,7 +39,7 @@ describe('TransactionTable', () => {
         jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(account);
         jest.spyOn(rootStore.transactionStore, 'getTransactionsModel').mockReturnValue(transactionsModel);
         jest.spyOn(rootStore.payeeStore, 'getPayee').mockReturnValue(payee);
-        jest.spyOn(rootStore.securityStore, 'getSecurity').mockReturnValue(security);
+        rootStore.securityStore['securitiesById'].set(security.id, security);
     });
     it('displays transactions in a header/detail table', () => {
         const component = shallow(<TransactionTable accountId={account.id} />);
@@ -70,13 +70,17 @@ describe('TransactionTable', () => {
 
             expect(rootStore.payeeStore.getPayee).toBeCalledWith(txModel.payeeId);
         });
+        it('displays blank for no security', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getTxColumn(component, 'transaction.security').render;
+
+            expect(renderer(newTxModel())).toEqual('');
+        });
         it('displays security', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.security')?.render;
+            const renderer = getTxColumn(component, 'transaction.security').render;
 
             expect(renderer(txModel)).toEqual(security.name);
-
-            expect(rootStore.securityStore.getSecurity).toBeCalledWith(txModel.securityId);
         });
         it('displays memo', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
@@ -121,23 +125,31 @@ describe('TransactionTable', () => {
             amount: 456.23,
         });
 
+        it('displays blank for no group', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.group')?.render;
+
+            expect(renderer(newDetail())).toEqual(<span className='group'>{''}</span>);
+        });
         it('displays group', () => {
-            jest.spyOn(rootStore.groupStore, 'getGroup').mockReturnValue(group);
+            rootStore.groupStore['groupsById'].set(group.id, group);
             const component = shallow(<TransactionTable accountId={account.id} />);
             const renderer = getDetailColumn(component, 'detail.group')?.render;
 
             expect(renderer(detail)).toEqual(<span className='group'>{group.name}</span>);
+        });
+        it('displays blank for no category', () => {
+            const component = shallow(<TransactionTable accountId={account.id} />);
+            const renderer = getDetailColumn(component, 'detail.category')?.render;
 
-            expect(rootStore.groupStore.getGroup).toBeCalledWith(detail.transactionGroupId);
+            expect(renderer(newDetail())).toEqual(<span>{''}</span>);
         });
         it('displays category', () => {
-            jest.spyOn(rootStore.categoryStore, 'getCategory').mockReturnValue(category);
+            rootStore.categoryStore['categoriesById'].set(category.id, category);
             const component = shallow(<TransactionTable accountId={account.id} />);
             const renderer = getDetailColumn(component, 'detail.category')?.render;
 
             expect(renderer(detail)).toEqual(<span>{category.displayName}</span>);
-
-            expect(rootStore.categoryStore.getCategory).toBeCalledWith(detail.transactionCategoryId);
         });
         it('displays transfer account', () => {
             const relatedAccount = newAccountModel();

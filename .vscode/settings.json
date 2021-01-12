@@ -1,9 +1,4 @@
 {
-    "go.lintTool": "revive",
-    "go.lintFlags": [
-        "--config .revive.toml"
-    ],
-    "go.useLanguageServer": true,
     "go.formatTool": "goimports",
     "go.toolsEnvVars": {
         "GO111MODULES": "on"

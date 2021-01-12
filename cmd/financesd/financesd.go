@@ -50,7 +50,7 @@ func main() {
 	} else {
 		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
 		http.Handle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
-		http.Handle("/finances/", loadHtml(cwd, config))
+		http.Handle("/finances/", loadHTML(cwd, config))
 		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
 			log.Printf("%d %-5s %s %s %d %v %s", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
@@ -81,13 +81,13 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type staticHtml struct {
+type staticHTML struct {
 	modTime time.Time
 	size    int64
 	content string
 }
 
-func loadHtml(cwd string, config *configuration.Config) *staticHtml {
+func loadHTML(cwd string, config *configuration.Config) *staticHTML {
 	file := filepath.Join(cwd, "web", "resources", "index.html")
 	stat, err := os.Stat(file)
 	if err != nil {
@@ -105,12 +105,12 @@ func loadHtml(cwd string, config *configuration.Config) *staticHtml {
 		log.Panicf("Error generating html: %v", err)
 	}
 	content := buff.String()
-	return &staticHtml{content: content, size: int64(len(content)), modTime: stat.ModTime()}
+	return &staticHTML{content: content, size: int64(len(content)), modTime: stat.ModTime()}
 }
 
 var unixEpochTime = time.Unix(0, 0)
 
-func (st *staticHtml) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (st *staticHTML) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Header().Set("Allow", "GET, OPTIONS, HEAD")

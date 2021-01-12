@@ -5,33 +5,33 @@ import (
 	"time"
 )
 
-type mockSql struct {
+type mockSQL struct {
 	method string
-	query string
-	args []interface{}
+	query  string
+	args   []interface{}
 }
 
-func (sql *mockSql) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (sql *mockSQL) Exec(query string, args ...interface{}) (sql.Result, error) {
 	sql.method = "Exec"
 	sql.query = query
 	sql.args = args
 	return nil, nil
 }
 
-func (sql *mockSql) Prepare(query string) (*sql.Stmt, error) {
+func (sql *mockSQL) Prepare(query string) (*sql.Stmt, error) {
 	sql.method = "Prepare"
 	sql.query = query
-return nil, nil
+	return nil, nil
 }
 
-func (sql *mockSql) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (sql *mockSQL) Query(query string, args ...interface{}) (*sql.Rows, error) {
 	sql.method = "Query"
 	sql.query = query
 	sql.args = args
 	return nil, nil
 }
 
-func (sql *mockSql) QueryRow(query string, args ...interface{}) *sql.Row {
+func (sql *mockSQL) QueryRow(query string, args ...interface{}) *sql.Row {
 	sql.method = "QueryRow"
 	sql.query = query
 	sql.args = args
@@ -39,11 +39,11 @@ func (sql *mockSql) QueryRow(query string, args ...interface{}) *sql.Row {
 }
 
 type mockContext struct {
-	sqlCommon *mockSql
+	sqlCommon *mockSQL
 }
 
 func newMockContext() *mockContext {
-	return &mockContext{sqlCommon: &mockSql{}}
+	return &mockContext{sqlCommon: &mockSQL{}}
 }
 
 func (ctx *mockContext) Value(key interface{}) interface{} {

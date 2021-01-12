@@ -1,5 +1,6 @@
 package graphql
 
-type ReqContextKey string
+type reqContextKey string
 
-const DbContextKey = ReqContextKey("db")
+// DbContextKey is the GraphQL request context key for the database connection.
+const DbContextKey = reqContextKey("db")

@@ -59,7 +59,7 @@ var transactionQueryFields = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		if _, ok := p.Args["accountId"]; ok {
 			db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
-			return NewQuery("transaction", "t").SelectFields(p.Info).Filter(p.Args).OrderBy("%[1]s.date, %[1]s.id").Execute(db)
+			return newQuery("transaction", "t").SelectFields(p.Info).Filter(p.Args).OrderBy("%[1]s.date, %[1]s.id").Execute(db)
 		}
 		return nil, errors.New("accountId is required")
 	},

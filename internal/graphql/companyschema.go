@@ -24,6 +24,6 @@ var companyQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
-		return NewQuery("company", "c").SelectFields(p.Info).Filter(p.Args).Execute(db)
+		return newQuery("company", "c").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

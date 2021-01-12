@@ -23,6 +23,7 @@ var queries = graphql.Fields{
 	transactionQuery: transactionQueryFields,
 }
 
+// Schema creates the root GraphQL schema.
 func Schema() (graphql.Schema, error) {
 	companySchema.AddFieldConfig("accounts", &graphql.Field{Type: graphql.NewList(accountSchema)})
 	detailSchema.AddFieldConfig("relatedDetail", &graphql.Field{Type: detailSchema})

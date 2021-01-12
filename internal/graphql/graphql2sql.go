@@ -27,8 +27,8 @@ type sqlData struct { // TODO unique alias per subquery
 	Args       []interface{}
 }
 
-// NewQuery creates a SQL builder for retrieving JSON data.
-func NewQuery(table string, alias string) *sqlData {
+// newQuery creates a SQL builder for retrieving JSON data.
+func newQuery(table string, alias string) *sqlData {
 	return &sqlData{table: table, alias: alias, columns: make([]string, 0)}
 }
 
@@ -39,17 +39,17 @@ func (q *sqlData) SelectFields(info graphql.ResolveInfo, derivedFieldSqls ...map
 }
 
 func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection, derivedFieldSqls ...map[string]string) *sqlData {
-	derivedfieldSql := make(map[string]string)
-	for _, fieldSql := range derivedFieldSqls {
-		for field, sql := range fieldSql {
-			derivedfieldSql[field] = sql
+	derivedfieldSQL := make(map[string]string)
+	for _, fieldSQL := range derivedFieldSqls {
+		for field, sql := range fieldSQL {
+			derivedfieldSQL[field] = sql
 		}
 	}
 	for _, field := range selection {
 		switch field := field.(type) {
 		case *ast.Field:
 			if field.GetSelectionSet() == nil {
-				if sql, ok := derivedfieldSql[field.Name.Value]; ok {
+				if sql, ok := derivedfieldSQL[field.Name.Value]; ok {
 					q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s", field.Name.Value, fmt.Sprintf(sql, q.alias)))
 				} else {
 					q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toSnakeCase(field.Name.Value)))
@@ -99,7 +99,7 @@ func (q *sqlData) OrderBy(orderBy string) *sqlData {
 
 func (q *sqlData) addSubQuery(fieldName string, outType graphql.Type, selection []ast.Selection) {
 	table := getTableName(outType)
-	subQuery := NewQuery(table, fmt.Sprintf("%s%d", getAlias(table), q.depth))
+	subQuery := newQuery(table, fmt.Sprintf("%s%d", getAlias(table), q.depth))
 	subQuery.depth = q.depth + 1
 	subQuery.selectFields(outType, selection)
 	if isList(outType) {
@@ -132,21 +132,21 @@ func (q *sqlData) Execute(db gorm.SQLCommon) ([]interface{}, error) {
 	if os.Getenv("SHOW_SQL") != "" {
 		log.Println(query)
 	}
-	if rows, err := db.Query(query, q.Args...); err != nil {
+	rows, err := db.Query(query, q.Args...)
+	if err != nil {
 		return nil, err
-	} else {
-		results := make([]interface{}, 0)
-		for rows.Next() {
-			var jsonString sql.RawBytes
-			var result interface{}
-			if err := rows.Scan(&jsonString); err != nil {
-				return nil, err
-			}
-			json.Unmarshal(jsonString, &result)
-			results = append(results, result)
-		}
-		return results, nil
 	}
+	results := make([]interface{}, 0)
+	for rows.Next() {
+		var jsonString sql.RawBytes
+		var result interface{}
+		if err := rows.Scan(&jsonString); err != nil {
+			return nil, err
+		}
+		json.Unmarshal(jsonString, &result)
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func (q *sqlData) String() string {

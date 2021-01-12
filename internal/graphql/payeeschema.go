@@ -22,6 +22,6 @@ var payeeQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
-		return NewQuery("payee", "p").SelectFields(p.Info).Filter(p.Args).Execute(db)
+		return newQuery("payee", "p").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

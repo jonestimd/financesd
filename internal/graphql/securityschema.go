@@ -27,11 +27,11 @@ var securityQueryFields = &graphql.Field{
 		db := p.Context.Value(DbContextKey).(*gorm.DB).Preload("Asset")
 		securities := make([]*model.Security, 0)
 		if id, ok := p.Args["id"]; ok {
-			if intId, err := strconv.ParseInt(id.(string), 10, 64); err == nil {
-				return securities, db.Find(&securities, "asset_id = ?", intId).Error
-			} else {
-				return nil, err
+			intID, err := strconv.ParseInt(id.(string), 10, 64)
+			if err == nil {
+				return securities, db.Find(&securities, "asset_id = ?", intID).Error
 			}
+			return nil, err
 		}
 		if symbol, ok := p.Args["symbol"]; ok {
 			return securities, db.Joins("join asset a on a.id = security.asset_id").

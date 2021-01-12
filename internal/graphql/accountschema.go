@@ -24,7 +24,7 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	}),
 })
 
-var accountFieldSql = map[string]string{
+var accountFieldSQL = map[string]string{
 	"transactionCount": "(select count(*) from transaction where account_id = %s.id)",
 	"balance": "(select sum(td.amount) " +
 		"from transaction tx " +
@@ -41,6 +41,6 @@ var accountQueryFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
-		return NewQuery("account", "a").SelectFields(p.Info, accountFieldSql).Filter(p.Args).Execute(db)
+		return newQuery("account", "a").SelectFields(p.Info, accountFieldSQL).Filter(p.Args).Execute(db)
 	},
 }

@@ -27,7 +27,7 @@ var categoryFieldSQL = map[string]string{
 var categoryQueryFields = &graphql.Field{
 	Type: graphql.NewList(categorySchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
+		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
 		return newQuery("transaction_category", "c").SelectFields(p.Info, categoryFieldSQL).Execute(db)
 	},
 }

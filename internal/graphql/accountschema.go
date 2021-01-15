@@ -40,7 +40,7 @@ var accountQueryFields = &graphql.Field{
 		"name": {Type: graphql.String, Description: "unique account name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
+		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
 		return newQuery("account", "a").SelectFields(p.Info, accountFieldSQL).Filter(p.Args).Execute(db)
 	},
 }

@@ -23,7 +23,7 @@ var companyQueryFields = &graphql.Field{
 		"name": {Type: graphql.String, Description: "unique company name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
+		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
 		return newQuery("company", "c").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

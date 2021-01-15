@@ -10,7 +10,7 @@ const payeeQuery = "payees"
 const assetsQuery = "assets"
 const securityQuery = "securities"
 const categoryQuery = "categories"
-const groupsQuery = "groups"
+const groupQuery = "groups"
 const transactionQuery = "transactions"
 
 var queries = graphql.Fields{
@@ -19,7 +19,7 @@ var queries = graphql.Fields{
 	payeeQuery:       payeeQueryFields,
 	securityQuery:    securityQueryFields,
 	categoryQuery:    categoryQueryFields,
-	groupsQuery:      groupQueryFields,
+	groupQuery:       groupQueryFields,
 	transactionQuery: transactionQueryFields,
 }
 

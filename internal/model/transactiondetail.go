@@ -1,16 +1,16 @@
 package model
 
 type TransactionDetail struct {
-	ID                    int
-	TransactionID         int
+	ID                    int64
+	TransactionID         int64
 	Transaction           *Transaction
-	TransactionCategoryID *int
-	TransactionGroupID    *int
+	TransactionCategoryID *int64
+	TransactionGroupID    *int64
 	Memo                  *string
 	Amount                float64
 	AssetQuantity         float64
-	ExchangeAssetID       *int
-	RelatedDetailID       *int
+	ExchangeAssetID       *int64
+	RelatedDetailID       *int64
 	RelatedDetail         *TransactionDetail
 	Version               int
 	Audited

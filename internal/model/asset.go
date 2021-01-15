@@ -1,7 +1,7 @@
 package model
 
 type Asset struct {
-	ID      int
+	ID      int64
 	Name    string
 	Type    string
 	Scale   int

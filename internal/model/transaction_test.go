@@ -6,30 +6,30 @@ import (
 )
 
 func Test_Transaction_GetRelatedDetailIDs(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		description string
-		relatedId 	int
-		expectedIds []int
-	} {
-		{"does nothing if no related detail", -1, []int{}},
-		{"appends related detail ID", 1, []int{1}},
+		relatedID   int64
+		expectedIDs []int64
+	}{
+		{"does nothing if no related detail", -1, []int64{}},
+		{"appends related detail ID", 1, []int64{1}},
 	}
 
 	for _, test := range tests {
-		t.Run(test.description, func (t *testing.T) {
-			var relatedId *int = nil
-			if test.relatedId > 0 {
-				relatedId = &test.relatedId
+		t.Run(test.description, func(t *testing.T) {
+			var relatedID *int64 = nil
+			if test.relatedID > 0 {
+				relatedID = &test.relatedID
 			} else {
-				relatedId = nil
+				relatedID = nil
 			}
-			details := append(make([]TransactionDetail, 0), TransactionDetail{RelatedDetailID: relatedId})
+			details := append(make([]TransactionDetail, 0), TransactionDetail{RelatedDetailID: relatedID})
 			tx := Transaction{Details: details}
 
-			ids := tx.GetRelatedDetailIDs(make([]int, 0));
+			ids := tx.GetRelatedDetailIDs(make([]int64, 0))
 
-			if !reflect.DeepEqual(ids, test.expectedIds) {
-				t.Errorf("Expected IDs: %v, got: %v", test.expectedIds, ids)
+			if !reflect.DeepEqual(ids, test.expectedIDs) {
+				t.Errorf("Expected IDs: %v, got: %v", test.expectedIDs, ids)
 			}
 		})
 	}

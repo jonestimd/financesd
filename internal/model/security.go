@@ -2,6 +2,6 @@ package model
 
 type Security struct {
 	Asset   Asset
-	AssetId int64
+	AssetID int64
 	Type    string
 }

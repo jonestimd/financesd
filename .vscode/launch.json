@@ -13,7 +13,7 @@
             "cwd": "${workspaceRoot}",
             "program": "${workspaceRoot}/cmd/financesd/financesd.go",
             "env": {
-                "SHOW_SQL": false
+                "SHOW_SQL": "yes"
             },
             "args": []
         },
@@ -27,7 +27,11 @@
             "type": "pwa-node",
             "console": "internalConsole",
             "outputCapture": "std",
-            "args": ["--runInBand", "--coverage=false", ""]
+            "args": [
+                "--runInBand",
+                "--coverage=false",
+                ""
+            ]
         }
     ]
 }

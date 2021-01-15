@@ -1,7 +1,7 @@
 package model
 
 type Company struct {
-	ID       int
+	ID       int64
 	Name     string
 	Accounts []Account
 	Version  int

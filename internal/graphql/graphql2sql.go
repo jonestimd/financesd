@@ -130,7 +130,7 @@ func getTableName(gt graphql.Type) string {
 func (q *sqlData) Execute(db gorm.SQLCommon) ([]interface{}, error) {
 	query := q.String()
 	if os.Getenv("SHOW_SQL") != "" {
-		log.Println(query)
+		log.Println("SQL:", query)
 	}
 	rows, err := db.Query(query, q.Args...)
 	if err != nil {
@@ -183,9 +183,13 @@ func (q *sqlData) String() string {
 
 func getAlias(table string) string {
 	alias := table[0:1]
-	for i, rune := range table {
-		if rune == '_' && len(table) > i+1 {
-			alias += table[i+1 : i+2]
+	append := false
+	for _, rune := range table[1:] {
+		if rune == '_' {
+			append = true
+		} else if append {
+			alias += string(rune)
+			append = false
 		}
 	}
 	return alias

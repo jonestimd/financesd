@@ -22,7 +22,7 @@ var groupQueryFields = &graphql.Field{
 		"name": {Type: graphql.String, Description: "unique group name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(gorm.SQLCommon)
+		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
 		return newQuery("tx_group", "g").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

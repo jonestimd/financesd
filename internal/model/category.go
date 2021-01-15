@@ -1,11 +1,11 @@
 package model
 
 type TransactionCategory struct {
-	ID          int
+	ID          int64
 	Code        string
 	Description *string
 	AmountType  string
-	ParentId    *int
+	ParentId    *int64
 	Security    *YesNo
 	Income      *YesNo
 	Audited

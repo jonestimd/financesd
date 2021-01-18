@@ -7,13 +7,13 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jonestimd/financesd/internal/sqltest"
 )
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
-	testQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		accountID := "123"
-		args := map[string]interface{}{"accountId": accountID}
-		params := newResolveParams(tx, transactionQuery, args, newField("", "id"), newField("", "memo"))
+		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo")).addArg("accountId", accountID)
 		rows := sqlmock.NewRows([]string{"json"}).AddRow(`{"id":1,"name":"Transaction 1"}`)
 		mock.ExpectQuery(`select json_object("id", t.id, "memo", t.memo) from transaction t where t.account_id = ? order by t.date, t.id`).
 			WithArgs(accountID).
@@ -22,7 +22,7 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 			{"id": 1.0, "name": "Transaction 1"},
 		}
 
-		result, err := transactionQueryFields.Resolve(params)
+		result, err := transactionQueryFields.Resolve(params.ResolveParams)
 
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
@@ -37,10 +37,10 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 }
 
 func Test_transactionQueryFields_Resolve_requiresAccountID(t *testing.T) {
-	testQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		params := newResolveParams(tx, transactionQuery, nil, newField("", "id"), newField("", "memo"))
+	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo"))
 
-		_, err := transactionQueryFields.Resolve(params)
+		_, err := transactionQueryFields.Resolve(params.ResolveParams)
 
 		if err == nil {
 			t.Error("Expected an error")

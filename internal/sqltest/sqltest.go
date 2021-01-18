@@ -1,4 +1,4 @@
-package graphql
+package sqltest
 
 import (
 	"database/sql"
@@ -29,7 +29,8 @@ var queryMatcher sqlmock.QueryMatcher = sqlmock.QueryMatcherFunc(func(expectedSQ
 	return nil
 })
 
-func testQuery(t *testing.T, test func(mockDb sqlmock.Sqlmock, tx *sql.Tx)) {
+// TestQuery runs a database test in a transaction on a sqlmock connection.
+func TestQuery(t *testing.T, test func(mockDB sqlmock.Sqlmock, tx *sql.Tx)) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(queryMatcher))
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -46,6 +47,7 @@ func testQuery(t *testing.T, test func(mockDb sqlmock.Sqlmock, tx *sql.Tx)) {
 	test(mock, tx)
 }
 
-func mockRows(columns ...string) *sqlmock.Rows {
+// MockRows creates a sqlmock.Rows for the specified columns.
+func MockRows(columns ...string) *sqlmock.Rows {
 	return sqlmock.NewRows(columns)
 }

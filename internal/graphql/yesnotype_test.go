@@ -1,10 +1,14 @@
 package graphql
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/jonestimd/financesd/internal/model"
+)
 
 func Test_yesnotype_Serialize(t *testing.T) {
-	y := "Y"
-	n := "N"
+	y := model.YesNo('Y')
+	n := model.YesNo('N')
 	tests := []struct {
 		name   string
 		value  interface{}

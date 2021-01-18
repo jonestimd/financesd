@@ -6,18 +6,19 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jonestimd/financesd/internal/sqltest"
 )
 
 func Test_payeeQueryFields_Resolve(t *testing.T) {
-	testQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		params := newResolveParams(tx, payeeQuery, nil, newField("", "id"), newField("", "name"))
+	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		params := newResolveParams(tx, payeeQuery, newField("", "id"), newField("", "name"))
 		rows := sqlmock.NewRows([]string{"json"}).AddRow(`{"id":1,"name":"Payee 1"}`)
 		mock.ExpectQuery(`select json_object("id", p.id, "name", p.name) from payee p`).WithArgs().WillReturnRows(rows)
 		expectedRows := []map[string]interface{}{
 			{"id": 1.0, "name": "Payee 1"},
 		}
 
-		result, err := payeeQueryFields.Resolve(params)
+		result, err := payeeQueryFields.Resolve(params.ResolveParams)
 
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)

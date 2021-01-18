@@ -85,23 +85,6 @@ func Test_findQuery(t *testing.T) {
 	}
 }
 
-func Test_isPathSelected(t *testing.T) {
-	queryKey := "the query"
-	selections := []ast.Selection{
-		newField("not the query", ""),
-		newField(queryKey, "", newField("", "the field", newField("", "some property"))),
-	}
-	operation := mockDefinition{selections: ast.NewSelectionSet(&ast.SelectionSet{Selections: selections})}
-	info := graphql.ResolveInfo{Operation: &operation, Path: &graphql.ResponsePath{Key: queryKey}}
-
-	if !isPathSelected(info, "the field") {
-		t.Errorf("Expected true")
-	}
-	if isPathSelected(info, "unknown field") {
-		t.Errorf("Expected false")
-	}
-}
-
 type child struct {
 	ID string
 }

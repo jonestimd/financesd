@@ -52,6 +52,10 @@ func newField(alias string, name string, selections ...ast.Selection) *ast.Field
 	})
 }
 
+type resolveParamsBuilder struct {
+	graphql.ResolveParams
+}
+
 func newResolveInfo(queryName string, querySelection ...ast.Selection) graphql.ResolveInfo {
 	schema, _ := Schema()
 	queryKey := "the query"
@@ -59,11 +63,38 @@ func newResolveInfo(queryName string, querySelection ...ast.Selection) graphql.R
 		newField(queryKey, queryName, querySelection...),
 	}
 	operation := mockDefinition{selections: ast.NewSelectionSet(&ast.SelectionSet{Selections: selections})}
-	return graphql.ResolveInfo{Schema: schema, Operation: &operation, Path: &graphql.ResponsePath{Key: queryKey}}
+	return graphql.ResolveInfo{
+		Schema:    schema,
+		Operation: &operation,
+		Path:      &graphql.ResponsePath{Key: queryKey},
+		RootValue: make(map[string]interface{}),
+	}
 }
 
-func newResolveParams(tx *sql.Tx, queryName string, args map[string]interface{}, querySelection ...ast.Selection) graphql.ResolveParams {
+func newResolveParams(tx *sql.Tx, queryName string, querySelection ...ast.Selection) *resolveParamsBuilder {
 	info := newResolveInfo(queryName, querySelection...)
 	context := context.WithValue(context.TODO(), DbContextKey, tx)
-	return graphql.ResolveParams{Info: info, Args: args, Context: context}
+	return &resolveParamsBuilder{graphql.ResolveParams{Info: info, Context: context}}
+}
+
+func (b *resolveParamsBuilder) addArg(name string, value interface{}) *resolveParamsBuilder {
+	if name != "" {
+		if b.Args == nil {
+			b.Args = make(map[string]interface{})
+		}
+		b.Args[name] = value
+	}
+	return b
+}
+
+func (b *resolveParamsBuilder) setSource(source interface{}) *resolveParamsBuilder {
+	b.Source = source
+	return b
+}
+
+func (b *resolveParamsBuilder) setRootValue(name string, value interface{}) *resolveParamsBuilder {
+	if value != nil {
+		rootValue(b.ResolveParams.Info)[name] = value
+	}
+	return b
 }

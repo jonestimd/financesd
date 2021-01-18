@@ -55,9 +55,11 @@ func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection, 
 				} else {
 					q.columns = append(q.columns, fmt.Sprintf("\"%s\", %s.%s", field.Name.Value, q.alias, toSnakeCase(field.Name.Value)))
 				}
-			} else {
-				fieldType := getFieldType(outType, field.Name.Value)
-				q.addSubQuery(field.Name.Value, fieldType, field.GetSelectionSet().Selections)
+				// } else {
+				// 	fieldType := getFieldType(outType, field.Name.Value)
+				// 	if fieldType != nil {
+				// 		q.addSubQuery(field.Name.Value, fieldType, field.GetSelectionSet().Selections)
+				// 	}
 			}
 		}
 	}
@@ -67,7 +69,10 @@ func (q *sqlData) selectFields(outType graphql.Type, selection []ast.Selection, 
 func getFieldType(parentType graphql.Type, name string) graphql.Type {
 	switch gt := unwrapList(parentType).(type) {
 	case *graphql.Object:
-		return gt.Fields()[name].Type
+		field := gt.Fields()[name]
+		if field.Resolve == nil {
+			return field.Type
+		}
 	}
 	return nil
 }

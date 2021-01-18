@@ -2,32 +2,36 @@ package model
 
 import (
 	"database/sql/driver"
+	"fmt"
 )
 
 // YesNo maps a boolean value to a char column containing Y or N.
-type YesNo struct {
-	value byte
-}
+type YesNo byte
 
-// Value returns the value to use for a query parameter.
+// Value implements the sql.Valuer interface.
 func (yn *YesNo) Value() (driver.Value, error) {
-	return yn.value, nil
+	return []byte{byte(*yn)}, nil
 }
 
-// Scan populates a YesNo with the value from a query row.
-func (yn *YesNo) Scan(src interface{}) error {
-	yn.value = src.([]byte)[0]
-	return nil
+// Scan implements the sql.Scanner interface.
+func (yn *YesNo) Scan(value interface{}) error {
+	if b, ok := value.([]byte); ok && len(b) > 0 {
+		*yn = YesNo(b[0])
+		return nil
+	}
+	return fmt.Errorf("invalid value for YesNo: %v", value)
 }
 
+// Get returns the boolean value
 func (yn *YesNo) Get() bool {
-	return yn.value == 'Y'
+	return *yn == 'Y'
 }
 
+// Set sets the boolean value
 func (yn *YesNo) Set(value bool) {
 	if value {
-		yn.value = 'Y'
+		*yn = 'Y'
 	} else {
-		yn.value = 'N'
+		*yn = 'N'
 	}
 }

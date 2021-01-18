@@ -2,16 +2,17 @@ package graphql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
-	"github.com/jinzhu/gorm"
 )
 
 var jsonArrayagg = "json_arrayagg"
@@ -127,7 +128,7 @@ func getTableName(gt graphql.Type) string {
 	return toSnakeCase(unwrapList(gt).Name())
 }
 
-func (q *sqlData) Execute(db gorm.SQLCommon) ([]interface{}, error) {
+func (q *sqlData) Execute(db *sql.Tx) ([]map[string]interface{}, error) {
 	query := q.String()
 	if os.Getenv("SHOW_SQL") != "" {
 		log.Println("SQL:", query)
@@ -136,10 +137,10 @@ func (q *sqlData) Execute(db gorm.SQLCommon) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	results := make([]interface{}, 0)
+	results := make([]map[string]interface{}, 0)
 	for rows.Next() {
 		var jsonString sql.RawBytes
-		var result interface{}
+		var result map[string]interface{}
 		if err := rows.Scan(&jsonString); err != nil {
 			return nil, err
 		}
@@ -193,6 +194,56 @@ func getAlias(table string) string {
 		}
 	}
 	return alias
+}
+
+// scanToMaps scans rows into a slice of maps.
+func scanToMaps(rows *sql.Rows, nameMapper func(string) string) ([]map[string]interface{}, error) {
+	columnTypes, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+	results := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		values := make([]interface{}, len(columns))
+		for i, columnType := range columnTypes {
+			if columnType.ScanType() != nil {
+				values[i] = reflect.New(columnType.ScanType()).Interface()
+			} else {
+				values[i] = new(interface{})
+			}
+		}
+		rows.Scan(values...)
+		result := make(map[string]interface{}, len(columns))
+		for i, name := range columns {
+			if nameMapper != nil {
+				name = nameMapper(name)
+			}
+			prop := toCamleCase(name)
+			if reflectValue := reflect.Indirect(reflect.ValueOf(values[i])); reflectValue.IsValid() {
+				result[prop] = reflectValue.Interface()
+				if valuer, ok := result[prop].(driver.Valuer); ok {
+					result[prop], _ = valuer.Value()
+				} else if b, ok := result[prop].(sql.RawBytes); ok {
+					result[prop] = string(b)
+				}
+			} else {
+				result[prop] = nil
+			}
+		}
+		results = append(results, result)
+	}
+	return results, nil
+}
+
+func toCamleCase(name string) string {
+	re := regexp.MustCompile("_.")
+	return re.ReplaceAllStringFunc(name, func(match string) string {
+		return strings.ToUpper(match[1:])
+	})
 }
 
 func toSnakeCase(name string) string {

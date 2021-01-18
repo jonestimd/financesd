@@ -1,8 +1,9 @@
 package graphql
 
 import (
+	"database/sql"
+
 	"github.com/graphql-go/graphql"
-	"github.com/jinzhu/gorm"
 )
 
 // Schema
@@ -23,7 +24,7 @@ var companyQueryFields = &graphql.Field{
 		"name": {Type: graphql.String, Description: "unique company name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
+		db := p.Context.Value(DbContextKey).(*sql.Tx)
 		return newQuery("company", "c").SelectFields(p.Info).Filter(p.Args).Execute(db)
 	},
 }

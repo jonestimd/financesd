@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,8 +18,8 @@ import (
 	"github.com/felixge/httpsnoop"
 	"github.com/go-akka/configuration"
 	_ "github.com/go-sql-driver/mysql" // register the driver
+	gql "github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	"github.com/jinzhu/gorm"
 	"github.com/jonestimd/financesd/internal/graphql"
 )
 
@@ -29,55 +30,86 @@ func main() {
 	password := config.GetString("connection.default.password")
 	host := config.GetString("connection.default.host")
 	schema := config.GetString("connection.default.schema")
-	db, err := gorm.Open(driver, fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, host, schema))
+	db, err := sql.Open(driver, fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, host, schema))
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
 	defer db.Close()
-	db.SingularTable(true)
+	db.SetConnMaxLifetime(config.GetTimeDuration("connection.maxLifetime", 0))
+	db.SetMaxIdleConns(int(config.GetInt32("connection.maxIdleConnections", 10)))
+	db.SetMaxOpenConns(int(config.GetInt32("connection.maxOpenConnections", 10)))
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	}
 
 	graphqlSchema, err := graphql.Schema()
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
-	h := handler.New(&handler.Config{
-		Schema:   &graphqlSchema,
-		Pretty:   false,
-		GraphiQL: true,
+	gqlHandler := handler.New(&handler.Config{
+		Schema:           &graphqlSchema,
+		Pretty:           false,
+		GraphiQL:         true,
+		ResultCallbackFn: resultCallback,
 	})
 	if cwd, err := os.Getwd(); err != nil {
 		log.Fatal("can't get current directory")
 	} else {
-		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: h})
+		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: gqlHandler})
 		http.Handle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
 		http.Handle("/finances/", loadHTML(cwd, config))
 		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
-			log.Printf("%d %-5s %s %s %d %v %s", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
+			log.Printf("%d %-5s %s %s %d %v %s\n", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
 				snoop.Duration.Truncate(time.Millisecond), r.UserAgent())
 		})
 		host := config.GetString("listen.host", "localhost")
 		port := config.GetInt32("listen.port", 8080)
-		log.Printf("Listening at %s:%d/finances", host, port)
+		log.Printf("Listening at %s:%d/finances\n", host, port)
 		log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router))
 	}
 }
 
 type graphqlHandler struct {
-	db      *gorm.DB
+	db      *sql.DB
 	handler http.Handler
+}
+
+type reqContextKey string
+
+const hasErrorKey = reqContextKey("hasError")
+
+func resultCallback(ctx context.Context, params *gql.Params, result *gql.Result, responseBody []byte) {
+	hasError := ctx.Value(hasErrorKey).(*bool)
+	*hasError = result.HasErrors()
 }
 
 func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// start transaction
-	tx := h.db.Begin()
-	ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
-	h.handler.ServeHTTP(w, r.WithContext(ctx))
-	// end transaction
-	if tx.Error == nil {
-		tx.Commit()
+	tx, err := h.db.Begin()
+	if err != nil {
+		http.Error(w, "Error starting transaction", http.StatusInternalServerError)
 	} else {
-		tx.Rollback()
+		defer func() {
+			if r := recover(); r != nil {
+				tx.Rollback()
+				panic(r)
+			}
+		}()
+		var hasError bool
+		ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
+		ctx = context.WithValue(ctx, hasErrorKey, &hasError)
+		h.handler.ServeHTTP(w, r.WithContext(ctx))
+		// end transaction
+		if hasError {
+			log.Println("Rolling back")
+			if err := tx.Rollback(); err != nil {
+				log.Printf("Rollback failed: %v\n", err)
+			}
+		} else if err := tx.Commit(); err != nil {
+			log.Printf("Commit failed: %v\n", err)
+			http.Error(w, fmt.Sprintf("Commit failed: %v", err), http.StatusInternalServerError)
+		}
 	}
 }
 

@@ -1,25 +1,25 @@
 package graphql
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 )
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
-	testQuery(t, func(mock sqlmock.Sqlmock, orm *gorm.DB) {
+	testQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		accountID := "123"
 		args := map[string]interface{}{"accountId": accountID}
-		params := newResolveParams(orm, transactionQuery, args, newField("", "id"), newField("", "memo"))
+		params := newResolveParams(tx, transactionQuery, args, newField("", "id"), newField("", "memo"))
 		rows := sqlmock.NewRows([]string{"json"}).AddRow(`{"id":1,"name":"Transaction 1"}`)
-		mock.ExpectQuery(`^select json_object\("id", t\.id, "memo", t\.memo\) from transaction t where t\.account_id = \? order by t\.date, t\.id$`).
+		mock.ExpectQuery(`select json_object("id", t.id, "memo", t.memo) from transaction t where t.account_id = ? order by t.date, t.id`).
 			WithArgs(accountID).
 			WillReturnRows(rows)
-		expectedRows := []interface{}{
-			map[string]interface{}{"id": 1.0, "name": "Transaction 1"},
+		expectedRows := []map[string]interface{}{
+			{"id": 1.0, "name": "Transaction 1"},
 		}
 
 		result, err := transactionQueryFields.Resolve(params)
@@ -37,8 +37,8 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 }
 
 func Test_transactionQueryFields_Resolve_requiresAccountID(t *testing.T) {
-	testQuery(t, func(mock sqlmock.Sqlmock, orm *gorm.DB) {
-		params := newResolveParams(orm, transactionQuery, nil, newField("", "id"), newField("", "memo"))
+	testQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		params := newResolveParams(tx, transactionQuery, nil, newField("", "id"), newField("", "memo"))
 
 		_, err := transactionQueryFields.Resolve(params)
 

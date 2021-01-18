@@ -2,10 +2,10 @@ package graphql
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
-	"github.com/jinzhu/gorm"
 )
 
 type mockDefinition struct {
@@ -62,8 +62,8 @@ func newResolveInfo(queryName string, querySelection ...ast.Selection) graphql.R
 	return graphql.ResolveInfo{Schema: schema, Operation: &operation, Path: &graphql.ResponsePath{Key: queryKey}}
 }
 
-func newResolveParams(orm *gorm.DB, queryName string, args map[string]interface{}, querySelection ...ast.Selection) graphql.ResolveParams {
+func newResolveParams(tx *sql.Tx, queryName string, args map[string]interface{}, querySelection ...ast.Selection) graphql.ResolveParams {
 	info := newResolveInfo(queryName, querySelection...)
-	context := context.WithValue(context.TODO(), DbContextKey, orm)
+	context := context.WithValue(context.TODO(), DbContextKey, tx)
 	return graphql.ResolveParams{Info: info, Args: args, Context: context}
 }

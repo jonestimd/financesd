@@ -3,13 +3,10 @@ package graphql
 import (
 	"fmt"
 	"reflect"
-	"regexp"
 	"testing"
 
 	"github.com/graphql-go/graphql/language/ast"
 )
-
-var whitespace = regexp.MustCompile("[ \n\t]+")
 
 func compareColumns(expected []string, actual []string, t *testing.T) {
 	if len(expected) != len(actual) {

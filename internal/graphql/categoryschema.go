@@ -1,8 +1,9 @@
 package graphql
 
 import (
+	"database/sql"
+
 	"github.com/graphql-go/graphql"
-	"github.com/jinzhu/gorm"
 )
 
 var categorySchema = graphql.NewObject(graphql.ObjectConfig{
@@ -27,7 +28,7 @@ var categoryFieldSQL = map[string]string{
 var categoryQueryFields = &graphql.Field{
 	Type: graphql.NewList(categorySchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(*gorm.DB).CommonDB()
+		db := p.Context.Value(DbContextKey).(*sql.Tx)
 		return newQuery("transaction_category", "c").SelectFields(p.Info, categoryFieldSQL).Execute(db)
 	},
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func Test_payeeQueryFields_Resolve(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, payeeQuery, newField("", "id"), newField("", "name"))
 		rows := sqlmock.NewRows([]string{"json"}).AddRow(`{"id":1,"name":"Payee 1"}`)
 		mock.ExpectQuery(`select json_object("id", p.id, "name", p.name) from payee p`).WithArgs().WillReturnRows(rows)

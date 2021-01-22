@@ -23,7 +23,7 @@ func Test_companyQueryFields_Resolve(t *testing.T) {
 		byName.Restore()
 	}()
 	name := "the company"
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		tests := []struct {
 			name     string
 			argName  string
@@ -76,7 +76,7 @@ func Test_resolveAccounts(t *testing.T) {
 		{name: "returns accounts from map", result: expectedAccounts, accountMap: accounts.ByID(), callCount: 0},
 		{name: "returns accounts from database", result: expectedAccounts, callCount: 1},
 	}
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				getAccounts := mocka.Function(t, &getAccountsByCompanyIDs, &accounts)
@@ -103,7 +103,7 @@ func Test_resolveAccounts_returnsDatabaseError(t *testing.T) {
 	expectedErr := fmt.Errorf("database error")
 	getAccounts := mocka.Function(t, &getAccountsByCompanyIDs, model.NewAccounts(expectedErr))
 	defer getAccounts.Restore()
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).
 			setSource(&company).
 			setRootValue(companyIDsRootKey, []int64{company.ID})
@@ -119,7 +119,7 @@ func Test_resolveAccounts_returnsErrorForNoCompanyIDs(t *testing.T) {
 	company := model.Company{ID: 99}
 	getAccounts := mocka.Function(t, &getAccountsByCompanyIDs, nil)
 	defer getAccounts.Restore()
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).setSource(&company)
 
 		result, err := resolveAccounts(params.ResolveParams)

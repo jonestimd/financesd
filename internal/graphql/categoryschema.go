@@ -21,14 +21,10 @@ var categorySchema = graphql.NewObject(graphql.ObjectConfig{
 	}),
 })
 
-var categoryFieldSQL = map[string]string{
-	"transactionCount": "(select count(distinct transaction_id) from transaction_detail where transaction_category_id = %s.id)",
-}
-
 var categoryQueryFields = &graphql.Field{
 	Type: graphql.NewList(categorySchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(*sql.Tx)
-		return newQuery("transaction_category", "c").SelectFields(p.Info, categoryFieldSQL).Execute(db)
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
+		return getAllCategories(tx)
 	},
 }

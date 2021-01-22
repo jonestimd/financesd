@@ -25,7 +25,7 @@ func Test_accountQueryFields_Resolve(t *testing.T) {
 		byName.Restore()
 	}()
 	name := "the account"
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		tests := []struct {
 			name     string
 			argName  string
@@ -49,9 +49,9 @@ func Test_accountQueryFields_Resolve(t *testing.T) {
 					assert.NotNil(t, err, "Expected an error")
 				} else {
 					assert.Nil(t, err, "Unexpected error: %v", err)
-					assert.Equal(t, 1, test.stub.CallCount(), "Expected 1 call")
-					assert.Equal(t, test.stubArgs, test.stub.GetFirstCall().Arguments(), "Args don't match")
-					assert.Equal(t, accounts.Accounts, result, "Result doesn't match")
+					assert.Equal(t, 1, test.stub.CallCount())
+					assert.Equal(t, test.stubArgs, test.stub.GetFirstCall().Arguments())
+					assert.Equal(t, accounts.Accounts, result)
 					assert.Equal(t, rootValue(params.Info)[companyIDsRootKey], []int64{companyID})
 					if test.stub == getAll {
 						accountsByID := map[int64]*model.Account{accountID: accounts.Accounts[0]}
@@ -80,7 +80,7 @@ func Test_resolveCompany(t *testing.T) {
 		{name: "returns company from map", companyID: &companyID, result: &company, companyMap: companyMap, callCount: 0},
 		{name: "returns company from database", companyID: &companyID, result: &company, callCount: 1},
 	}
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 				getCompanies := mocka.Function(t, &getCompaniesByIDs, companyMap, nil)
@@ -109,7 +109,7 @@ func Test_resolveCompany_returnsDatabaseError(t *testing.T) {
 	expectedErr := fmt.Errorf("database error")
 	getCompanies := mocka.Function(t, &getCompaniesByIDs, nil, expectedErr)
 	defer getCompanies.Restore()
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		account := &model.Account{CompanyID: &companyID}
 		params := newResolveParams(tx, "", newField("", "id"), newField("", "name")).
 			setSource(account).

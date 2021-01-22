@@ -13,7 +13,7 @@ import (
 )
 
 func Test_securityQueryFields_Resolve_all(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		var assetID int64 = 1
 		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name"))
 		mock.ExpectQuery(securitySQL).WithArgs().WillReturnRows(
@@ -37,7 +37,7 @@ func Test_securityQueryFields_Resolve_all(t *testing.T) {
 }
 
 func Test_securityQueryFields_Resolve_queryError(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name"))
 		queryError := errors.New("invalid SQL")
 		mock.ExpectQuery(securitySQL).WithArgs().WillReturnError(queryError)
@@ -51,7 +51,7 @@ func Test_securityQueryFields_Resolve_queryError(t *testing.T) {
 }
 
 func Test_securityQueryFields_Resolve_byID(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		var assetID int64 = 1
 		securityType := "Stock"
 		name := "Security 1"
@@ -76,7 +76,7 @@ func Test_securityQueryFields_Resolve_byID(t *testing.T) {
 			t.Errorf("there were unfulfilled expectations: %s", err)
 		}
 	})
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name")).addArg("id", "one")
 
 		_, err := securityQueryFields.Resolve(params.ResolveParams)
@@ -91,7 +91,7 @@ func Test_securityQueryFields_Resolve_byID(t *testing.T) {
 }
 
 func Test_securityQueryFields_Resolve_bySymbol(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		var assetID int64 = 1
 		symbol := "A1"
 		securityType := "Stock"

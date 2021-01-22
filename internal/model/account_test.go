@@ -92,7 +92,7 @@ func Test_GetAllAccounts(t *testing.T) {
 		accounts := []*Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAllAccounts(tx)
 
 			assert.Equal(t, []interface{}{tx, accountType, accountsSQL, []interface{}(nil)}, runQueryStub.GetFirstCall().Arguments())
@@ -104,7 +104,7 @@ func Test_GetAllAccounts(t *testing.T) {
 		err := errors.New("database error")
 		runQueryStub := mocka.Function(t, &runQuery, nil, err)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAllAccounts(tx)
 
 			assertAccountsError(t, result, err)
@@ -118,7 +118,7 @@ func Test_GetAccountByID(t *testing.T) {
 		accounts := []*Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountByID(tx, id)
 
 			assert.Equal(t, []interface{}{tx, accountType, accountsSQL + " where a.id = ?", []interface{}{id}},
@@ -131,7 +131,7 @@ func Test_GetAccountByID(t *testing.T) {
 		err := errors.New("database error")
 		runQueryStub := mocka.Function(t, &runQuery, nil, err)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountByID(tx, id)
 
 			assertAccountsError(t, result, err)
@@ -145,7 +145,7 @@ func Test_GetAccountsByName(t *testing.T) {
 		accounts := []*Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountsByName(tx, name)
 
 			assert.Equal(t, []interface{}{tx, accountType, accountsSQL + " where a.name = ?", []interface{}{name}},
@@ -158,7 +158,7 @@ func Test_GetAccountsByName(t *testing.T) {
 		err := errors.New("database error")
 		runQueryStub := mocka.Function(t, &runQuery, nil, err)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountsByName(tx, name)
 
 			assertAccountsError(t, result, err)
@@ -172,7 +172,7 @@ func Test_GetAccountsByCompanyID(t *testing.T) {
 		accounts := []*Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountsByCompanyIDs(tx, ids)
 
 			jsonIDs, _ := json.Marshal(ids)
@@ -186,7 +186,7 @@ func Test_GetAccountsByCompanyID(t *testing.T) {
 		err := errors.New("database error")
 		runQueryStub := mocka.Function(t, &runQuery, nil, err)
 		defer runQueryStub.Restore()
-		sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountsByCompanyIDs(tx, ids)
 
 			assertAccountsError(t, result, err)

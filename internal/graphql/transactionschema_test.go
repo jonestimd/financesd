@@ -11,7 +11,7 @@ import (
 )
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		accountID := "123"
 		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo")).addArg("accountId", accountID)
 		rows := sqlmock.NewRows([]string{"json"}).AddRow(`{"id":1,"name":"Transaction 1"}`)
@@ -37,7 +37,7 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 }
 
 func Test_transactionQueryFields_Resolve_requiresAccountID(t *testing.T) {
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo"))
 
 		_, err := transactionQueryFields.Resolve(params.ResolveParams)

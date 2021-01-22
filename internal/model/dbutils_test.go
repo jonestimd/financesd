@@ -13,7 +13,7 @@ import (
 func Test_runQuery_populatesModel(t *testing.T) {
 	name := "the company"
 	query := "select * from company where name = ?"
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		rows := sqltest.MockRows("id", "name").AddRow(42, name)
 		mock.ExpectQuery(query).WithArgs(name).WillReturnRows(rows)
 
@@ -27,7 +27,7 @@ func Test_runQuery_populatesModel(t *testing.T) {
 func Test_runQuery_returnsQueryError(t *testing.T) {
 	name := "the company"
 	query := "select * from company where name = ?"
-	sqltest.TestQuery(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		expectedErr := errors.New("query error")
 		mock.ExpectQuery(query).WithArgs(name).WillReturnError(expectedErr)
 

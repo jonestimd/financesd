@@ -29,8 +29,8 @@ var queryMatcher sqlmock.QueryMatcher = sqlmock.QueryMatcherFunc(func(expectedSQ
 	return nil
 })
 
-// TestQuery runs a database test in a transaction on a sqlmock connection.
-func TestQuery(t *testing.T, test func(mockDB sqlmock.Sqlmock, tx *sql.Tx)) {
+// TestInTx runs a database test in a transaction on a sqlmock connection.
+func TestInTx(t *testing.T, test func(mockDB sqlmock.Sqlmock, tx *sql.Tx)) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(queryMatcher))
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)

@@ -28,7 +28,7 @@ func (s *Security) ptrTo(column string) interface{} {
 var securityType = reflect.TypeOf(Security{})
 
 const securitySQL = `select s.type security_type, a.*,
-	(select count(t.id) from transaction t where t.security_id = s.id) transaction_count
+	(select count(t.id) from transaction t where t.security_id = a.id) transaction_count
 from security s
 join asset a on s.asset_id = a.id`
 

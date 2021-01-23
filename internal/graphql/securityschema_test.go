@@ -2,14 +2,55 @@ package graphql
 
 import (
 	"database/sql"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/model"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_securitySchema_Fields(t *testing.T) {
+	symbol := "S1"
+	now := time.Now()
+	security := &model.Security{
+		Asset: model.Asset{
+			ID:      1,
+			Name:    "the asset",
+			Type:    "Security",
+			Scale:   6,
+			Symbol:  &symbol,
+			Version: 42,
+			Audited: model.Audited{ChangeUser: "me", ChangeDate: &now},
+		},
+	}
+	params := graphql.ResolveParams{Source: security}
+	tests := []struct {
+		field string
+		value interface{}
+	}{
+		{"id", security.Asset.ID},
+		{"assetType", security.Asset.Type},
+		{"name", security.Asset.Name},
+		{"scale", security.Asset.Scale},
+		{"symbol", security.Asset.Symbol},
+		{"version", security.Asset.Version},
+		{"changeUser", security.Asset.Audited.ChangeUser},
+		{"changeDate", security.Asset.Audited.ChangeDate},
+	}
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%s returns value", test.field), func(t *testing.T) {
+			value, err := securitySchema.Fields()[test.field].Resolve(params)
+
+			assert.Nil(t, err)
+			assert.Equal(t, test.value, value)
+		})
+	}
+}
 
 func Test_securityQueryFields_Resolve_all(t *testing.T) {
 	symbol := "S1"

@@ -11,17 +11,18 @@ import (
 var securitySchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "security",
 	Description: "an investement asset",
-	Fields: addAudit(graphql.Fields{
-		"id":         &graphql.Field{Type: graphql.ID},
-		"assetType":  &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Type")},
-		"type":       &graphql.Field{Type: graphql.String},
-		"name":       &graphql.Field{Type: graphql.String},
-		"scale":      &graphql.Field{Type: graphql.Int},
-		"symbol":     &graphql.Field{Type: graphql.String},
-		"version":    &graphql.Field{Type: graphql.String},
-		"changeUser": &graphql.Field{Type: graphql.String},
-		"changeDate": &graphql.Field{Type: graphql.String},
-	}),
+	Fields: graphql.Fields{
+		"id":               &graphql.Field{Type: graphql.ID, Resolve: nestedResolver("Asset", "ID")},
+		"assetType":        &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Type")},
+		"type":             &graphql.Field{Type: graphql.String},
+		"name":             &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Name")},
+		"scale":            &graphql.Field{Type: graphql.Int, Resolve: nestedResolver("Asset", "Scale")},
+		"symbol":           &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Symbol")},
+		"version":          &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Version")},
+		"transactionCount": &graphql.Field{Type: graphql.Int},
+		"changeUser":       &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "ChangeUser")},
+		"changeDate":       &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "ChangeDate")},
+	},
 })
 
 var securityQueryFields = &graphql.Field{

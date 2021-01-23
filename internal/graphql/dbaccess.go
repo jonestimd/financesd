@@ -13,3 +13,5 @@ var getAccountsByCompanyIDs = model.GetAccountsByCompanyIDs
 var getAccountsByName = model.GetAccountsByName
 
 var getAllCategories = model.GetAllCategories
+
+var getAllPayees = model.GetAllPayees

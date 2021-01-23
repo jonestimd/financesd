@@ -98,7 +98,7 @@ func (a *Accounts) Error() error {
 	return a.err
 }
 
-const accountsSQL = `select a.*,
+const accountSQL = `select a.*,
 	(select count(*) from transaction where account_id = a.id) transaction_count,
 	(select sum(td.amount)
 	 from transaction tx
@@ -109,7 +109,7 @@ from account a`
 
 // GetAllAccounts loads all accounts.
 func GetAllAccounts(tx *sql.Tx) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountsSQL)
+	accounts, err := runQuery(tx, accountType, accountSQL)
 	if err != nil {
 		return &Accounts{err: err}
 	}
@@ -118,7 +118,7 @@ func GetAllAccounts(tx *sql.Tx) *Accounts {
 
 // GetAccountByID returns the account with ID.
 func GetAccountByID(tx *sql.Tx, id int64) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountsSQL+" where a.id = ?", id)
+	accounts, err := runQuery(tx, accountType, accountSQL+" where a.id = ?", id)
 	if err != nil {
 		return &Accounts{err: err}
 	}
@@ -127,7 +127,7 @@ func GetAccountByID(tx *sql.Tx, id int64) *Accounts {
 
 // GetAccountsByName returns the accounts having name.
 func GetAccountsByName(tx *sql.Tx, name string) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountsSQL+" where a.name = ?", name)
+	accounts, err := runQuery(tx, accountType, accountSQL+" where a.name = ?", name)
 	if err != nil {
 		return &Accounts{err: err}
 	}
@@ -137,7 +137,7 @@ func GetAccountsByName(tx *sql.Tx, name string) *Accounts {
 // GetAccountsByCompanyIDs returns the accounts for the sepcified companies.
 func GetAccountsByCompanyIDs(tx *sql.Tx, companyIDs []int64) *Accounts {
 	jsonIDs, _ := json.Marshal(companyIDs) // can't be cyclic, so ignoring error
-	accounts, err := runQuery(tx, accountType, accountsSQL+" where json_contains(?, cast(company_id as json))", jsonIDs)
+	accounts, err := runQuery(tx, accountType, accountSQL+" where json_contains(?, cast(company_id as json))", jsonIDs)
 	if err != nil {
 		return &Accounts{err: err}
 	}

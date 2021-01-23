@@ -13,7 +13,7 @@ var securitySchema = graphql.NewObject(graphql.ObjectConfig{
 	Description: "an investement asset",
 	Fields: addAudit(graphql.Fields{
 		"id":         &graphql.Field{Type: graphql.ID},
-		"assetType":  &graphql.Field{Type: graphql.String},
+		"assetType":  &graphql.Field{Type: graphql.String, Resolve: nestedResolver("Asset", "Type")},
 		"type":       &graphql.Field{Type: graphql.String},
 		"name":       &graphql.Field{Type: graphql.String},
 		"scale":      &graphql.Field{Type: graphql.Int},
@@ -24,20 +24,6 @@ var securitySchema = graphql.NewObject(graphql.ObjectConfig{
 	}),
 })
 
-const securitySQL = `select a.*, s.type security_type
-from asset a
-join security s on a.id = s.asset_id`
-
-func securityColumnMapper(name string) string {
-	switch name {
-	case "security_type":
-		return "type"
-	case "type":
-		return "asset_type"
-	}
-	return name
-}
-
 var securityQueryFields = &graphql.Field{
 	Type: graphql.NewList(securitySchema),
 	Args: map[string]*graphql.ArgumentConfig{
@@ -45,24 +31,16 @@ var securityQueryFields = &graphql.Field{
 		"symbol": {Type: graphql.String, Description: "unique security symbol"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(*sql.Tx)
-		args := make([]interface{}, 0)
-		sql := securitySQL
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		if id, ok := p.Args["id"]; ok {
 			intID, err := strconv.ParseInt(id.(string), 10, 64)
 			if err != nil {
 				return nil, err
 			}
-			args = append(args, intID)
-			sql += " where a.id = ?"
+			return getSecurityByID(tx, intID)
 		} else if symbol, ok := p.Args["symbol"]; ok {
-			args = append(args, symbol)
-			sql += " where a.symbol = ?"
+			return getSecurityBySymbol(tx, symbol.(string))
 		}
-		rows, err := db.Query(sql, args...)
-		if err != nil {
-			return nil, err
-		}
-		return scanToMaps(rows, securityColumnMapper)
+		return getAllSecurities(tx)
 	},
 }

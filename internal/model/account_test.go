@@ -95,7 +95,7 @@ func Test_GetAllAccounts(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAllAccounts(tx)
 
-			assert.Equal(t, []interface{}{tx, accountType, accountsSQL, []interface{}(nil)}, runQueryStub.GetFirstCall().Arguments())
+			assert.Equal(t, []interface{}{tx, accountType, accountSQL, []interface{}(nil)}, runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, result.Error())
 			assert.Equal(t, accounts, result.Accounts)
 		})
@@ -121,7 +121,7 @@ func Test_GetAccountByID(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountByID(tx, id)
 
-			assert.Equal(t, []interface{}{tx, accountType, accountsSQL + " where a.id = ?", []interface{}{id}},
+			assert.Equal(t, []interface{}{tx, accountType, accountSQL + " where a.id = ?", []interface{}{id}},
 				runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, result.Error())
 			assert.Equal(t, accounts, result.Accounts)
@@ -148,7 +148,7 @@ func Test_GetAccountsByName(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result := GetAccountsByName(tx, name)
 
-			assert.Equal(t, []interface{}{tx, accountType, accountsSQL + " where a.name = ?", []interface{}{name}},
+			assert.Equal(t, []interface{}{tx, accountType, accountSQL + " where a.name = ?", []interface{}{name}},
 				runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, result.Error())
 			assert.Equal(t, accounts, result.Accounts)
@@ -176,7 +176,7 @@ func Test_GetAccountsByCompanyID(t *testing.T) {
 			result := GetAccountsByCompanyIDs(tx, ids)
 
 			jsonIDs, _ := json.Marshal(ids)
-			assert.Equal(t, []interface{}{tx, accountType, accountsSQL + " where json_contains(?, cast(company_id as json))", []interface{}{jsonIDs}},
+			assert.Equal(t, []interface{}{tx, accountType, accountSQL + " where json_contains(?, cast(company_id as json))", []interface{}{jsonIDs}},
 				runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, result.Error())
 			assert.Equal(t, accounts, result.Accounts)

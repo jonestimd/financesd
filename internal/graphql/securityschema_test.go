@@ -2,118 +2,56 @@ package graphql
 
 import (
 	"database/sql"
-	"errors"
-	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/MonsantoCo/mocka/v2"
 	"github.com/jonestimd/financesd/internal/model"
 	"github.com/jonestimd/financesd/internal/sqltest"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_securityQueryFields_Resolve_all(t *testing.T) {
+	symbol := "S1"
+	securities := []*model.Security{{AssetID: 42}}
+	getAll := mocka.Function(t, &getAllSecurities, securities, nil)
+	getByID := mocka.Function(t, &getSecurityByID, securities, nil)
+	getBySymbol := mocka.Function(t, &getSecurityBySymbol, securities, nil)
+	defer func() {
+		getAll.Restore()
+		getByID.Restore()
+		getBySymbol.Restore()
+	}()
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		var assetID int64 = 1
-		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name"))
-		mock.ExpectQuery(securitySQL).WithArgs().WillReturnRows(
-			sqltest.MockRows("id", "type", "security_type").AddRow(assetID, "Security", "Stock"))
-		expectedRows := []map[string]interface{}{
-			{"id": assetID, "assetType": "Security", "type": "Stock"},
+		tests := []struct {
+			name     string
+			argName  string
+			argValue interface{}
+			stub     *mocka.Stub
+			stubArgs []interface{}
+			err      bool
+		}{
+			{name: "returns all securities", stub: getAll, stubArgs: []interface{}{tx}},
+			{name: "returns security with ID", argName: "id", argValue: "42", stub: getByID, stubArgs: []interface{}{tx, int64(42)}},
+			{name: "returns security with symbol", argName: "symbol", argValue: symbol, stub: getBySymbol, stubArgs: []interface{}{tx, symbol}},
+			{name: "returns error for invalid ID", argName: "id", argValue: "abc", stub: getByID, err: true},
 		}
+		for _, test := range tests {
+			t.Run(test.name, func(t *testing.T) {
+				params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name")).
+					addArg(test.argName, test.argValue)
 
-		result, err := securityQueryFields.Resolve(params.ResolveParams)
+				result, err := securityQueryFields.Resolve(params.ResolveParams)
 
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-		if !reflect.DeepEqual(result, expectedRows) {
-			t.Errorf("Expected result: %v, got %v", expectedRows, result)
-		}
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("there were unfulfilled expectations: %s", err)
-		}
-	})
-}
-
-func Test_securityQueryFields_Resolve_queryError(t *testing.T) {
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name"))
-		queryError := errors.New("invalid SQL")
-		mock.ExpectQuery(securitySQL).WithArgs().WillReturnError(queryError)
-
-		_, err := securityQueryFields.Resolve(params.ResolveParams)
-
-		if err != queryError {
-			t.Errorf("Unexpected error: %v", err)
-		}
-	})
-}
-
-func Test_securityQueryFields_Resolve_byID(t *testing.T) {
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		var assetID int64 = 1
-		securityType := "Stock"
-		name := "Security 1"
-		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name")).
-			addArg("id", fmt.Sprint(assetID))
-		mock.ExpectQuery(securitySQL + " where a.id = ?").
-			WithArgs(assetID).
-			WillReturnRows(sqltest.MockRows("id", "security_type", "name").AddRow(assetID, securityType, name))
-		expectedRows := []map[string]interface{}{
-			{"id": assetID, "type": securityType, "name": name},
-		}
-
-		result, err := securityQueryFields.Resolve(params.ResolveParams)
-
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-		if !reflect.DeepEqual(result, expectedRows) {
-			t.Errorf("Expected result: %v, got %v", expectedRows[0], result.([]*model.Security)[0])
-		}
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("there were unfulfilled expectations: %s", err)
-		}
-	})
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name")).addArg("id", "one")
-
-		_, err := securityQueryFields.Resolve(params.ResolveParams)
-
-		if err == nil {
-			t.Error("Expected a parsing error")
-		}
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("there were unfulfilled expectations: %s", err)
-		}
-	})
-}
-
-func Test_securityQueryFields_Resolve_bySymbol(t *testing.T) {
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		var assetID int64 = 1
-		symbol := "A1"
-		securityType := "Stock"
-		name := "Security 1"
-		params := newResolveParams(tx, securityQuery, newField("", "type"), newField("", "id"), newField("", "name")).addArg("symbol", symbol)
-		mock.ExpectQuery(securitySQL + " where a.symbol = ?").
-			WithArgs(symbol).
-			WillReturnRows(sqltest.MockRows("id", "security_type", "name").AddRow(assetID, securityType, name))
-		expectedRows := []map[string]interface{}{
-			{"id": assetID, "type": securityType, "name": name},
-		}
-
-		result, err := securityQueryFields.Resolve(params.ResolveParams)
-
-		if err != nil {
-			t.Errorf("Unexpected error: %v", err)
-		}
-		if !reflect.DeepEqual(result, expectedRows) {
-			t.Errorf("Expected result: %v, got %v", expectedRows[0], result.([]*model.Security)[0])
-		}
-		if err := mock.ExpectationsWereMet(); err != nil {
-			t.Errorf("there were unfulfilled expectations: %s", err)
+				if test.err {
+					assert.NotNil(t, err)
+				} else {
+					assert.Nil(t, err)
+					assert.Equal(t, securities, result)
+					assert.Equal(t, 1, test.stub.CallCount())
+					assert.Equal(t, test.stubArgs, test.stub.GetFirstCall().Arguments())
+				}
+			})
 		}
 	})
 }

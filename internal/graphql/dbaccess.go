@@ -15,3 +15,7 @@ var getAccountsByName = model.GetAccountsByName
 var getAllCategories = model.GetAllCategories
 
 var getAllPayees = model.GetAllPayees
+
+var getAllSecurities = model.GetAllSecurities
+var getSecurityByID = model.GetSecurityByID
+var getSecurityBySymbol = model.GetSecurityBySymbol

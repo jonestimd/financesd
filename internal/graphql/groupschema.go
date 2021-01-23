@@ -18,12 +18,8 @@ var groupSchema = graphql.NewObject(graphql.ObjectConfig{
 
 var groupQueryFields = &graphql.Field{
 	Type: graphql.NewList(groupSchema),
-	Args: map[string]*graphql.ArgumentConfig{
-		"id":   {Type: graphql.ID, Description: "group ID"},
-		"name": {Type: graphql.String, Description: "unique group name"},
-	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		db := p.Context.Value(DbContextKey).(*sql.Tx)
-		return newQuery("tx_group", "g").SelectFields(p.Info).Filter(p.Args).Execute(db)
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
+		return getAllGroups(tx)
 	},
 }

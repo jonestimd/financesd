@@ -18,10 +18,6 @@ var payeeSchema = graphql.NewObject(graphql.ObjectConfig{
 
 var payeeQueryFields = &graphql.Field{
 	Type: graphql.NewList(payeeSchema),
-	Args: map[string]*graphql.ArgumentConfig{
-		"id":   {Type: graphql.ID, Description: "payee ID"},
-		"name": {Type: graphql.String, Description: "unique payee name"},
-	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		return getAllPayees(tx)

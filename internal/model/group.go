@@ -9,7 +9,7 @@ import (
 type Group struct {
 	ID               int64
 	Name             string
-	Description      string
+	Description      *string
 	Version          int
 	TransactionCount int64
 	Audited

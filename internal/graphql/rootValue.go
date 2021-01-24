@@ -8,6 +8,7 @@ import (
 const accountsRootKey = "accountsByID"
 const companyIDsRootKey = "companyIDs"
 const companiesRootKey = "companiesByID"
+const accountTxKey = "accountTxKey"
 
 type companyIDs interface {
 	Result() interface{}

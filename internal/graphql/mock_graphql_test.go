@@ -98,3 +98,18 @@ func (b *resolveParamsBuilder) setRootValue(name string, value interface{}) *res
 	}
 	return b
 }
+
+func findSchemaField(root *graphql.Object, names ...string) *graphql.FieldDefinition {
+	field := root.Fields()[names[0]]
+	for _, name := range names[1:] {
+		switch field.Type.(type) {
+		case *graphql.List:
+			field = field.Type.(*graphql.List).OfType.(*graphql.Object).Fields()[name]
+		case *graphql.Object:
+			field = field.Type.(*graphql.Object).Fields()[name]
+		default:
+			return nil
+		}
+	}
+	return field
+}

@@ -21,3 +21,5 @@ var getAllPayees = model.GetAllPayees
 var getAllSecurities = model.GetAllSecurities
 var getSecurityByID = model.GetSecurityByID
 var getSecurityBySymbol = model.GetSecurityBySymbol
+
+var getAccountTransactions = model.GetTransactions

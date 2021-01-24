@@ -41,7 +41,7 @@ func Test_companyQueryFields_Resolve(t *testing.T) {
 			t.Run(test.name, func(t *testing.T) {
 				params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).addArg(test.argName, test.argValue)
 
-				result, err := companyQueryFields.Resolve(params.ResolveParams)
+				result, err := companyQueryFields().Resolve(params.ResolveParams)
 
 				if test.err {
 					assert.NotNil(t, err, "Expected an error")

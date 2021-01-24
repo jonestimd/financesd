@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/stretchr/testify/assert"
 )
 
 var whitespace = regexp.MustCompile("[ \n\t]+")
@@ -39,10 +40,7 @@ func TestInTx(t *testing.T, test func(mockDB sqlmock.Sqlmock, tx *sql.Tx)) {
 
 	mock.ExpectBegin()
 	tx, err := db.Begin()
-	if err != nil {
-		panic(err.Error())
-	}
-	// defer tx.Commit()
+	assert.Nil(t, err)
 
 	test(mock, tx)
 }

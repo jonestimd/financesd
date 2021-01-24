@@ -16,31 +16,33 @@ var companySchema = graphql.NewObject(graphql.ObjectConfig{
 	Fields: addAudit(graphql.Fields{
 		"id":   &graphql.Field{Type: graphql.ID},
 		"name": &graphql.Field{Type: graphql.String},
-		// add in Schema(): "accounts": &graphql.Field{Type: graphql.NewList(accountSchema()), Resolve: resolveAccounts},
 	}),
 })
 
-var companyQueryFields = &graphql.Field{
-	Type: graphql.NewList(companySchema),
-	Args: map[string]*graphql.ArgumentConfig{
-		"id":   {Type: graphql.ID, Description: "company ID"},
-		"name": {Type: graphql.String, Description: "unique company name"},
-	},
-	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		if idArg, ok := p.Args["id"]; ok {
-			id, err := strconv.ParseInt(idArg.(string), 10, 64)
-			if err != nil {
-				return nil, err
+func companyQueryFields() *graphql.Field {
+	companySchema.AddFieldConfig("accounts", &graphql.Field{Type: graphql.NewList(accountSchema), Resolve: resolveAccounts})
+	return &graphql.Field{
+		Type: graphql.NewList(companySchema),
+		Args: map[string]*graphql.ArgumentConfig{
+			"id":   {Type: graphql.ID, Description: "company ID"},
+			"name": {Type: graphql.String, Description: "unique company name"},
+		},
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			tx := p.Context.Value(DbContextKey).(*sql.Tx)
+			if idArg, ok := p.Args["id"]; ok {
+				id, err := strconv.ParseInt(idArg.(string), 10, 64)
+				if err != nil {
+					return nil, err
+				}
+				return addCompanyIDsToRoot(p.Info, getCompanyByID(tx, id))
 			}
-			return addCompanyIDsToRoot(p.Info, getCompanyByID(tx, id))
-		}
-		if nameArg, ok := p.Args["name"]; ok {
-			name, _ := nameArg.(string)
-			return addCompanyIDsToRoot(p.Info, getCompanyByName(tx, name))
-		}
-		return addCompanyIDsToRoot(p.Info, getAllCompanies(tx))
-	},
+			if nameArg, ok := p.Args["name"]; ok {
+				name, _ := nameArg.(string)
+				return addCompanyIDsToRoot(p.Info, getCompanyByName(tx, name))
+			}
+			return addCompanyIDsToRoot(p.Info, getAllCompanies(tx))
+		},
+	}
 }
 
 func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {

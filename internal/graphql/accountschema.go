@@ -27,15 +27,6 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	}),
 })
 
-var accountFieldSQL = map[string]string{ // TODO only used for tests
-	"transactionCount": "(select count(*) from transaction where account_id = %s.id)",
-	"balance": "(select sum(td.amount) " +
-		"from transaction tx " +
-		"join transaction_detail td on tx.id = td.transaction_id " +
-		"left join transaction_category tc on td.transaction_category_id = tc.id " +
-		"where tx.account_id = %s.id and coalesce(tc.amount_type, '') != 'ASSET_VALUE')",
-}
-
 var accountQueryFields = &graphql.Field{
 	Type: graphql.NewList(accountSchema),
 	Args: map[string]*graphql.ArgumentConfig{

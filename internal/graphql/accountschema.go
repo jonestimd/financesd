@@ -40,31 +40,22 @@ var accountQueryFields = &graphql.Field{
 			if err != nil {
 				return nil, err
 			}
-			return addCompanyIDsToRoot(p.Info, getAccountByID(tx, id))
+			return getAccountByID(tx, id)
 		}
 		if nameArg, ok := p.Args["name"]; ok {
 			name, _ := nameArg.(string)
-			return addCompanyIDsToRoot(p.Info, getAccountsByName(tx, name))
+			return getAccountsByName(tx, name)
 		}
-		return addAccountsToRoot(p.Info, getAllAccounts(tx))
+		return getAllAccounts(tx)
 	},
 }
 
+type accountModel interface {
+	GetCompany(tx *sql.Tx) (*model.Company, error)
+}
+
 func resolveCompany(p graphql.ResolveParams) (interface{}, error) {
-	account := p.Source.(*model.Account)
-	if account.CompanyID == nil {
-		return nil, nil
-	}
+	account := p.Source.(accountModel)
 	tx := p.Context.Value(DbContextKey).(*sql.Tx)
-	rootValue := p.Info.RootValue.(map[string]interface{})
-	if _, ok := rootValue[companiesRootKey]; !ok {
-		ids := rootValue[companyIDsRootKey].([]int64)
-		byID, err := getCompaniesByIDs(tx, ids)
-		if err != nil {
-			return nil, err
-		}
-		rootValue[companiesRootKey] = byID
-	}
-	companiesByID := rootValue[companiesRootKey].(map[int64]*model.Company)
-	return companiesByID[*account.CompanyID], nil
+	return account.GetCompany(tx)
 }

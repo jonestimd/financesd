@@ -51,9 +51,6 @@ func main() {
 		Pretty:           false,
 		GraphiQL:         true,
 		ResultCallbackFn: resultCallback,
-		RootObjectFn: handler.RootObjectFn(func(ctx context.Context, r *http.Request) map[string]interface{} {
-			return make(map[string]interface{}) // TODO use struct
-		}),
 	})
 	if cwd, err := os.Getwd(); err != nil {
 		log.Fatal("can't get current directory")

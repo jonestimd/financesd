@@ -92,13 +92,6 @@ func (b *resolveParamsBuilder) setSource(source interface{}) *resolveParamsBuild
 	return b
 }
 
-func (b *resolveParamsBuilder) setRootValue(name string, value interface{}) *resolveParamsBuilder {
-	if value != nil {
-		rootValue(b.ResolveParams.Info)[name] = value
-	}
-	return b
-}
-
 func findSchemaField(root *graphql.Object, names ...string) *graphql.FieldDefinition {
 	field := root.Fields()[names[0]]
 	for _, name := range names[1:] {

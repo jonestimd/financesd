@@ -19,6 +19,7 @@ type Account struct {
 	Version          int64
 	Balance          string
 	TransactionCount int64
+	source           *companySource
 	Audited
 }
 
@@ -50,53 +51,18 @@ func (a *Account) ptrTo(column string) interface{} {
 	return a.Audited.ptrToAudit(column)
 }
 
+// GetCompany returns the company for the account.
+func (a *Account) GetCompany(tx *sql.Tx) (*Company, error) {
+	if a.CompanyID == nil {
+		return nil, nil
+	}
+	if a.source.loadCompanies(tx) != nil {
+		return nil, a.source.err
+	}
+	return a.source.companiesByID[*a.CompanyID], nil
+}
+
 var accountType = reflect.TypeOf(Account{})
-
-// Accounts contains result of loading accounts.
-type Accounts struct {
-	Accounts   []*Account
-	err        error
-	companyIDs []int64
-	byID       map[int64]*Account
-}
-
-// NewAccounts creates an error result.
-func NewAccounts(err error) *Accounts {
-	return &Accounts{err: err}
-}
-
-// CompanyIDs returns the unique company IDs for the accounts.
-func (a *Accounts) CompanyIDs() []int64 {
-	if a.companyIDs == nil {
-		companyIDs := newIDSet()
-		a.byID = make(map[int64]*Account, len(a.Accounts))
-		for _, account := range a.Accounts {
-			a.byID[account.ID] = account
-			if account.CompanyID != nil {
-				companyIDs.Add(*account.CompanyID)
-			}
-		}
-		a.companyIDs = companyIDs.Values()
-	}
-	return a.companyIDs
-}
-
-// ByID returns a map of accounts keyed by ID.
-func (a *Accounts) ByID() map[int64]*Account {
-	if a.companyIDs == nil {
-		a.CompanyIDs()
-	}
-	return a.byID
-}
-
-// Result returns the accounts as an interface.
-func (a *Accounts) Result() interface{} {
-	return a.Accounts
-}
-
-func (a *Accounts) Error() error {
-	return a.err
-}
 
 const accountSQL = `select a.*,
 	(select count(*) from transaction where account_id = a.id) transaction_count,
@@ -107,39 +73,31 @@ const accountSQL = `select a.*,
 	 where tx.account_id = a.id and coalesce(tc.amount_type, '') != 'ASSET_VALUE') balance
 from account a`
 
-// GetAllAccounts loads all accounts.
-func GetAllAccounts(tx *sql.Tx) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountSQL)
+func runAccountQuery(tx *sql.Tx, cacheAccounts bool, query string, args ...interface{}) ([]*Account, error) {
+	accounts, err := runQuery(tx, accountType, query, args...)
 	if err != nil {
-		return &Accounts{err: err}
+		return nil, err
 	}
-	return &Accounts{Accounts: accounts.([]*Account)}
+	return newCompanySource().setAccounts(accounts.([]*Account), cacheAccounts), nil
+}
+
+// GetAllAccounts loads all accounts.
+func GetAllAccounts(tx *sql.Tx) ([]*Account, error) {
+	return runAccountQuery(tx, true, accountSQL)
 }
 
 // GetAccountByID returns the account with ID.
-func GetAccountByID(tx *sql.Tx, id int64) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountSQL+" where a.id = ?", id)
-	if err != nil {
-		return &Accounts{err: err}
-	}
-	return &Accounts{Accounts: accounts.([]*Account)}
+func GetAccountByID(tx *sql.Tx, id int64) ([]*Account, error) {
+	return runAccountQuery(tx, false, accountSQL+" where a.id = ?", id)
 }
 
 // GetAccountsByName returns the accounts having name.
-func GetAccountsByName(tx *sql.Tx, name string) *Accounts {
-	accounts, err := runQuery(tx, accountType, accountSQL+" where a.name = ?", name)
-	if err != nil {
-		return &Accounts{err: err}
-	}
-	return &Accounts{Accounts: accounts.([]*Account)}
+func GetAccountsByName(tx *sql.Tx, name string) ([]*Account, error) {
+	return runAccountQuery(tx, false, accountSQL+" where a.name = ?", name)
 }
 
-// GetAccountsByCompanyIDs returns the accounts for the sepcified companies.
-func GetAccountsByCompanyIDs(tx *sql.Tx, companyIDs []int64) *Accounts {
+// getAccountsByCompanyIDs returns the accounts for the sepcified companies.
+func getAccountsByCompanyIDs(tx *sql.Tx, companyIDs []int64) ([]*Account, error) {
 	jsonIDs, _ := json.Marshal(companyIDs) // can't be cyclic, so ignoring error
-	accounts, err := runQuery(tx, accountType, accountSQL+" where json_contains(?, cast(company_id as json))", jsonIDs)
-	if err != nil {
-		return &Accounts{err: err}
-	}
-	return &Accounts{Accounts: accounts.([]*Account)}
+	return runAccountQuery(tx, true, accountSQL+" where json_contains(?, cast(company_id as json))", jsonIDs)
 }

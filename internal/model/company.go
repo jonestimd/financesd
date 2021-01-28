@@ -11,6 +11,7 @@ type Company struct {
 	ID      int64
 	Name    string
 	Version int
+	source  *companySource
 	Audited
 }
 
@@ -27,70 +28,47 @@ func (c *Company) ptrTo(column string) interface{} {
 	return c.Audited.ptrToAudit(column)
 }
 
+// GetAccounts returns the accounts for the company.
+func (c *Company) GetAccounts(tx *sql.Tx) ([]*Account, error) {
+	if c.source.accounts == nil && c.source.loadAccounts(tx) != nil {
+		return nil, c.source.err
+	}
+	accounts := make([]*Account, 0, 1)
+	for _, account := range c.source.accounts {
+		if *account.CompanyID == c.ID {
+			accounts = append(accounts, account)
+		}
+	}
+	return accounts, nil
+}
+
 var companyType = reflect.TypeOf(Company{})
 
-// Companies contains result of loading companies.
-type Companies struct {
-	Companies []*Company
-	err       error
-}
-
-// CompanyIDs returns the IDs of the companies.
-func (c *Companies) CompanyIDs() []int64 {
-	companyIDs := make([]int64, len(c.Companies))
-	for i, company := range c.Companies {
-		companyIDs[i] = (company.ID)
-	}
-	return companyIDs
-}
-
-// Result returns the companies as an interface.
-func (c *Companies) Result() interface{} {
-	return c.Companies
-}
-
-func (c *Companies) Error() error {
-	return c.err
-}
-
-// GetAllCompanies loads all companies.
-func GetAllCompanies(tx *sql.Tx) *Companies {
-	companies, err := runQuery(tx, companyType, "select * from company")
-	if err != nil {
-		return &Companies{err: err}
-	}
-	return &Companies{Companies: companies.([]*Company)}
-}
-
-// GetCompanyByID returns the company with the ID.
-func GetCompanyByID(tx *sql.Tx, id int64) *Companies {
-	companies, err := runQuery(tx, companyType, "select * from company where id = ?", id)
-	if err != nil {
-		return &Companies{err: err}
-	}
-	return &Companies{Companies: companies.([]*Company)}
-}
-
-// GetCompanyByName returns the company with the name.
-func GetCompanyByName(tx *sql.Tx, name string) *Companies {
-	companies, err := runQuery(tx, companyType, "select * from company where name = ?", name)
-	if err != nil {
-		return &Companies{err: err}
-	}
-	return &Companies{Companies: companies.([]*Company)}
-}
-
-// GetCompaniesByIDs loads specified companies.
-func GetCompaniesByIDs(tx *sql.Tx, ids []int64) (map[int64]*Company, error) {
-	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
-	models, err := runQuery(tx, companyType, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
+func runCompanyQuery(tx *sql.Tx, query string, args ...interface{}) ([]*Company, error) {
+	companies, err := runQuery(tx, companyType, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	companies := models.([]*Company)
-	byID := make(map[int64]*Company, len(companies))
-	for _, company := range companies {
-		byID[company.ID] = company
-	}
-	return byID, nil
+	return newCompanySource().setCompanies(companies.([]*Company)), nil
+}
+
+// GetAllCompanies loads all companies.
+func GetAllCompanies(tx *sql.Tx) ([]*Company, error) {
+	return runCompanyQuery(tx, "select * from company")
+}
+
+// GetCompanyByID returns the company with the ID.
+func GetCompanyByID(tx *sql.Tx, id int64) ([]*Company, error) {
+	return runCompanyQuery(tx, "select * from company where id = ?", id)
+}
+
+// GetCompanyByName returns the company with the name.
+func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
+	return runCompanyQuery(tx, "select * from company where name = ?", name)
+}
+
+// getCompaniesByIDs loads specified companies.
+func getCompaniesByIDs(tx *sql.Tx, ids []int64) ([]*Company, error) {
+	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
+	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
 }

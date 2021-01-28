@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"database/sql"
-	"errors"
 	"strconv"
 
 	"github.com/graphql-go/graphql"
@@ -34,36 +33,23 @@ func companyQueryFields() *graphql.Field {
 				if err != nil {
 					return nil, err
 				}
-				return addCompanyIDsToRoot(p.Info, getCompanyByID(tx, id))
+				return getCompanyByID(tx, id)
 			}
 			if nameArg, ok := p.Args["name"]; ok {
 				name, _ := nameArg.(string)
-				return addCompanyIDsToRoot(p.Info, getCompanyByName(tx, name))
+				return getCompanyByName(tx, name)
 			}
-			return addCompanyIDsToRoot(p.Info, getAllCompanies(tx))
+			return getAllCompanies(tx)
 		},
 	}
 }
 
+type companyModel interface {
+	GetAccounts(tx *sql.Tx) ([]*model.Account, error)
+}
+
 func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {
-	company := p.Source.(*model.Company)
-	rootValue := p.Info.RootValue.(map[string]interface{})
-	if _, ok := rootValue[accountsRootKey]; !ok {
-		if ids, ok := rootValue[companyIDsRootKey]; ok {
-			tx := p.Context.Value(DbContextKey).(*sql.Tx)
-			if _, err := addAccountsToRoot(p.Info, getAccountsByCompanyIDs(tx, ids.([]int64))); err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, errors.New("no company IDs in context")
-		}
-	}
-	accountsByID := rootValue[accountsRootKey].(map[int64]*model.Account)
-	accounts := make([]*model.Account, 0)
-	for _, account := range accountsByID {
-		if account.CompanyID != nil && *account.CompanyID == company.ID {
-			accounts = append(accounts, account)
-		}
-	}
-	return accounts, nil
+	company := p.Source.(companyModel)
+	tx := p.Context.Value(DbContextKey).(*sql.Tx)
+	return company.GetAccounts(tx)
 }

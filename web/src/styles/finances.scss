@@ -18,8 +18,8 @@ body {
     margin: $app-margin;
 }
 
-a.menu-item {
-    text-decoration: unset;
+.MuiMenuItem-root a {
+    text-decoration: inherit;
     color: inherit;
 }
 

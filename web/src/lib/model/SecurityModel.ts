@@ -1,9 +1,11 @@
 export interface IAsset {
     id: string;
     name: string;
+    type: string;
     scale: number;
     symbol?: string;
     version: number;
+    transactionCount: number;
 }
 
 export interface ISecurity extends IAsset {
@@ -13,10 +15,11 @@ export interface ISecurity extends IAsset {
 export class SecurityModel implements ISecurity {
     id: string;
     name: string;
+    type: string;
     scale: number;
     symbol: string;
     version: number;
-    type: string;
+    transactionCount: number;
 
     constructor(security: ISecurity) {
         Object.assign(this, security);

@@ -5,7 +5,7 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-export const query = '{securities {id name scale symbol type version}}';
+export const query = '{securities {id name type scale symbol type version transactionCount}}';
 
 type SecurityResponse = agent.IGraphqlResponse<{securities: ISecurity[]}>;
 

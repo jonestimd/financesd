@@ -8,6 +8,7 @@ import AccountsPage from './AccountsPage';
 import TransactionsPage from './transaction/TransactionsPage';
 import CategoriesPage from './CategoriesPage';
 import PayeesPage from './PayeesPage';
+import SecuritiesPage from './SecuritiesPage';
 import {createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
 
 const history = createBrowserHistory();
@@ -65,6 +66,7 @@ export const Routes: React.FC = () => {
                             <Route exact path='/finances/account/:accountId' component={TransactionsPage} />
                             <Route exact path='/finances/categories' component={CategoriesPage} />
                             <Route exact path='/finances/payees' component={PayeesPage} />
+                            <Route exact path='/finances/securities' component={SecuritiesPage} />
                             <Route component={NotFound} />
                         </Switch>
                     </Router>

@@ -33,5 +33,9 @@
     "category.income": "Income",
     "category.transactionCount": "Transactions",
     "payee.name": "Name",
-    "payee.transactionCount": "Transactions"
+    "payee.transactionCount": "Transactions",
+    "security.name": "Name",
+    "security.type": "Type",
+    "security.symbol": "Symbol",
+    "security.transactionCount": "TransactionCount"
 }

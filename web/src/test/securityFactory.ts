@@ -9,6 +9,7 @@ export function newSecurity(overrides: Partial<ISecurity> = {}): ISecurity {
         type: 'Stock',
         scale: 6,
         version: 1,
+        transactionCount: 96,
         ...overrides,
     };
 }

@@ -7,6 +7,7 @@ export function newPayee(overrides: Partial<IPayee> = {}): IPayee {
         id: `${++nextId}`,
         name: `Payee ${nextId}`,
         version: 1,
+        transactionCount: 42,
         ...overrides,
     };
 }

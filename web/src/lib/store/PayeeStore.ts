@@ -7,7 +7,7 @@ import {LoadResult} from './interfaces';
 
 export const query = `{
     payees {
-        id name version
+        id name version transactionCount
     }
 }`;
 

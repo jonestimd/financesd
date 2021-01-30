@@ -31,5 +31,7 @@
     "category.amountType": "Type",
     "category.security": "Security",
     "category.income": "Income",
-    "category.transactionCount": "Transactions"
+    "category.transactionCount": "Transactions",
+    "payee.name": "Name",
+    "payee.transactionCount": "Transactions"
 }

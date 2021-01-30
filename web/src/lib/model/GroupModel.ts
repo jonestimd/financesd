@@ -14,6 +14,10 @@ export class GroupModel implements IGroup {
     transactionCount: number;
 
     constructor(group: IGroup) {
-        Object.assign(this, group);
+        this.id = group.id;
+        this.name = group.name;
+        this.description = group.description;
+        this.version = group.version;
+        this.transactionCount = group.transactionCount;
     }
 }

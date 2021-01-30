@@ -12,6 +12,8 @@ export const Currency: React.FC<{children: number}> = ({children}) => {
     return <em className={numberClass(children)}>{currency.format(children)}</em>;
 };
 
+export const HideZero: React.FC<{children?: number}> = ({children}) => children ? <Currency>{children}</Currency> : null;
+
 export const Shares: React.FC<{children: number}> = ({children}) => {
     return <em className={numberClass(children)}>{shares.format(children)}</em>;
 };

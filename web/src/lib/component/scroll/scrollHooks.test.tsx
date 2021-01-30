@@ -39,7 +39,7 @@ describe('scrollHooks', () => {
                 jest.spyOn(prototype, 'getBoundingClientRect').mockReturnValue({height: 42} as DOMRect);
                 const component = setup({prototypeSelector});
 
-                hook.listRef.current = list;
+                hook.listRef!.current = list;
                 component.rerender({x: 'force rerender'});
 
                 expect(hook.rowHeight).toEqual(42);
@@ -58,7 +58,7 @@ describe('scrollHooks', () => {
                 jest.spyOn(prototype, 'getBoundingClientRect').mockReturnValue({height: 42} as DOMRect);
                 const component = setup({headerSelector});
 
-                hook.listRef.current = list;
+                hook.listRef!.current = list;
                 component.rerender({x: 'force rerender'});
 
                 expect(hook.headerHeight).toEqual(42);
@@ -71,7 +71,7 @@ describe('scrollHooks', () => {
 
                 setup({defaultRowHeight});
 
-                expect(hook.endRow(defaultRowHeight * visibleRows)).toEqual(Math.ceil(visibleRows * (1 + 2 * defaultOverscan)));
+                expect(hook.endRow!(defaultRowHeight * visibleRows)).toEqual(Math.ceil(visibleRows * (1 + 2 * defaultOverscan)));
             });
         });
         describe('onScroll', () => {
@@ -81,7 +81,7 @@ describe('scrollHooks', () => {
                 jest.spyOn(list, 'clientHeight', 'get').mockReturnValue(defaultRowHeight * visibleRows);
                 jest.spyOn(list, 'scrollTop', 'get').mockReturnValue(defaultRowHeight * (scrollTopRow + 0.4));
 
-                hook.onScroll({currentTarget: list} as unknown as React.UIEvent<HTMLElement>);
+                hook.onScroll!({currentTarget: list} as unknown as React.UIEvent<HTMLElement>);
                 component.rerender({x: 'force rerender'});
 
                 expect(hook.startRow).toEqual(expectedStartRow);

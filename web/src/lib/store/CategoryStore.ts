@@ -26,7 +26,7 @@ export default class CategoryStore {
         return sortValues(this.categoriesById, compareBy((category) => category.displayName));
     }
 
-    getCategory(id: string | number): CategoryModel | undefined {
+    getCategory(id?: string | number): CategoryModel | undefined {
         return this.categoriesById.get('' + id);
     }
 

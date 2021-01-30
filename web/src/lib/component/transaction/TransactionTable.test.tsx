@@ -52,19 +52,19 @@ describe('TransactionTable', () => {
     describe('transaction row', () => {
         it('displays date', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.date')?.render;
+            const renderer = getTxColumn(component, 'transaction.date')!.render;
 
             expect(renderer(txModel)).toEqual(txModel.date);
         });
         it('displays reference number', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.referenceNumber')?.render;
+            const renderer = getTxColumn(component, 'transaction.referenceNumber')!.render;
 
             expect(renderer(txModel)).toEqual(txModel.referenceNumber);
         });
         it('displays payee', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.payee')?.render;
+            const renderer = getTxColumn(component, 'transaction.payee')!.render;
 
             expect(renderer(txModel)).toEqual(payee.name);
 
@@ -72,19 +72,19 @@ describe('TransactionTable', () => {
         });
         it('displays blank for no security', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.security').render;
+            const renderer = getTxColumn(component, 'transaction.security')!.render;
 
             expect(renderer(newTxModel())).toEqual('');
         });
         it('displays security', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.security').render;
+            const renderer = getTxColumn(component, 'transaction.security')!.render;
 
             expect(renderer(txModel)).toEqual(security.name);
         });
         it('displays memo', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.memo')?.render;
+            const renderer = getTxColumn(component, 'transaction.memo')!.render;
 
             expect(renderer(txModel)).toEqual(txModel.memo);
         });
@@ -108,7 +108,7 @@ describe('TransactionTable', () => {
         });
         it('displays cleared status', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getTxColumn(component, 'transaction.cleared')?.render;
+            const renderer = getTxColumn(component, 'transaction.cleared')!.render;
 
             expect(renderer(txModel)).toBeNull();
             expect(renderer({cleared: true})).toEqual(<span>&#x2713;</span>);
@@ -127,27 +127,27 @@ describe('TransactionTable', () => {
 
         it('displays blank for no group', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.group')?.render;
+            const renderer = getDetailColumn(component, 'detail.group')!.render;
 
             expect(renderer(newDetail())).toEqual(<span className='group'>{''}</span>);
         });
         it('displays group', () => {
             rootStore.groupStore['groupsById'].set(group.id, group);
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.group')?.render;
+            const renderer = getDetailColumn(component, 'detail.group')!.render;
 
             expect(renderer(detail)).toEqual(<span className='group'>{group.name}</span>);
         });
         it('displays blank for no category', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.category')?.render;
+            const renderer = getDetailColumn(component, 'detail.category')!.render;
 
             expect(renderer(newDetail())).toEqual(<span>{''}</span>);
         });
         it('displays category', () => {
             rootStore.categoryStore['categoriesById'].set(category.id, category);
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.category')?.render;
+            const renderer = getDetailColumn(component, 'detail.category')!.render;
 
             expect(renderer(detail)).toEqual(<span>{category.displayName}</span>);
         });
@@ -157,7 +157,7 @@ describe('TransactionTable', () => {
             const relatedDetail = {transaction: relatedTx};
             jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(relatedAccount);
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.category')?.render;
+            const renderer = getDetailColumn(component, 'detail.category')!.render;
 
             expect(renderer({relatedDetail})).toEqual(<span className='transfer'>{relatedAccount.name}</span>);
 
@@ -165,7 +165,7 @@ describe('TransactionTable', () => {
         });
         it('displays memo', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
-            const renderer = getDetailColumn(component, 'detail.memo')?.render;
+            const renderer = getDetailColumn(component, 'detail.memo')!.render;
 
             expect(renderer(detail)).toEqual(detail.memo);
         });
@@ -173,6 +173,7 @@ describe('TransactionTable', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
             const {render: renderer, ...rest} = getDetailColumn(component, 'detail.shares')!;
 
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             expect(renderer(detail)).toEqual(`${detail.assetQuantity}`);
             expect(renderer({})).toEqual('');
             const className = rest.className as (detail: Partial<ITransactionDetail>) => string;

@@ -1,19 +1,21 @@
 import React from 'react';
 
+const defaultRowHeight = 24;
+
 function getHeight(container: HTMLElement, selector: string) {
-    return container.querySelector(selector).getBoundingClientRect().height;
+    return container.querySelector(selector)?.getBoundingClientRect().height;
 }
 
 function getPageSize(container: HTMLElement, rowSelector: string) {
     const {height} = container.getBoundingClientRect();
-    const rowHeight = getHeight(container, rowSelector);
+    const rowHeight = getHeight(container, rowSelector) ?? defaultRowHeight;
     return Math.floor(height / rowHeight);
 }
 
 function ensureVisible(container: HTMLElement, row: number, rowSelector: string, headerSelector?: string) {
     const {clientHeight, scrollTop} = container;
-    const headerHeight = headerSelector ? getHeight(container, headerSelector) : 0;
-    const rowHeight = getHeight(container, rowSelector);
+    const headerHeight = headerSelector ? getHeight(container, headerSelector) ?? defaultRowHeight : 0;
+    const rowHeight = getHeight(container, rowSelector) ?? defaultRowHeight;
     const rowTop = row * rowHeight;
     if (rowTop < scrollTop) container.scrollTo({top: rowTop});
     else if (rowTop + rowHeight > scrollTop + clientHeight) container.scrollTo({top: rowTop + headerHeight - clientHeight + rowHeight});

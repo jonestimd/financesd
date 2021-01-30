@@ -30,7 +30,7 @@ export default class PayeeStore {
         return sortValuesByName(this.payeesById);
     }
 
-    getPayee(id: string | number): PayeeModel {
+    getPayee(id?: string | number): PayeeModel | undefined {
         return this.payeesById.get('' + id);
     }
 

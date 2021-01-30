@@ -3,7 +3,7 @@ import {shallow} from 'enzyme';
 import TransactionList from './TransactionList';
 import {RootStore} from 'src/lib/store/RootStore';
 import TransactionTableModel from 'src/lib/model/TransactionTableModel';
-import ListViewport from '../scroll/ListViewport';
+import ListViewport, {IProps} from '../scroll/ListViewport';
 import {newTxModel} from 'src/test/transactionFactory';
 import Memo from './Memo';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -11,8 +11,9 @@ import Payee from './Payee';
 import Security from './Security';
 import TxDetail from './TxDetail';
 import {newDetail} from 'src/test/detailFactory';
+import TransactionModel from 'src/lib/model/TransactionModel';
 
-type RenderItem = Parameters<typeof ListViewport>[0]['renderItem'];
+type RenderItem = IProps<TransactionModel>['renderItem'];
 
 describe('TransactionList', () => {
     const {categoryStore, transactionStore} = new RootStore();
@@ -49,7 +50,7 @@ describe('TransactionList', () => {
             renderItem = shallow(<TransactionList />).find(ListViewport).prop('renderItem');
         });
         it('displays transaction date, payee, memo, security, details and cleared', () => {
-            const tx = shallow(renderItem(txModel, undefined, false));
+            const tx = shallow(renderItem(txModel, -1, false) as React.ReactElement);
 
             expect(tx.find('.leading .date')).toHaveText(txModel.date);
             expect(tx.find(Payee)).toHaveProp('transaction', txModel);
@@ -63,21 +64,21 @@ describe('TransactionList', () => {
             expect(tx.find('.ref-number')).not.toExist();
         });
         it('highlights selected transaction', () => {
-            const tx = shallow(renderItem(newTxModel({categoryStore}), undefined, true));
+            const tx = shallow(renderItem(newTxModel({categoryStore}), -1, true) as React.ReactElement);
 
             expect(tx).toHaveClassName('selected');
         });
         it('displays checked checkbox for cleared transaction', () => {
-            const tx = shallow(renderItem(newTxModel({categoryStore, cleared: true}), undefined, true));
+            const tx = shallow(renderItem(newTxModel({categoryStore, cleared: true}), -1, true) as React.ReactElement);
 
             expect(tx.find('.trailing').find(Checkbox)).toHaveProp('checked', true);
         });
         it('displays reference number', () => {
             const referenceNumber = '555';
 
-            const tx = shallow(renderItem(newTxModel({referenceNumber, categoryStore}), undefined, true));
+            const tx = shallow(renderItem(newTxModel({referenceNumber, categoryStore}), -1, true) as React.ReactElement);
 
-            expect(tx.find('.ref-number')).toHaveText(txModel.referenceNumber);
+            expect(tx.find('.ref-number')).toHaveText(referenceNumber);
         });
     });
 });

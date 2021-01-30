@@ -30,7 +30,7 @@
             "args": [
                 "--runInBand",
                 "--coverage=false",
-                ""
+                "transactiontable"
             ]
         }
     ]

@@ -17,7 +17,15 @@ import (
 func Test_securitySchema_Fields(t *testing.T) {
 	symbol := "S1"
 	now := time.Now()
+	cost := float64(12.34)
+	dividends := float64(23.45)
 	security := &model.Security{
+		Type:             "Stock",
+		Shares:           96,
+		FirstAcquired:    &now,
+		CostBasis:        &cost,
+		Dividends:        &dividends,
+		TransactionCount: 69,
 		Asset: model.Asset{
 			ID:      1,
 			Name:    "the asset",

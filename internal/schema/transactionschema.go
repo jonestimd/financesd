@@ -32,7 +32,7 @@ func getTxSchemaConfig(name string) graphql.ObjectConfig {
 		Name:        name,
 		Fields: addAudit(graphql.Fields{
 			"id":              &graphql.Field{Type: graphql.ID},
-			"date":            &graphql.Field{Type: graphql.String},
+			"date":            &graphql.Field{Type: dateType},
 			"memo":            &graphql.Field{Type: graphql.String},
 			"referenceNumber": &graphql.Field{Type: graphql.String},
 			"cleared":         &graphql.Field{Type: yesNoType},

@@ -8,6 +8,7 @@ export function newSecurity(overrides: Partial<ISecurity> = {}): ISecurity {
         name: `Security ${nextId}`,
         type: 'Stock',
         scale: 6,
+        shares: 0,
         version: 1,
         transactionCount: 96,
         ...overrides,

@@ -29,8 +29,8 @@ export default class TransactionStore {
         this.rootStore = rootStore;
     }
 
-    getTransactionsModel(accountId: string): TransactionTableModel {
-        return this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
+    getTransactionsModel(accountId?: string): TransactionTableModel {
+        return accountId && this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
     }
 
     async loadTransactions(accountId: string): Promise<void> {

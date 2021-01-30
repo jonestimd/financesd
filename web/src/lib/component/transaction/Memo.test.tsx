@@ -4,7 +4,7 @@ import Memo from './Memo';
 
 describe('Memo', () => {
     it('returns null if no memo', () => {
-        expect(shallow(<Memo text={null} />)).toBeEmptyRender();
+        expect(shallow(<Memo />)).toBeEmptyRender();
     });
     it('displays memo', () => {
         const memo = 'the memo';

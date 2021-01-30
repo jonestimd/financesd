@@ -38,6 +38,18 @@ describe('formats', () => {
             expect(result).toHaveText('-$1.23');
         });
     });
+    describe('HideZero', () => {
+        it('does not display 0', () => {
+            const result = shallow(<formats.HideZero>{0}</formats.HideZero>);
+
+            expect(result).toBeEmptyRender();
+        });
+        it('displays non-zero value as currency', () => {
+            const result = shallow(<formats.HideZero>{0.01}</formats.HideZero>);
+
+            expect(result.find(formats.Currency)).toHaveProp('children', 0.01);
+        });
+    });
     describe('Shares', () => {
         it('displays children as asset quantity', () => {
             const result = shallow(<formats.Shares>{1.2345678}</formats.Shares>);

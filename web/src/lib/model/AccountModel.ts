@@ -25,11 +25,11 @@ export class AccountModel implements IAccount {
     }
 
     id: string;
-    companyId: number;
+    companyId?: number;
     type: string;
     name: string;
-    description: string;
-    accountNo: string;
+    description?: string;
+    accountNo?: string;
     closed: boolean;
     version: number;
     transactionCount: number;
@@ -37,7 +37,16 @@ export class AccountModel implements IAccount {
     company?: ICompany;
 
     constructor(account: IAccount, company?: ICompany) {
-        Object.assign(this, account);
+        this.id = account.id;
+        this.companyId = account.companyId;
+        this.type = account.type;
+        this.name = account.name;
+        this.description = account.description;
+        this.accountNo = account.accountNo;
+        this.closed = account.closed;
+        this.version = account.version;
+        this.transactionCount = account.transactionCount;
+        this.balance = account.balance;
         this.company = company;
     }
 

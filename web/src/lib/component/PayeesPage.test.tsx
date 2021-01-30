@@ -44,7 +44,7 @@ describe('PayeesPage', () => {
 
                 const column = columns.find((column) => column.key === `payee.${key}`);
 
-                expect(column.render(input)).toEqual(value);
+                expect(column!.render(input)).toEqual(value);
             });
         });
     });

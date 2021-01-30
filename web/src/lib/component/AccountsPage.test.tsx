@@ -46,7 +46,7 @@ describe('AccountsPage', () => {
 
                 const column = columns.find(({key}) => key === `account.${name}`);
 
-                expect(column.render(account)).toEqual(value);
+                expect(column?.render(account)).toEqual(value);
             });
         });
     });

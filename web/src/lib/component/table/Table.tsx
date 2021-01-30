@@ -28,8 +28,8 @@ export interface IRow {
     id: string;
 }
 
-function evalSupplier<T>(supplier: ClassSupplier<T>, row?: T): string {
-    return typeof supplier === 'function' ? supplier(row) : supplier;
+function evalSupplier<T>(supplier?: ClassSupplier<T>, row?: T): string {
+    return typeof supplier === 'function' ? supplier(row) : supplier ?? '';
 }
 
 function columnClasses<T>(columns: IColumn<T>[], selectedIndex = -1, row?: T): string[] {
@@ -45,7 +45,7 @@ interface IHeaderProps<T> {
     columns: IColumn<T>[];
 }
 
-export const HeaderRow: React.FC<IHeaderProps<unknown>> = ({className, columns}) => {
+export const HeaderRow = <T extends unknown>({className, columns}: IHeaderProps<T>) => {
     const classes = columnClasses(columns);
     return (
         <TableRow className={className}>

@@ -41,5 +41,9 @@
     "security.name": "Name",
     "security.type": "Type",
     "security.symbol": "Symbol",
-    "security.transactionCount": "TransactionCount"
+    "security.shares": "Shares",
+    "security.firstAcquired": "First Acquired",
+    "security.costBasis": "Cost Basis",
+    "security.dividends": "Dividends",
+    "security.transactionCount": "Transactions"
 }

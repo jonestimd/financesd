@@ -3,12 +3,17 @@ package model
 import (
 	"database/sql"
 	"reflect"
+	"time"
 )
 
 // Security represents an investment security.
 type Security struct {
 	AssetID          int64
 	Type             string
+	Shares           float64
+	FirstAcquired    *time.Time
+	CostBasis        *float64
+	Dividends        *float64
 	TransactionCount int64
 	Asset
 }
@@ -19,6 +24,14 @@ func (s *Security) ptrTo(column string) interface{} {
 		return &s.AssetID
 	case "security_type":
 		return &s.Type
+	case "shares":
+		return &s.Shares
+	case "first_acquired":
+		return &s.FirstAcquired
+	case "cost_basis":
+		return &s.CostBasis
+	case "dividends":
+		return &s.Dividends
 	case "transaction_count":
 		return &s.TransactionCount
 	}
@@ -27,10 +40,31 @@ func (s *Security) ptrTo(column string) interface{} {
 
 var securityType = reflect.TypeOf(Security{})
 
+const securitySummarySQL = `select t.security_id, count(distinct t.id) transaction_count
+	, sum(coalesce(adjust_shares(t.security_id, t.date, td.asset_quantity), 0)) shares
+	, min(t.date) first_acquired
+	, sum(case when td.asset_quantity > 0
+		then abs(td.amount)*(td.asset_quantity-coalesce(sl.purchase_shares,0))/td.asset_quantity
+		else 0 end) cost_basis
+	, sum(case when td.asset_quantity is null and td.amount > 0 then td.amount else 0 end) dividends
+from tx t
+join tx_detail td on t.id = td.tx_id
+left join (
+	select purchase_tx_detail_id, sum(purchase_shares) purchase_shares from security_lot
+	group by purchase_tx_detail_id
+) sl on td.id = sl.purchase_tx_detail_id
+where t.security_id is not null`
+
 const securitySQL = `select s.type security_type, a.*,
-	(select count(t.id) from transaction t where t.security_id = a.id) transaction_count
+	coalesce(summary.transaction_count, 0) transaction_count,
+	coalesce(summary.shares, 0) shares,
+	summary.first_acquired, summary.cost_basis, summary.dividends
 from security s
-join asset a on s.asset_id = a.id`
+join asset a on s.asset_id = a.id
+left join (
+	` + securitySummarySQL + `
+	group by t.security_id
+) summary on summary.security_id = a.id`
 
 // GetAllSecurities loads all securities.
 func GetAllSecurities(tx *sql.Tx) ([]*Security, error) {

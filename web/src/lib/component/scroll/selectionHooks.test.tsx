@@ -43,7 +43,7 @@ describe('selectionHooks', () => {
             const container = createDiv();
             const row = createDiv();
             const header = createDiv();
-            const children = {
+            const children: Record<string, Element> = {
                 [rowSelector]: row,
                 [headerSelector]: header,
             };
@@ -68,7 +68,7 @@ describe('selectionHooks', () => {
                 setup(options);
                 const event = mockKeyEvent('', false);
 
-                hook.onKeyDown(event);
+                hook.onKeyDown!(event);
 
                 expect(event.stopPropagation).toBeCalledTimes(1);
                 expect(event.preventDefault).not.toBeCalled();
@@ -82,7 +82,7 @@ describe('selectionHooks', () => {
                 setup({...options, headerSelector, initialRow});
                 const event = mockKeyEvent('PageUp', false);
 
-                hook.onKeyDown(event);
+                hook.onKeyDown!(event);
 
                 expect(container.scrollTo).toBeCalledWith({top: (initialRow - pageSize) * rowHeight});
             });
@@ -92,7 +92,7 @@ describe('selectionHooks', () => {
                 setup({...options, headerSelector, initialRow});
                 const event = mockKeyEvent('PageDown', false);
 
-                hook.onKeyDown(event);
+                hook.onKeyDown!(event);
 
                 const finalRow = initialRow + pageSize;
                 expect(container.scrollTo).toBeCalledWith({top: finalRow * rowHeight + headerHeight - containerHeight + rowHeight});
@@ -116,7 +116,7 @@ describe('selectionHooks', () => {
                     setup({...options, initialRow});
                     const event = mockKeyEvent(key, ctrl);
 
-                    hook.onKeyDown(event);
+                    hook.onKeyDown!(event);
 
                     expect(hook.row).toEqual(expectedRow);
                     expect(event.preventDefault).toBeCalled();
@@ -136,10 +136,10 @@ describe('selectionHooks', () => {
             columnTests.forEach(({name, initialColumn, key, ctrl, expectedColumn}) =>
                 it(name, () => {
                     setup(options);
-                    for (let index = 0; index < initialColumn; index++) hook.onKeyDown(mockKeyEvent('ArrowRight', false));
+                    for (let index = 0; index < initialColumn; index++) hook.onKeyDown!(mockKeyEvent('ArrowRight', false));
                     const event = mockKeyEvent(key, ctrl);
 
-                    hook.onKeyDown(event);
+                    hook.onKeyDown!(event);
 
                     expect(hook.column).toEqual(expectedColumn);
                 })
@@ -149,7 +149,7 @@ describe('selectionHooks', () => {
             const container = document.createElement('div');
             const rows = new Array(50).fill(null).map(() => container.appendChild(document.createElement('div')));
 
-            const mockMouseEvent = (target: HTMLElement, clientY = -1) => ({
+            const mockMouseEvent = (target: HTMLElement | null, clientY = -1) => ({
                 target,
                 currentTarget: container,
                 clientY,
@@ -171,10 +171,10 @@ describe('selectionHooks', () => {
                 });
                 it('selects row and column', () => {
                     const column = columns - 2;
-                    cells.forEach((cell) => delete cell.colSpan);
+                    cells.forEach((cell) => cell.colSpan = 1);
                     setup(options);
 
-                    hook.onMouseDown(mockMouseEvent(cells[column]));
+                    hook.onMouseDown!(mockMouseEvent(cells[column]));
 
                     expect(hook.row).toEqual(rowIndex);
                     expect(hook.column).toEqual(column);
@@ -183,7 +183,7 @@ describe('selectionHooks', () => {
                     Object.defineProperty(cells[1], 'colSpan', {value: 2});
                     setup(options);
 
-                    hook.onMouseDown(mockMouseEvent(cells[2]));
+                    hook.onMouseDown!(mockMouseEvent(cells[2]));
 
                     expect(hook.row).toEqual(rowIndex);
                     expect(hook.column).toEqual(3);
@@ -199,7 +199,7 @@ describe('selectionHooks', () => {
                 it('selects row at click', () => {
                     setup(options);
 
-                    hook.onMouseDown(mockMouseEvent(null, rowHeight * 4.1));
+                    hook.onMouseDown!(mockMouseEvent(null, rowHeight * 4.1));
 
                     expect(hook.row).toEqual(4);
                 });
@@ -207,7 +207,7 @@ describe('selectionHooks', () => {
                     const initialRow = 5;
                     setup({...options, initialRow});
 
-                    hook.onMouseDown(mockMouseEvent(null, rowHeight * (rows.length + 1)));
+                    hook.onMouseDown!(mockMouseEvent(null, rowHeight * (rows.length + 1)));
 
                     expect(hook.row).toEqual(initialRow);
                 });

@@ -55,7 +55,7 @@ describe('CategoriesPage', () => {
 
                 const column = columns.find((column) => column.key === `category.${key}`);
 
-                expect(column.render(input)).toEqual(value);
+                expect(column?.render(input)).toEqual(value);
             });
         });
     });

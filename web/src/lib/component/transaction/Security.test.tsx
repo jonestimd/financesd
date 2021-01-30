@@ -6,16 +6,18 @@ import SecurityStore from 'src/lib/store/SecurityStore';
 import {SecurityModel} from 'src/lib/model/SecurityModel';
 import Security from './Security';
 import {newTx} from 'src/test/transactionFactory';
+import CategoryStore from 'src/lib/store/CategoryStore';
 
 describe('Security', () => {
     const messageStore = new MessageStore();
     const securityStore = new SecurityStore(messageStore);
+    const categoryStore = new CategoryStore(messageStore);
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({securityStore});
     });
     it('returns null if no security', () => {
-        const tx = new TransactionModel(newTx(), null);
+        const tx = new TransactionModel(newTx(), categoryStore);
 
         const component = shallow(<Security transaction={tx} />);
 
@@ -25,7 +27,7 @@ describe('Security', () => {
         const securityId = 123;
         const name = 'the security';
         jest.spyOn(securityStore, 'getSecurity').mockReturnValue({name} as SecurityModel);
-        const tx = new TransactionModel(newTx({securityId}), null);
+        const tx = new TransactionModel(newTx({securityId}), categoryStore);
 
         const component = shallow(<Security transaction={tx} />);
 

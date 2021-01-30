@@ -5,7 +5,11 @@ import {IMessageStore} from './MessageStore';
 import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
-export const query = '{securities {id name type scale symbol type version transactionCount}}';
+export const query = `{
+    securities {
+        id name type scale symbol type version transactionCount shares firstAcquired costBasis dividends
+    }
+}`;
 
 type SecurityResponse = agent.IGraphqlResponse<{securities: ISecurity[]}>;
 
@@ -31,7 +35,7 @@ export default class SecurityStore {
         return sortValuesByName(this.securitiesById);
     }
 
-    getSecurity(id: string | number): SecurityModel {
+    getSecurity(id?: string | number): SecurityModel | undefined {
         return this.securitiesById.get('' + id);
     }
 

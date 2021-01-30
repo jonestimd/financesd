@@ -8,7 +8,7 @@ export interface IScrollOptions {
     defaultHeaderHeight?: number;
 }
 
-const getHeight = (list: HTMLElement, itemSelector: string, defaultHeight: number) => {
+const getHeight = (list: HTMLElement | null, itemSelector: string, defaultHeight: number) => {
     return list?.querySelector(itemSelector)?.getBoundingClientRect().height ?? defaultHeight;
 };
 
@@ -19,9 +19,9 @@ export const defaultOverscan = 0.25;
 export function useScroll<T extends HTMLElement>(options: IScrollOptions) {
     const {overscan = defaultOverscan, defaultRowHeight = 24, prototypeSelector = '*', headerSelector, defaultHeaderHeight} = options;
     const [startRow, setStartRow] = React.useState(0);
-    const listRef = React.useRef<T>(null);
+    const listRef = React.useRef<T | null>(null);
     const rowHeight = getHeight(listRef.current, prototypeSelector, defaultRowHeight);
-    const headerHeight = headerSelector ? getHeight(listRef.current, headerSelector, defaultHeaderHeight) : 0;
+    const headerHeight = headerSelector ? getHeight(listRef.current, headerSelector, defaultHeaderHeight ?? defaultRowHeight) : 0;
     return {
         startRow, listRef, rowHeight, headerHeight,
         endRow: (scrollHeight: number) => startRow + Math.ceil(scrollHeight / rowHeight * (1 + 2 * overscan)),

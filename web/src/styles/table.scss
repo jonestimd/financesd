@@ -18,6 +18,7 @@ table.table {
             color: $mdc-theme-on-secondary;
             background: $mdc-theme-secondary;
             position: sticky;
+            white-space: nowrap;
         }
         tr:nth-child(1) th {
             top: 0;
@@ -71,6 +72,8 @@ table.table {
         }
     }
 
+    td.security,
+    td.enum,
     td.date {
         white-space: nowrap;
     }

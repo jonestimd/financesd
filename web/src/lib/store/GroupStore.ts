@@ -28,7 +28,7 @@ export default class GroupStore {
         return sortValuesByName(this.groupsById);
     }
 
-    getGroup(id: string | number): GroupModel | undefined {
+    getGroup(id?: string | number): GroupModel | undefined {
         return this.groupsById.get('' + id);
     }
 

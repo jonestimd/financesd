@@ -3,6 +3,7 @@ import CategoryStore from '../store/CategoryStore';
 import {computed, makeObservable, observable} from 'mobx';
 import IMixedRowTableModel from './IMixedRowTableModel';
 import sortedIndex from 'lodash/sortedIndex';
+import MessageStore from '../store/MessageStore';
 
 export default class TransactionTableModel implements IMixedRowTableModel<TransactionModel> {
     @observable
@@ -45,4 +46,4 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
     }
 }
 
-TransactionTableModel.EMPTY = new TransactionTableModel([], null);
+TransactionTableModel.EMPTY = new TransactionTableModel([], new CategoryStore(new MessageStore()));

@@ -37,7 +37,7 @@ describe('ScrollViewport', () => {
         jest.spyOn(React, 'useRef').mockReturnValue(ref);
         shallow(<ScrollViewport>{capture.setHeight}</ScrollViewport>);
 
-        window.onresize(null);
+        window.onresize!({} as UIEvent);
 
         expect(capture.height).toEqual(150);
     });

@@ -45,7 +45,7 @@ describe('GroupsPage', () => {
 
                 const column = columns.find((column) => column.key === `group.${key}`);
 
-                expect(column.render(input)).toEqual(value);
+                expect(column?.render(input)).toEqual(value);
             });
         });
     });

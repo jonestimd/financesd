@@ -6,7 +6,7 @@ import {observer} from 'mobx-react-lite';
 const Payee: React.FC<{transaction: TransactionModel}> = observer(({transaction: {payeeId}}) => {
     if (payeeId) {
         const {payeeStore} = React.useContext(RootStoreContext);
-        return <span className='payee chip'><i className='material-icons md-18'>person</i>{payeeStore.getPayee(payeeId).name}</span>;
+        return <span className='payee chip'><i className='material-icons md-18'>person</i>{payeeStore.getPayee(payeeId)?.name}</span>;
     }
     return null;
 });

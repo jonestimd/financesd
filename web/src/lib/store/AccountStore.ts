@@ -39,7 +39,7 @@ export default class AccountStore {
         return sortValuesByName(this.companiesById);
     }
 
-    getAccount(id: string | number) {
+    getAccount(id?: string | number) {
         return this.accountsById.get('' + id);
     }
 

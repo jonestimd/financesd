@@ -9,7 +9,7 @@ export function mockScrollHook(overrides: Partial<ScrollHook> = {}) {
         startRow: 0,
         rowHeight: 0,
         headerHeight: 0,
-        listRef: {current: null} as React.MutableRefObject<HTMLElement>,
+        listRef: {current: null} as unknown as React.MutableRefObject<HTMLElement>,
         endRow: jest.fn<number, [number]>(),
         onScroll: jest.fn<void, [React.UIEvent<HTMLElement>]>(),
         ...overrides,

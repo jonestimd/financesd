@@ -1,10 +1,14 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "strict": true,
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "useDefineForClassFields": true,
-        "lib": ["esnext", "dom"],
+        "lib": [
+            "esnext",
+            "dom"
+        ],
         "allowJs": true,
         "jsx": "preserve",
         "moduleResolution": "node",

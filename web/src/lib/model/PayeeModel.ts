@@ -12,6 +12,9 @@ export class PayeeModel implements IPayee {
     transactionCount: number;
 
     constructor(payee: IPayee) {
-        Object.assign(this, payee);
+        this.id = payee.id;
+        this.name = payee.name;
+        this.version = payee.version;
+        this.transactionCount = payee.transactionCount;
     }
 }

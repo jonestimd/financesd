@@ -16,7 +16,7 @@ const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactio
         </span>;
     }
     if (transactionCategoryId) {
-        return <span className='category'>{categoryStore.getCategory(transactionCategoryId).displayName}</span>;
+        return <span className='category'>{categoryStore.getCategory(transactionCategoryId)?.displayName}</span>;
     }
     return null;
 });

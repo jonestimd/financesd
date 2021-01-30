@@ -42,20 +42,27 @@ export default class TransactionModel implements ITransaction {
 
     id: string;
     date: string;
-    referenceNumber: string;
-    payeeId: number;
-    securityId: number;
-    memo: string;
+    referenceNumber?: string;
+    payeeId?: number;
+    securityId?: number;
+    memo?: string;
     cleared: boolean;
     @observable
     details: ITransactionDetail[];
     @observable
-    balance: number;
+    balance = 0;
     categoryStore: CategoryStore;
 
     constructor(transaction: ITransaction, categoryStore: CategoryStore) {
         makeObservable(this);
-        Object.assign(this, transaction);
+        this.id = transaction.id;
+        this.date = transaction.date;
+        this.referenceNumber = transaction.referenceNumber;
+        this.payeeId = transaction.payeeId;
+        this.securityId = transaction.securityId;
+        this.memo = transaction.memo;
+        this.cleared = transaction.cleared;
+        this.details = transaction.details;
         this.categoryStore = categoryStore;
     }
 
@@ -65,6 +72,6 @@ export default class TransactionModel implements ITransaction {
     }
 
     private isAssetValue({transactionCategoryId}: ITransactionDetail): boolean {
-        return typeof transactionCategoryId === 'number' && this.categoryStore.getCategory(transactionCategoryId).isAssetValue;
+        return this.categoryStore.getCategory(transactionCategoryId)?.isAssetValue ?? false;
     }
 }

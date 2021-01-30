@@ -4,7 +4,7 @@ import ScrollViewport, {IScrollableProps} from './ScrollViewport';
 import {useScroll} from './scrollHooks';
 import {useSelection} from './selectionHooks';
 
-interface IProps<T> {
+export interface IProps<T> {
     className?: string;
     defaultRowHeight?: number;
     rowSelector: string;

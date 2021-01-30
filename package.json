@@ -9,7 +9,7 @@
     "build:dev": "rm -fr web/dist && mkdir -p web/dist && webpack -w",
     "pretest": "eslint --ext .ts,.tsx web",
     "test": "jest web/src",
-    "test:api": "go test --coverprofile cover.out ./internal/... && npm run go:coverage",
+    "test:api": "go test --coverprofile cover.out ./cmd/... ./internal/... && npm run go:coverage",
     "go:coverage": "go tool cover -html=cover.out -o coverage/go-coverage.html",
     "publish": "echo 'not intended for publishing' && exit 1"
   },
@@ -73,7 +73,9 @@
     ],
     "clearMocks": true,
     "collectCoverage": true,
-    "collectCoverageFrom": ["<rootDir>/web/src/lib/**/*.{ts,tsx}"],
+    "collectCoverageFrom": [
+      "<rootDir>/web/src/lib/**/*.{ts,tsx}"
+    ],
     "coverageDirectory": "coverage",
     "coverageProvider": "babel",
     "testEnvironment": "jsdom",

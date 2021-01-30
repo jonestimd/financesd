@@ -5,7 +5,7 @@ import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
 import {LoadResult} from './interfaces';
 
-export const query = `query($accountId: ID) {
+export const query = `query($accountId: ID!) {
     transactions(accountId: $accountId) {
         id date referenceNumber payeeId securityId memo cleared
         details {

@@ -18,10 +18,18 @@ import (
 	"github.com/felixge/httpsnoop"
 	"github.com/go-akka/configuration"
 	_ "github.com/go-sql-driver/mysql" // register the driver
-	gql "github.com/graphql-go/graphql"
+	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	"github.com/jonestimd/financesd/internal/graphql"
+	"github.com/jonestimd/financesd/internal/schema"
 )
+
+var httpHandle = http.Handle
+var httpListenAndServe = http.ListenAndServe
+var logAndQuit = log.Fatal
+var sqlOpen = sql.Open
+var newSchema = schema.New
+var getwd = os.Getwd
+var newHandler = handler.New
 
 func main() {
 	config := configuration.LoadConfig(fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME")))
@@ -30,34 +38,34 @@ func main() {
 	password := config.GetString("connection.default.password")
 	host := config.GetString("connection.default.host")
 	schema := config.GetString("connection.default.schema")
-	db, err := sql.Open(driver, fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, host, schema))
+	db, err := sqlOpen(driver, fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", user, password, host, schema))
 	if err != nil {
-		log.Fatal(err)
+		logAndQuit(err)
 	}
 	defer db.Close()
 	db.SetConnMaxLifetime(config.GetTimeDuration("connection.maxLifetime", 0))
 	db.SetMaxIdleConns(int(config.GetInt32("connection.maxIdleConnections", 10)))
 	db.SetMaxOpenConns(int(config.GetInt32("connection.maxOpenConnections", 10)))
 	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		logAndQuit(err)
 	}
 
-	graphqlSchema, err := graphql.Schema()
+	graphqlSchema, err := newSchema()
 	if err != nil {
-		log.Fatal(err)
+		logAndQuit(err)
 	}
-	gqlHandler := handler.New(&handler.Config{
+	gqlHandler := newHandler(&handler.Config{
 		Schema:           &graphqlSchema,
 		Pretty:           false,
 		GraphiQL:         true,
 		ResultCallbackFn: resultCallback,
 	})
-	if cwd, err := os.Getwd(); err != nil {
-		log.Fatal("can't get current directory")
+	if cwd, err := getwd(); err != nil {
+		logAndQuit("can't get current directory")
 	} else {
-		http.Handle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: gqlHandler})
-		http.Handle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
-		http.Handle("/finances/", loadHTML(cwd, config))
+		httpHandle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: gqlHandler})
+		httpHandle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
+		httpHandle("/finances/", loadHTML(cwd, config))
 		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
 			log.Printf("%d %-5s %s %s %d %v %s\n", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
@@ -66,7 +74,7 @@ func main() {
 		host := config.GetString("listen.host", "localhost")
 		port := config.GetInt32("listen.port", 8080)
 		log.Printf("Listening at %s:%d/finances\n", host, port)
-		log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), router))
+		logAndQuit(httpListenAndServe(fmt.Sprintf("%s:%d", host, port), router))
 	}
 }
 
@@ -79,7 +87,7 @@ type reqContextKey string
 
 const hasErrorKey = reqContextKey("hasError")
 
-func resultCallback(ctx context.Context, params *gql.Params, result *gql.Result, responseBody []byte) {
+func resultCallback(ctx context.Context, params *graphql.Params, result *graphql.Result, responseBody []byte) {
 	hasError := ctx.Value(hasErrorKey).(*bool)
 	*hasError = result.HasErrors()
 }
@@ -97,7 +105,7 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}()
 		var hasError bool
-		ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
+		ctx := context.WithValue(r.Context(), schema.DbContextKey, tx)
 		ctx = context.WithValue(ctx, hasErrorKey, &hasError)
 		h.handler.ServeHTTP(w, r.WithContext(ctx))
 		// end transaction
@@ -119,7 +127,7 @@ type staticHTML struct {
 	content string
 }
 
-func loadHTML(cwd string, config *configuration.Config) *staticHTML {
+var loadHTML = func(cwd string, config *configuration.Config) *staticHTML {
 	file := filepath.Join(cwd, "web", "resources", "index.html")
 	stat, err := os.Stat(file)
 	if err != nil {

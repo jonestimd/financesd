@@ -1,4 +1,4 @@
-package graphql
+package schema
 
 import (
 	"database/sql"
@@ -11,17 +11,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_groupQueryFields_Resolve(t *testing.T) {
+func Test_categoryQueryFields_Resolve(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		groups := []*model.Group{{ID: 42}}
-		getAll := mocka.Function(t, &getAllGroups, groups, nil)
+		categories := []*model.Category{{ID: 42}}
+		getAll := mocka.Function(t, &getAllCategories, categories, nil)
 		defer getAll.Restore()
-		params := newResolveParams(tx, groupQuery, newField("", "id"), newField("", "name"))
+		params := newResolveParams(tx, categoryQuery, newField("", "id"), newField("", "code"))
 
-		result, err := groupQueryFields.Resolve(params.ResolveParams)
+		result, err := categoryQueryFields.Resolve(params.ResolveParams)
 
 		assert.Nil(t, err)
-		assert.Equal(t, groups, result)
+		assert.Equal(t, categories, result)
 		assert.Equal(t, []interface{}{tx}, getAll.GetFirstCall().Arguments())
 	})
 }

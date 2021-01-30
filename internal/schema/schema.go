@@ -1,4 +1,4 @@
-package graphql
+package schema
 
 import (
 	"github.com/graphql-go/graphql"
@@ -23,8 +23,8 @@ var queries = graphql.Fields{
 	transactionQuery: transactionQueryFields,
 }
 
-// Schema creates the root GraphQL schema.
-func Schema() (graphql.Schema, error) {
+// New creates the root GraphQL schema.
+func New() (graphql.Schema, error) {
 	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: queries}
 	schemaConfig := graphql.SchemaConfig{Query: graphql.NewObject(rootQuery)}
 	return graphql.NewSchema(schemaConfig)

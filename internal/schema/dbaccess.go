@@ -1,4 +1,4 @@
-package graphql
+package schema
 
 import "github.com/jonestimd/financesd/internal/model"
 

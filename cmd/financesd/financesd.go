@@ -18,16 +18,16 @@ import (
 	"github.com/felixge/httpsnoop"
 	"github.com/go-akka/configuration"
 	_ "github.com/go-sql-driver/mysql" // register the driver
-	gql "github.com/graphql-go/graphql"
+	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
-	"github.com/jonestimd/financesd/internal/graphql"
+	"github.com/jonestimd/financesd/internal/schema"
 )
 
 var httpHandle = http.Handle
 var httpListenAndServe = http.ListenAndServe
 var logAndQuit = log.Fatal
 var sqlOpen = sql.Open
-var getSchema = graphql.Schema
+var newSchema = schema.New
 var getwd = os.Getwd
 var newHandler = handler.New
 
@@ -50,7 +50,7 @@ func main() {
 		logAndQuit(err)
 	}
 
-	graphqlSchema, err := getSchema()
+	graphqlSchema, err := newSchema()
 	if err != nil {
 		logAndQuit(err)
 	}
@@ -87,7 +87,7 @@ type reqContextKey string
 
 const hasErrorKey = reqContextKey("hasError")
 
-func resultCallback(ctx context.Context, params *gql.Params, result *gql.Result, responseBody []byte) {
+func resultCallback(ctx context.Context, params *graphql.Params, result *graphql.Result, responseBody []byte) {
 	hasError := ctx.Value(hasErrorKey).(*bool)
 	*hasError = result.HasErrors()
 }
@@ -105,7 +105,7 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 		}()
 		var hasError bool
-		ctx := context.WithValue(r.Context(), graphql.DbContextKey, tx)
+		ctx := context.WithValue(r.Context(), schema.DbContextKey, tx)
 		ctx = context.WithValue(ctx, hasErrorKey, &hasError)
 		h.handler.ServeHTTP(w, r.WithContext(ctx))
 		// end transaction

@@ -9,7 +9,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	gql "github.com/graphql-go/graphql"
+	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
 	"github.com/graphql-go/handler"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +20,7 @@ type mockDependencies struct {
 	mockDB             sqlmock.Sqlmock
 	staticHTML         *staticHTML
 	sqlOpen            *mocka.Stub
-	getSchema          *mocka.Stub
+	newSchema          *mocka.Stub
 	getwd              *mocka.Stub
 	httpHandle         *mocka.Stub
 	httpListenAndServe *mocka.Stub
@@ -35,7 +35,7 @@ func (m *mockDependencies) restore(t *testing.T, panicMessage string, verify fun
 	}
 	m.db.Close()
 	m.sqlOpen.Restore()
-	m.getSchema.Restore()
+	m.newSchema.Restore()
 	m.getwd.Restore()
 	m.httpHandle.Restore()
 	m.httpListenAndServe.Restore()
@@ -57,7 +57,7 @@ func makeMocks(t *testing.T) *mockDependencies {
 		mockDB:             mock,
 		staticHTML:         staticHTMLValue,
 		sqlOpen:            mocka.Function(t, &sqlOpen, db, nil),
-		getSchema:          mocka.Function(t, &getSchema, gql.Schema{}, nil),
+		newSchema:          mocka.Function(t, &newSchema, graphql.Schema{}, nil),
 		getwd:              mocka.Function(t, &getwd, "/here", nil),
 		httpHandle:         mocka.Function(t, &httpHandle),
 		httpListenAndServe: mocka.Function(t, &httpListenAndServe, errors.New("stopped server")),
@@ -123,7 +123,7 @@ func Test_main_quitsOnSchemaError(t *testing.T) {
 	mocks := makeMocks(t)
 	mocks.mockDB.ExpectPing()
 	expectedErr := errors.New("schema error")
-	mocks.getSchema.OnFirstCall().Return(gql.Schema{}, expectedErr)
+	mocks.newSchema.OnFirstCall().Return(graphql.Schema{}, expectedErr)
 	defer mocks.restore(t, "log.Fatal", func() {
 		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 		assert.Equal(t, []interface{}{expectedErr}, mocks.exitMessage)
@@ -159,10 +159,10 @@ func Test_resultCallback(t *testing.T) {
 		var hasError bool
 		ctx := context.WithValue(context.TODO(), hasErrorKey, &hasError)
 
-		callback(ctx, nil, &gql.Result{}, nil)
+		callback(ctx, nil, &graphql.Result{}, nil)
 		assert.Equal(t, false, hasError)
 
-		callback(ctx, nil, &gql.Result{Errors: []gqlerrors.FormattedError{{}}}, nil)
+		callback(ctx, nil, &graphql.Result{Errors: []gqlerrors.FormattedError{{}}}, nil)
 		assert.Equal(t, true, hasError)
 	})
 	main()

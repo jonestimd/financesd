@@ -1,4 +1,4 @@
-package graphql
+package schema
 
 import (
 	"context"
@@ -57,7 +57,7 @@ type resolveParamsBuilder struct {
 }
 
 func newResolveInfo(queryName string, querySelection ...ast.Selection) graphql.ResolveInfo {
-	schema, _ := Schema()
+	schema, _ := New()
 	queryKey := "the query"
 	selections := []ast.Selection{
 		newField(queryKey, queryName, querySelection...),

@@ -7,6 +7,7 @@ import {translate} from '../i18n/localize';
 const menuItems = [
     ['menu.accounts', '/finances/'],
     ['menu.categories', '/finances/categories'],
+    ['menu.groups', '/finances/groups'],
     ['menu.payees', '/finances/payees'],
     ['menu.securities', '/finances/securities'],
 ];

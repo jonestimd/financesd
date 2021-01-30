@@ -3,6 +3,7 @@ export interface IGroup {
     name: string;
     description?: string;
     version: number;
+    transactionCount: number;
 }
 
 export class GroupModel implements IGroup {
@@ -10,6 +11,7 @@ export class GroupModel implements IGroup {
     name: string;
     description?: string;
     version: number;
+    transactionCount: number;
 
     constructor(group: IGroup) {
         Object.assign(this, group);

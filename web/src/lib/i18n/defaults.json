@@ -1,6 +1,7 @@
 {
     "menu.accounts": "Accounts",
     "menu.categories": "Categories",
+    "menu.groups": "Groups",
     "menu.payees": "Payees",
     "menu.securities": "Securities",
     "account.company": "Company",
@@ -32,6 +33,9 @@
     "category.security": "Security",
     "category.income": "Income",
     "category.transactionCount": "Transactions",
+    "group.name": "Name",
+    "group.description": "Description",
+    "group.transactionCount": "Transactions",
     "payee.name": "Name",
     "payee.transactionCount": "Transactions",
     "security.name": "Name",

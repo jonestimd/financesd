@@ -6,7 +6,7 @@ import {computed, flow, makeObservable, ObservableMap} from 'mobx';
 import {LoadResult} from './interfaces';
 
 export const query = `{
-    groups {id name description version}
+    groups {id name description version transactionCount}
 }`;
 
 type GroupsResponse = agent.IGraphqlResponse<{groups: IGroup[]}>;

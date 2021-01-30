@@ -17,6 +17,7 @@ import TransactionsPage from './transaction/TransactionsPage';
 import CategoriesPage from './CategoriesPage';
 import PayeesPage from './PayeesPage';
 import SecuritiesPage from './SecuritiesPage';
+import GroupsPage from './GroupsPage';
 
 jest.mock('../store/RootStore');
 
@@ -82,12 +83,13 @@ describe('main', () => {
                 expect(component.find(ProgressMessage)).toExist();
                 expect(component.find(Router)).toHaveProp('history', browserHistory);
                 const routes = component.find(Route);
-                expect(routes).toHaveLength(6);
+                expect(routes).toHaveLength(7);
                 expect(routes.at(0)).toHaveProps({exact: true, path: '/finances', component: AccountsPage});
                 expect(routes.at(1)).toHaveProps({exact: true, path: '/finances/account/:accountId', component: TransactionsPage});
                 expect(routes.at(2)).toHaveProps({exact: true, path: '/finances/categories', component: CategoriesPage});
                 expect(routes.at(3)).toHaveProps({exact: true, path: '/finances/payees', component: PayeesPage});
                 expect(routes.at(4)).toHaveProps({exact: true, path: '/finances/securities', component: SecuritiesPage});
+                expect(routes.at(5)).toHaveProps({exact: true, path: '/finances/groups', component: GroupsPage});
             });
         });
     });

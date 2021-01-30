@@ -12,12 +12,14 @@ describe('PageMenu', () => {
         expect(items.map((item) => item.find(Link).prop('to'))).toEqual([
             '/finances/',
             '/finances/categories',
+            '/finances/groups',
             '/finances/payees',
             '/finances/securities',
         ]);
         expect(items.map((item) => item.find(Link).text())).toEqual([
             'Accounts',
             'Categories',
+            'Groups',
             'Payees',
             'Securities',
         ]);
@@ -28,11 +30,13 @@ describe('PageMenu', () => {
         const items = component.find(MenuItem);
         expect(items.map((item) => item.find(Link).prop('to'))).toEqual([
             '/finances/',
+            '/finances/groups',
             '/finances/payees',
             '/finances/securities',
         ]);
         expect(items.map((item) => item.find(Link).text())).toEqual([
             'Accounts',
+            'Groups',
             'Payees',
             'Securities',
         ]);

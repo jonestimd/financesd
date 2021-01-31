@@ -28,12 +28,31 @@ body {
         h6.MuiTypography-root {
             flex-grow: 1;
         }
-        .MuiToggleButton-root {
+        .MuiInputBase-root,
+        .MuiButtonBase-root {
             color: inherit;
+        }
+        .MuiAutocomplete-root {
+            flex-grow: 1;
+        }
+        .MuiButtonBase-root {
             &.Mui-selected {
                 background-color: rgba($color: #000000, $alpha: 0.25);
             }
         }
+    }
+}
+
+#accounts-menu {
+    .MuiAutocomplete-option {
+        padding: 0 16px;
+    }
+    .MuiListSubheader-root {
+        line-height: unset;
+    }
+    .MuiListSubheader-gutters {
+        padding-left: 0;
+        padding-right: 0;
     }
 }
 

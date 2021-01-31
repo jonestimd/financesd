@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Menu from '@material-ui/core/Menu';
 
 export interface ITopAppBarProps {
-    title: string;
+    title?: string;
     menuItems: React.ReactNode;
     children?: React.ReactNode;
 }
@@ -21,7 +21,7 @@ const TopAppBar: React.FC<ITopAppBarProps> = ({title, menuItems, children}) => {
         <AppBar position='fixed'>
             <Toolbar variant='dense' disableGutters>
                 <IconButton onClick={toggleMenu} color='inherit'><Icon>menu</Icon></IconButton>
-                <Typography variant='h6'>{title}</Typography>
+                {title ? <Typography variant='h6'>{title}</Typography> : null}
                 {children}
             </Toolbar>
             <div ref={menuAnchor} className='mdc-menu-surface--anchor' />

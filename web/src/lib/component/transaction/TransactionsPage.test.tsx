@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {ChangeEvent} from 'react';
 import {shallow} from 'enzyme';
+import {History} from 'history';
 import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel} from 'src/test/accountFactory';
+import {newAccountModel, newCompany} from 'src/test/accountFactory';
 import TransactionsPage from './TransactionsPage';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
@@ -9,12 +10,22 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import TopAppBar from '../TopAppBar';
 import {mockUseEffect} from 'src/test/mockHooks';
+import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
+import {AccountModel} from 'src/lib/model/AccountModel';
+import {TextField} from '@material-ui/core';
 
 const accountId = '123';
+const history = {push: jest.fn()} as unknown as History;
+
+jest.mock('react-router', () => ({
+    ...jest.requireActual('react-router'),
+    useHistory: () => history,
+// eslint-disable-next-line @typescript-eslint/ban-types
+} as object));
 
 describe('TransactionsPage', () => {
     const {accountStore, transactionStore} = new RootStore();
-    const account = newAccountModel();
+    const account = newAccountModel({}, newCompany());
     const props = {
         match: {params: {accountId}},
     };
@@ -31,10 +42,52 @@ describe('TransactionsPage', () => {
         expect(transactionStore.loadTransactions).toBeCalledWith(accountId);
         expect(accountStore.getAccount).toBeCalledWith(accountId);
     });
-    it('displays account name in app bar', () => {
-        const component = shallow(<TransactionsPage {...props} />);
+    describe('account input', () => {
+        it('displays account name', () => {
+            const component = shallow(<TransactionsPage {...props} />);
 
-        expect(component.find(TopAppBar)).toHaveProp('title', account.name);
+            expect(component.find(TopAppBar).find(Autocomplete)).toHaveProp('value', account);
+        });
+        it('displays blank account name', () => {
+            jest.spyOn(accountStore, 'getAccount').mockReturnValue(undefined);
+
+            const component = shallow(<TransactionsPage {...props} />);
+
+            expect(component.find(TopAppBar).find(Autocomplete)).toHaveProp('value', null);
+        });
+        it('groups accounts by company', () => {
+            type GroupByProp = (a: AccountModel) => string;
+            const groupBy = shallow(<TransactionsPage {...props} />).find(Autocomplete).prop<GroupByProp>('groupBy');
+
+            expect(groupBy(account)).toEqual(account.company!.name);
+            expect(groupBy(newAccountModel())).toEqual('');
+        });
+        it('displays company and account names', () => {
+            type GetOptionLabelProp = (a: AccountModel) => string;
+            const getOptionLabel = shallow(<TransactionsPage {...props} />).find(Autocomplete).prop<GetOptionLabelProp>('getOptionLabel');
+
+            expect(getOptionLabel(account)).toEqual(account.displayName);
+        });
+        it('displays account name in list', () => {
+            type RenderOptionProp = (a: AccountModel) => string;
+            const renderOption = shallow(<TransactionsPage {...props} />).find(Autocomplete).prop<RenderOptionProp>('renderOption');
+
+            expect(renderOption(account)).toEqual(account.name);
+        });
+        it('uses TextField for input', () => {
+            const renderInput = shallow(<TransactionsPage {...props}/>).find(Autocomplete).prop('renderInput');
+            const params = {id: 'x', disabled: false} as AutocompleteRenderInputParams;
+
+            expect(renderInput(params)).toEqual(<TextField {...params} variant='outlined'/>);
+        });
+        it('displays transactions for selected account', () => {
+            const component = shallow(<TransactionsPage {...props}/>);
+            const onChange = component.find(Autocomplete).prop('onChange')!;
+
+            onChange({} as ChangeEvent, account, 'select-option');
+
+            expect(history.push).toBeCalledWith(`/finances/account/${account.id}`);
+        });
     });
     describe('mode', () => {
         it('displays list and table mode buttons', () => {

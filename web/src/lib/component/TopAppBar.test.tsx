@@ -16,6 +16,14 @@ describe('TopAppBar', () => {
         expect(component.find(Toolbar).find('#children')).toExist();
         expect(component.find(Menu)).toHaveProps({open: false, children: menuItems});
     });
+    it('renders AppBar without title', () => {
+        const component = shallow(<TopAppBar menuItems={menuItems}><div id='children' /></TopAppBar>);
+
+        expect(component.find(AppBar)).toHaveProp('position', 'fixed');
+        expect(component.find(Toolbar).find(Typography)).not.toExist();
+        expect(component.find(Toolbar).find('#children')).toExist();
+        expect(component.find(Menu)).toHaveProps({open: false, children: menuItems});
+    });
     it('displays menu when button is clicked', () => {
         const component = shallow(<TopAppBar title={title} menuItems={menuItems} />);
 

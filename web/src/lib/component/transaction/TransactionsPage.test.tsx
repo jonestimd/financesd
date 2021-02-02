@@ -2,7 +2,7 @@ import React, {ChangeEvent} from 'react';
 import {shallow} from 'enzyme';
 import {History} from 'history';
 import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel, newCompany} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 import TransactionsPage from './TransactionsPage';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
@@ -25,7 +25,7 @@ jest.mock('react-router', () => ({
 
 describe('TransactionsPage', () => {
     const {accountStore, transactionStore} = new RootStore();
-    const account = newAccountModel({}, newCompany());
+    const account = newAccountModel({}, newCompanyModel());
     const props = {
         match: {params: {accountId}},
     };

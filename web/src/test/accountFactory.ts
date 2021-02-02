@@ -1,4 +1,5 @@
-import {AccountModel, IAccount, ICompany} from "src/lib/model/AccountModel";
+import {AccountModel, IAccount} from "src/lib/model/AccountModel";
+import {CompanyModel, ICompany} from "src/lib/model/CompanyModel";
 
 let nextId = 0;
 
@@ -9,6 +10,12 @@ export function newCompany(overrides: Partial<ICompany> = {}): ICompany {
         version: 1,
         ...overrides,
     };
+}
+
+export function newCompanyModel(overrides: Partial<ICompany> = {}, ...accounts: AccountModel[]) {
+    const company = new CompanyModel(newCompany(overrides), accounts);
+    accounts.forEach((account) => account.company = company);
+    return company;
 }
 
 export function newAccount(overrides: Partial<IAccount> = {}): IAccount {
@@ -24,6 +31,6 @@ export function newAccount(overrides: Partial<IAccount> = {}): IAccount {
     };
 }
 
-export function newAccountModel(overrides: Partial<IAccount> = {}, company?: ICompany) {
+export function newAccountModel(overrides: Partial<IAccount> = {}, company?: CompanyModel) {
     return new AccountModel(newAccount({...overrides, companyId: company && parseInt(company.id)}), company);
 }

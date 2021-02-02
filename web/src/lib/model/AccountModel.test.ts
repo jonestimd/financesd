@@ -1,9 +1,9 @@
-import {newAccount, newAccountModel, newCompany} from "src/test/accountFactory";
+import {newAccount, newAccountModel, newCompanyModel} from "src/test/accountFactory";
 import {AccountModel} from "./AccountModel";
 
 describe('AccountModel', () => {
     const account = newAccount();
-    const company = newCompany();
+    const company = newCompanyModel();
 
     describe('constructor', () => {
         it('populates account properties', () => {
@@ -45,7 +45,7 @@ describe('AccountModel', () => {
         it('sorts by company name then account name', () => {
             const account1 = newAccountModel({}, company);
             const account2 = newAccountModel({}, company);
-            const company2 = newCompany();
+            const company2 = newCompanyModel();
             const account3 = newAccountModel({name: account1.name}, company2);
 
             expect(AccountModel.compare(account1, account3)).toBeLessThan(0);

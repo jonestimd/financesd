@@ -10,7 +10,7 @@ import CategoriesPage from './CategoriesPage';
 import PayeesPage from './PayeesPage';
 import SecuritiesPage from './SecuritiesPage';
 import GroupsPage from './GroupsPage';
-import {createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
+import {createMuiTheme, StylesProvider, ThemeProvider} from '@material-ui/core/styles';
 
 const history = createBrowserHistory();
 
@@ -58,22 +58,24 @@ export const Routes: React.FC = () => {
     }, [rootStore.accountStore, rootStore.categoryStore, rootStore.groupStore, rootStore.payeeStore, rootStore.securityStore]);
     return (
         <RootStoreContext.Provider value={rootStore}>
-            <ThemeProvider theme={myTheme}>
-                <main className='app-main'>
-                    <ProgressMessage />
-                    <Router history={history}>
-                        <Switch>
-                            <Route exact path='/finances' component={AccountsPage} />
-                            <Route exact path='/finances/account/:accountId' component={TransactionsPage} />
-                            <Route exact path='/finances/categories' component={CategoriesPage} />
-                            <Route exact path='/finances/payees' component={PayeesPage} />
-                            <Route exact path='/finances/securities' component={SecuritiesPage} />
-                            <Route exact path='/finances/groups' component={GroupsPage} />
-                            <Route component={NotFound} />
-                        </Switch>
-                    </Router>
-                </main>
-            </ThemeProvider>
+            <StylesProvider injectFirst>
+                <ThemeProvider theme={myTheme}>
+                    <main className='app-main'>
+                        <ProgressMessage />
+                        <Router history={history}>
+                            <Switch>
+                                <Route exact path='/finances' component={AccountsPage} />
+                                <Route exact path='/finances/account/:accountId' component={TransactionsPage} />
+                                <Route exact path='/finances/categories' component={CategoriesPage} />
+                                <Route exact path='/finances/payees' component={PayeesPage} />
+                                <Route exact path='/finances/securities' component={SecuritiesPage} />
+                                <Route exact path='/finances/groups' component={GroupsPage} />
+                                <Route component={NotFound} />
+                            </Switch>
+                        </Router>
+                    </main>
+                </ThemeProvider>
+            </StylesProvider>
         </RootStoreContext.Provider>
     );
 };

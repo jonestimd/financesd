@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {RootStore} from '../store/RootStore';
-import {newAccountModel, newCompany} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 import AccountsPage from './AccountsPage';
 import Table, {IColumn} from './table/Table';
 import TopAppBar from './TopAppBar';
@@ -12,7 +12,7 @@ import * as formats from '../formats';
 
 describe('AccountsPage', () => {
     const rootStore = new RootStore();
-    const account = newAccountModel({description: 'my special account', accountNo: '123456-789'}, newCompany());
+    const account = newAccountModel({description: 'my special account', accountNo: '123456-789'}, newCompanyModel());
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue(rootStore);

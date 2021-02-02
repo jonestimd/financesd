@@ -5,7 +5,6 @@ import TopAppBar from './TopAppBar';
 import Table, {IColumn} from './table/Table';
 import {GroupModel} from '../model/GroupModel';
 import {translate} from '../i18n/localize';
-import PageMenu from './PageMenu';
 
 const columns: IColumn<GroupModel>[] = [
     {key: 'group.name', render: (group) => group.name},
@@ -18,7 +17,7 @@ const SecuritiesPage: React.FC = observer(() => {
     const groups = groupStore.groups;
     return (
         <div className='groups-list'>
-            <TopAppBar title={translate('menu.groups')} menuItems={<PageMenu currentPage='menu.groups' />} />
+            <TopAppBar title={translate('menu.groups')} currentPage='menu.groups' />
             <Table columns={columns} data={groups} />
         </div>
     );

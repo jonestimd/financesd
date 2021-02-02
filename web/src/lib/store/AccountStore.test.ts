@@ -2,8 +2,9 @@ import {RootStore} from "./RootStore";
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
 import {AccountModel} from "../model/AccountModel";
-import {newAccount, newAccountModel, newCompany} from "src/test/accountFactory";
+import {newAccount, newAccountModel, newCompany, newCompanyModel} from "src/test/accountFactory";
 import {loadingAccounts, query} from "./AccountStore";
+import {CompanyModel} from "../model/CompanyModel";
 
 describe('AccountStore', () => {
     const {accountStore, messageStore} = new RootStore();
@@ -26,7 +27,7 @@ describe('AccountStore', () => {
     });
     describe('get companies', () => {
         it('sorts by company name', () => {
-            const company = newCompany();
+            const company = newCompanyModel();
             accountStore['companiesById'].set(company.id, company);
             jest.spyOn(entityUtils, 'sortValuesByName');
 
@@ -65,7 +66,7 @@ describe('AccountStore', () => {
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingAccounts);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingAccounts);
             expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
-            expect(accountStore.companies).toEqual([company]);
+            expect(accountStore.companies).toEqual([new CompanyModel(company)]);
             expect(accountStore.accounts).toStrictEqual([new AccountModel(account)]);
         });
         it('does nothing is already loading', async () => {

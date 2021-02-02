@@ -1,10 +1,5 @@
+import {CompanyModel} from './CompanyModel';
 import {compareByName} from './entityUtils';
-
-export interface ICompany {
-    id: string;
-    name: string;
-    version: number;
-}
 
 export interface IAccount {
     id: string;
@@ -34,9 +29,9 @@ export class AccountModel implements IAccount {
     version: number;
     transactionCount: number;
     balance: number;
-    company?: ICompany;
+    company?: CompanyModel;
 
-    constructor(account: IAccount, company?: ICompany) {
+    constructor(account: IAccount, company?: CompanyModel) {
         this.id = account.id;
         this.companyId = account.companyId;
         this.type = account.type;

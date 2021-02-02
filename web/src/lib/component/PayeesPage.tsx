@@ -5,7 +5,6 @@ import TopAppBar from './TopAppBar';
 import Table, {IColumn} from './table/Table';
 import {PayeeModel} from '../model/PayeeModel';
 import {translate} from '../i18n/localize';
-import PageMenu from './PageMenu';
 
 const columns: IColumn<PayeeModel>[] = [
     {key: 'payee.name', render: (payee) => payee.name},
@@ -17,7 +16,7 @@ const PayeesPage: React.FC = observer(() => {
     const payees = payeeStore.payees;
     return (
         <div className='payee-list'>
-            <TopAppBar title={translate('menu.payees')} menuItems={<PageMenu currentPage='menu.payees' />} />
+            <TopAppBar title={translate('menu.payees')} currentPage='menu.payees' />
             <Table columns={columns} data={payees} />
         </div>
     );

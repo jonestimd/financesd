@@ -36,8 +36,23 @@ export default class AccountStore {
     }
 
     @computed
+    get filteredAccounts() {
+        return this.accounts.filter((account) => !account.hide);
+    }
+
+    @computed
+    get accountsWithoutCompany() {
+        return this.filteredAccounts.filter((account) => !account.companyId);
+    }
+
+    @computed
     get companies(): CompanyModel[] {
         return sortValuesByName(this.companiesById);
+    }
+
+    @computed
+    get filteredCompanies() {
+        return this.companies.filter((company) => company.filteredAccounts.length > 0);
     }
 
     getAccount(id?: string | number) {

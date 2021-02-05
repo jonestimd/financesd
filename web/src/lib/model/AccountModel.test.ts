@@ -1,4 +1,5 @@
 import {newAccount, newAccountModel, newCompanyModel} from "src/test/accountFactory";
+import settingsStore from "../store/settingsStore";
 import {AccountModel} from "./AccountModel";
 
 describe('AccountModel', () => {
@@ -39,6 +40,19 @@ describe('AccountModel', () => {
             const model = new AccountModel(account, company);
 
             expect(model.displayName).toEqual(`${company.name}: ${account.name}`);
+        });
+    });
+    describe('hide', () => {
+        it('returns false if hide closed accounts is false', () => {
+            jest.spyOn(settingsStore, 'hideClosedAccounts', 'get').mockReturnValue(false);
+
+            expect(newAccountModel({closed: true}).hide).toEqual(false);
+        });
+        it('returns true if account is closed and hide closed accounts is true', () => {
+            jest.spyOn(settingsStore, 'hideClosedAccounts', 'get').mockReturnValue(true);
+
+            expect(newAccountModel().hide).toEqual(false);
+            expect(newAccountModel({closed: true}).hide).toEqual(true);
         });
     });
     describe('compare', () => {

@@ -5,11 +5,11 @@ import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {Drawer} from '@material-ui/core';
-import PageMenu from './PageMenu';
+import PageMenu from './menu/PageMenu';
 
 export interface ITopAppBarProps {
     title?: string;
-    currentPage?: string;
+    currentPage: string;
     children?: React.ReactNode;
 }
 

@@ -4,6 +4,8 @@
     "menu.groups": "Groups",
     "menu.payees": "Payees",
     "menu.securities": "Securities",
+    "menu.hideClosedAccounts": "Hide closed accounts",
+    "menu.back": "Back",
     "account.company": "Company",
     "account.name": "Name",
     "account.type": "Type",

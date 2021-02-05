@@ -7,6 +7,7 @@ $transaction-hover-background: #dddddd !default;
 
 $app-margin: 0 !default;
 $app-bar-height: 48px !default;
+$side-bar-width: 300px !default;
 
 $selection-background: #dfd0e0 !default;
 
@@ -45,15 +46,35 @@ body {
 }
 
 .sidebar-menu {
-    overflow-x: hidden;
+    width: $side-bar-width;
+    overflow: hidden;
     .menu {
+        height: 100%;
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        transition: translate 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-
-        .MuiIconButton-label {
-            background-color: rgba(0, 0, 0, 0.15);
-            border-radius: 50%;
+        grid-template-columns: 1fr 1fr;
+        &.next {
+            translate: -$side-bar-width;
+            transition: translate 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+        &.previous {
+            position: relative;
+            left: -$side-bar-width;
+            translate: $side-bar-width;
+            transition: translate 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+        }
+        .MuiList-root {
+            width: $side-bar-width;
+            overflow-y: auto;
+        }
+        .MuiMenuItem-root {
+            .MuiListItemText-primary {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .MuiIconButton-label {
+                background-color: rgba(0, 0, 0, 0.15);
+                border-radius: 50%;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+import settingsStore from '../store/settingsStore';
 import {CompanyModel} from './CompanyModel';
 import {compareByName} from './entityUtils';
 
@@ -52,6 +53,10 @@ export class AccountModel implements IAccount {
     get displayName(): string {
         if (this.company) return `${this.company.name}: ${this.name}`;
         return this.name;
+    }
+
+    get hide() {
+        return this.closed && settingsStore.hideClosedAccounts;
     }
 
     compareTo(that: AccountModel): number {

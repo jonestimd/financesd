@@ -6,6 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {Drawer} from '@material-ui/core';
 import PageMenu from './menu/PageMenu';
+import {useHistory} from 'react-router';
 
 export interface ITopAppBarProps {
     title?: string;
@@ -18,6 +19,8 @@ const TopAppBar: React.FC<ITopAppBarProps> = ({title, currentPage, children}) =>
     const [showMenu, setShowMenu] = React.useState(false);
     const toggleMenu = React.useCallback(() => setShowMenu(!showMenu), [showMenu]);
     const hideMenu = React.useCallback(() => setShowMenu(false), []);
+    const history = useHistory();
+    history.listen(hideMenu);
     return <>
         <AppBar position='fixed'>
             <Toolbar variant='dense' disableGutters>

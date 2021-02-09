@@ -4,6 +4,15 @@ import TopAppBar from './TopAppBar';
 import PageMenu from './menu/PageMenu';
 import {AppBar, Drawer, IconButton, Toolbar, Typography} from '@material-ui/core';
 
+jest.mock('react-router', () => ({
+    ...jest.requireActual<Record<string, unknown>>('react-router'),
+    useHistory: () => ({
+        listen: historyListen,
+    }),
+}));
+
+const historyListen = jest.fn<void, [() => void]>();
+
 describe('TopAppBar', () => {
     const title = 'Page Title';
 
@@ -34,7 +43,16 @@ describe('TopAppBar', () => {
         const component = shallow(<TopAppBar currentPage='transactions' title={title} />);
         component.find(Toolbar).find(IconButton).simulate('click');
 
-        component.find(Drawer).prop('onClose')!({}, 'backdropClick');
+        component.find(Drawer).simulate('close');
+
+        expect(component.find(Drawer)).toHaveProp('open', false);
+    });
+    it('closes drawer when URL changes', () => {
+        const component = shallow(<TopAppBar currentPage='transactions' title={title} />);
+        component.find(Toolbar).find(IconButton).simulate('click');
+        const listener = historyListen.mock.calls[0][0];
+
+        listener();
 
         expect(component.find(Drawer)).toHaveProp('open', false);
     });

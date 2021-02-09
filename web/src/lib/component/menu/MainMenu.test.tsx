@@ -1,13 +1,12 @@
 import React from 'react';
 import {shallow, ShallowWrapper} from 'enzyme';
 import MainMenu from './MainMenu';
-import {IconButton, MenuItem} from '@material-ui/core';
-import {Link} from 'react-router-dom';
+import {IconButton, ListItemText, MenuItem} from '@material-ui/core';
 
 const getMenuItems = (component: ShallowWrapper) => {
     return component.find(MenuItem).map((item) => {
-        const link = item.find(Link);
-        return [link.prop('to'), link.text()];
+        const listItemText = item.find(ListItemText);
+        return [item.prop('to'), listItemText.length ? listItemText.text() : item.text()];
     });
 };
 

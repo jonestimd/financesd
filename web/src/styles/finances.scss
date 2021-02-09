@@ -19,11 +19,6 @@ body {
     margin: $app-margin;
 }
 
-.MuiMenuItem-root a {
-    text-decoration: inherit;
-    color: inherit;
-}
-
 .MuiAppBar-root {
     z-index: 1301;
     .MuiToolBar-root {
@@ -66,11 +61,13 @@ body {
             width: $side-bar-width;
             overflow-y: auto;
         }
-        .MuiMenuItem-root {
-            .MuiListItemText-primary {
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
+        // .MuiMenuItem-root { // for long account/company names
+        //     .MuiListItemText-primary {
+        //         overflow: hidden;
+        //         text-overflow: ellipsis;
+        //     }
+        // }
+        .MuiListItemSecondaryAction-root {
             .MuiIconButton-label {
                 background-color: rgba(0, 0, 0, 0.15);
                 border-radius: 50%;

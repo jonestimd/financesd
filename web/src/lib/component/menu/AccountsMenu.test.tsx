@@ -6,8 +6,18 @@ import {ListItemText, MenuItem} from '@material-ui/core';
 import {Link} from 'react-router-dom';
 import ChildMenu from './ChildMenu';
 
+jest.mock('react-router', () => {
+    return {
+        ...jest.requireActual<Record<string, unknown>>('react-router'),
+        useHistory: () => ({location}),
+    };
+});
+
+const location = {pathname: ''} as Location;
+
 describe('AccountsMenu', () => {
     const onBack = jest.fn();
+    beforeEach(() => location.pathname = '');
     it('displays back button', () => {
         const company = newCompanyModel({}, newAccountModel(), newAccountModel());
 
@@ -53,7 +63,7 @@ describe('AccountsMenu', () => {
 
             const component = shallow(<MenuAccount {...account} />);
 
-            expect(component.find(MenuItem)).toHaveProps({component: Link, to: `/finances/account/${account.id}`});
+            expect(component.find(MenuItem)).toHaveProps({component: Link, to: `/finances/account/${account.id}`, selected: false});
             expect(component.find(ListItemText)).toHaveProp('secondary', null);
             expect(component.find(ListItemText)).toHaveText(account.name);
         });
@@ -63,9 +73,17 @@ describe('AccountsMenu', () => {
 
             const component = shallow(<MenuAccount {...account} />);
 
-            expect(component.find(MenuItem)).toHaveProps({component: Link, to: `/finances/account/${account.id}`});
+            expect(component.find(MenuItem)).toHaveProps({component: Link, to: `/finances/account/${account.id}`, selected: false});
             expect(component.find(ListItemText)).toHaveProp('secondary', account.name);
             expect(component.find(ListItemText)).toHaveText(company.name);
+        });
+        it('highlights current account', () => {
+            const account = newAccountModel();
+            location.pathname = `/finances/account/${account.id}`;
+
+            const component = shallow(<MenuAccount {...account} />);
+
+            expect(component.find(MenuItem)).toHaveProps({component: Link, to: `/finances/account/${account.id}`, selected: true});
         });
     });
 });

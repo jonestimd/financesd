@@ -32,7 +32,11 @@ var getwd = os.Getwd
 var newHandler = handler.New
 
 func main() {
-	config := configuration.LoadConfig(fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME")))
+	configPath := fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME"))
+	if len(os.Args) > 1 {
+		configPath = os.Args[1]
+	}
+	config := configuration.LoadConfig(configPath)
 	driver := strings.ToLower(config.GetString("connection.default.driver"))
 	user := config.GetString("connection.default.user")
 	password := config.GetString("connection.default.password")

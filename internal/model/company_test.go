@@ -173,3 +173,42 @@ func Test_GetCompaniesByIDs(t *testing.T) {
 		})
 	})
 }
+
+func Test_AddCompanies(t *testing.T) {
+	id := int64(42)
+	t.Run("returns companies with ids", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			runInsertStub := mocka.Function(t, &runInsert, id, nil)
+			runInsertStub.OnSecondCall().Return(id+1, nil)
+			defer runInsertStub.Restore()
+
+			results, err := AddCompanies(tx, []string{"company1", "company2"}, "somebody")
+
+			assert.Nil(t, err)
+			assert.Equal(t, id, results[0].ID)
+			assert.Equal(t, "company1", results[0].Name)
+			assert.Equal(t, "somebody", results[0].ChangeUser)
+			assert.Equal(t, 1, results[0].Version)
+			assert.NotNil(t, results[0].source)
+			assert.Equal(t, id+1, results[1].ID)
+			assert.Equal(t, "company2", results[1].Name)
+			assert.Equal(t, "somebody", results[1].ChangeUser)
+			assert.Equal(t, 1, results[1].Version)
+			assert.NotNil(t, results[1].source)
+			assert.Nil(t, mock.ExpectationsWereMet())
+		})
+	})
+	t.Run("returns error", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			expectedErr := errors.New("database error")
+			runInsertStub := mocka.Function(t, &runInsert, int64(42), nil)
+			runInsertStub.OnSecondCall().Return(int64(0), expectedErr)
+			defer runInsertStub.Restore()
+
+			result, err := AddCompanies(tx, []string{"company1", "company2"}, "somebody")
+
+			assert.Same(t, expectedErr, err)
+			assert.Nil(t, result)
+		})
+	})
+}

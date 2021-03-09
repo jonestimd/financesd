@@ -83,3 +83,20 @@ func Test_resolveAccounts(t *testing.T) {
 		assert.Same(t, tx, mockCompany.tx)
 	})
 }
+
+func Test_addCompanyFields_Resolve(t *testing.T) {
+	names := []interface{}{"The Company"}
+	companies := []*model.Company{{ID: 42, Name: names[0].(string)}}
+	expectedErr := errors.New("test error")
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		mockAddCompanies := mocka.Function(t, &addCompanies, companies, expectedErr)
+		defer mockAddCompanies.Restore()
+		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).addArg("names", names)
+
+		result, err := addCompaniesFields.Resolve(params.ResolveParams)
+
+		assert.Same(t, expectedErr, err)
+		assert.Equal(t, companies, result)
+		assert.Equal(t, []interface{}{tx, asStrings(names), "somebody"}, mockAddCompanies.GetFirstCall().Arguments())
+	})
+}

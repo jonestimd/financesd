@@ -31,7 +31,7 @@ var securitySchema = graphql.NewObject(graphql.ObjectConfig{
 
 var securityQueryFields = &graphql.Field{
 	Type: graphql.NewList(securitySchema),
-	Args: map[string]*graphql.ArgumentConfig{
+	Args: graphql.FieldConfigArgument{
 		"id":     {Type: graphql.ID, Description: "security ID"},
 		"symbol": {Type: graphql.String, Description: "unique security symbol"},
 	},

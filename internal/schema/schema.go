@@ -6,6 +6,7 @@ import (
 
 const accountQuery = "accounts"
 const companyQuery = "companies"
+const addCompaniesMutation = "addCompanies"
 const payeeQuery = "payees"
 const assetsQuery = "assets"
 const securityQuery = "securities"
@@ -23,9 +24,15 @@ var queries = graphql.Fields{
 	transactionQuery: transactionQueryFields,
 }
 
-// New creates the root GraphQL schema.
+var mutations = graphql.Fields{
+	addCompaniesMutation: addCompaniesFields,
+}
+
+// New creates the GraphQL schema.
 func New() (graphql.Schema, error) {
-	rootQuery := graphql.ObjectConfig{Name: "RootQuery", Fields: queries}
-	schemaConfig := graphql.SchemaConfig{Query: graphql.NewObject(rootQuery)}
+	schemaConfig := graphql.SchemaConfig{
+		Query:    graphql.NewObject(graphql.ObjectConfig{Name: "Queries", Fields: queries}),
+		Mutation: graphql.NewObject(graphql.ObjectConfig{Name: "Mutations", Fields: mutations}),
+	}
 	return graphql.NewSchema(schemaConfig)
 }

@@ -34,6 +34,19 @@ var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...inte
 	return models.Interface(), nil
 }
 
+var runInsert = func(tx *sql.Tx, sql string, args ...interface{}) (int64, error) {
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+	res, err := stmt.Exec(args...)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
 type idSet struct {
 	ids map[int64]struct{}
 }

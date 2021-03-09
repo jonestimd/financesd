@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"reflect"
+	"time"
 )
 
 // Company contains information about a financial institution.
@@ -71,4 +72,18 @@ func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
 func getCompaniesByIDs(tx *sql.Tx, ids []int64) ([]*Company, error) {
 	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
 	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
+}
+
+// AddCompanies adds new companies.
+func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
+	changeDate := time.Now()
+	companies := make([]*Company, len(names))
+	for i, name := range names {
+		id, err := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 1)", name, user, changeDate)
+		if err != nil {
+			return nil, err
+		}
+		companies[i] = &Company{ID: id, Name: name, Audited: Audited{user, &changeDate}, Version: 1}
+	}
+	return newCompanySource().setCompanies(companies), nil
 }

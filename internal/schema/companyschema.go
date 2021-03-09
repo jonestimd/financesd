@@ -53,3 +53,16 @@ func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {
 	tx := p.Context.Value(DbContextKey).(*sql.Tx)
 	return company.GetAccounts(tx)
 }
+
+var addCompaniesFields = &graphql.Field{
+	Type: newList(companySchema),
+	Args: graphql.FieldConfigArgument{
+		"names": {Type: newList(graphql.String), Description: "unique company names"},
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
+		user := p.Context.Value(UserKey).(string)
+		names := asStrings(p.Args["names"])
+		return addCompanies(tx, names, user)
+	},
+}

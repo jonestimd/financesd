@@ -54,7 +54,7 @@ func getTxSchema() *graphql.Object {
 
 var transactionQueryFields = &graphql.Field{
 	Type: graphql.NewList(getTxSchema()),
-	Args: map[string]*graphql.ArgumentConfig{
+	Args: graphql.FieldConfigArgument{
 		"accountId": {Type: graphql.NewNonNull(graphql.ID), Description: "account ID"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {

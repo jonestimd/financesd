@@ -22,7 +22,7 @@ func companyQueryFields() *graphql.Field {
 	companySchema.AddFieldConfig("accounts", &graphql.Field{Type: graphql.NewList(accountSchema), Resolve: resolveAccounts})
 	return &graphql.Field{
 		Type: graphql.NewList(companySchema),
-		Args: map[string]*graphql.ArgumentConfig{
+		Args: graphql.FieldConfigArgument{
 			"id":   {Type: graphql.ID, Description: "company ID"},
 			"name": {Type: graphql.String, Description: "unique company name"},
 		},

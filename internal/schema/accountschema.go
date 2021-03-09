@@ -29,7 +29,7 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 
 var accountQueryFields = &graphql.Field{
 	Type: graphql.NewList(accountSchema),
-	Args: map[string]*graphql.ArgumentConfig{
+	Args: graphql.FieldConfigArgument{
 		"id":   {Type: graphql.ID, Description: "account ID"},
 		"name": {Type: graphql.String, Description: "unique account name"},
 	},

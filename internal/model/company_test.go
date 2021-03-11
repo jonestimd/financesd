@@ -181,10 +181,15 @@ func Test_AddCompanies(t *testing.T) {
 			runInsertStub := mocka.Function(t, &runInsert, id, nil)
 			runInsertStub.OnSecondCall().Return(id+1, nil)
 			defer runInsertStub.Restore()
+			validateNameStub := mocka.Function(t, &validateName, nil)
+			defer validateNameStub.Restore()
 
 			results, err := AddCompanies(tx, []string{"company1", "company2"}, "somebody")
 
 			assert.Nil(t, err)
+			assert.Equal(t, 2, validateNameStub.CallCount())
+			assert.Equal(t, []interface{}{"company1"}, validateNameStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{"company2"}, validateNameStub.GetCall(1).Arguments())
 			assert.Equal(t, id, results[0].ID)
 			assert.Equal(t, "company1", results[0].Name)
 			assert.Equal(t, "somebody", results[0].ChangeUser)

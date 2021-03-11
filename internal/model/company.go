@@ -79,6 +79,9 @@ func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
 	changeDate := time.Now()
 	companies := make([]*Company, len(names))
 	for i, name := range names {
+		if err := validateName(name); err != nil {
+			return nil, err
+		}
 		id, err := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 1)", name, user, changeDate)
 		if err != nil {
 			return nil, err

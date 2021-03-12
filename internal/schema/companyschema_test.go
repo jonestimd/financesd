@@ -100,3 +100,20 @@ func Test_addCompanyFields_Resolve(t *testing.T) {
 		assert.Equal(t, []interface{}{tx, asStrings(names), "somebody"}, mockAddCompanies.GetFirstCall().Arguments())
 	})
 }
+
+func Test_deleteCompanyFields_Resolve(t *testing.T) {
+	ids := []interface{}{1, 3}
+	expectedErr := errors.New("test error")
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		count := int64(2)
+		mockDeleteCompanies := mocka.Function(t, &deleteCompanies, count, expectedErr)
+		defer mockDeleteCompanies.Restore()
+		params := newResolveParams(tx, companyQuery).addArg("ids", ids)
+
+		result, err := deleteCompaniesFields.Resolve(params.ResolveParams)
+
+		assert.Same(t, expectedErr, err)
+		assert.Equal(t, count, result)
+		assert.Equal(t, []interface{}{tx, asInts(ids), "somebody"}, mockDeleteCompanies.GetFirstCall().Arguments())
+	})
+}

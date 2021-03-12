@@ -6,6 +6,7 @@ var getAllCompanies = model.GetAllCompanies
 var getCompanyByID = model.GetCompanyByID
 var getCompanyByName = model.GetCompanyByName
 var addCompanies = model.AddCompanies
+var deleteCompanies = model.DeleteCompanies
 
 var getAllAccounts = model.GetAllAccounts
 var getAccountByID = model.GetAccountByID

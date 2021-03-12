@@ -66,3 +66,16 @@ var addCompaniesFields = &graphql.Field{
 		return addCompanies(tx, names, user)
 	},
 }
+
+var deleteCompaniesFields = &graphql.Field{
+	Type: graphql.NewNonNull(graphql.Int),
+	Args: graphql.FieldConfigArgument{
+		"ids": {Type: newList(graphql.Int), Description: "IDs of companies to delete"},
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
+		user := p.Context.Value(UserKey).(string)
+		ids := asInts(p.Args["ids"])
+		return deleteCompanies(tx, ids, user)
+	},
+}

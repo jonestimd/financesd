@@ -15,3 +15,12 @@ func asStrings(arg interface{}) []string {
 	}
 	return values
 }
+
+func asInts(arg interface{}) []int {
+	list := arg.([]interface{})
+	values := make([]int, len(list))
+	for i, value := range list {
+		values[i] = value.(int)
+	}
+	return values
+}

@@ -90,3 +90,12 @@ func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
 	}
 	return newCompanySource().setCompanies(companies), nil
 }
+
+// DeleteCompanies deletes companies.
+func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
+	rs, err := runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
+	if err != nil {
+		return 0, err
+	}
+	return rs.RowsAffected()
+}

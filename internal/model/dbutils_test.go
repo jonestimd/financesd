@@ -10,6 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_intsToJson(t *testing.T) {
+	values := []int{1, 3, 5, 2, 4, 6}
+
+	result := intsToJson(values)
+
+	assert.Equal(t, result, "[1,3,5,2,4,6]")
+}
+
 func Test_runQuery_populatesModel(t *testing.T) {
 	name := "the company"
 	query := "select * from company where name = ?"

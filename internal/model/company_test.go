@@ -217,3 +217,33 @@ func Test_AddCompanies(t *testing.T) {
 		})
 	})
 }
+
+func Test_DeleteCompanies(t *testing.T) {
+	ids := []int{42, 96}
+	t.Run("returns update error", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			expectedErr := errors.New("database error")
+			runUpdateStub := mocka.Function(t, &runUpdate, nil, expectedErr)
+			defer runUpdateStub.Restore()
+
+			_, err := DeleteCompanies(tx, ids, "somebody")
+
+			assert.Same(t, expectedErr, err)
+		})
+	})
+	t.Run("returns delete count", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			count := int64(2)
+			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, count), nil)
+			defer runUpdateStub.Restore()
+
+			result, err := DeleteCompanies(tx, ids, "somebody")
+
+			assert.Equal(t,
+				[]interface{}{tx, "delete from company where json_contains(?, cast(id as json))", []interface{}{intsToJson(ids)}},
+				runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, count, result)
+			assert.Nil(t, err)
+		})
+	})
+}

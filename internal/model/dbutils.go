@@ -11,6 +11,10 @@ func intsToJson(values []int) string {
 	return strings.Replace(fmt.Sprint(values), " ", ",", -1)
 }
 
+func int64sToJson(values []int64) string {
+	return strings.Replace(fmt.Sprint(values), " ", ",", -1)
+}
+
 type model interface {
 	ptrTo(column string) interface{}
 }

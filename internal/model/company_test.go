@@ -3,7 +3,6 @@ package model
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -155,8 +154,7 @@ func Test_GetCompaniesByIDs(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result, err := getCompaniesByIDs(tx, ids)
 
-			jsonIDs, _ := json.Marshal(ids)
-			assert.Equal(t, []interface{}{tx, companyType, "select * from company where json_contains(?, cast(id as json))", []interface{}{jsonIDs}},
+			assert.Equal(t, []interface{}{tx, companyType, "select * from company where json_contains(?, cast(id as json))", []interface{}{"[42,96]"}},
 				runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, err)
 			assert.Equal(t, companies, result)

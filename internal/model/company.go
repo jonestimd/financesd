@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"time"
@@ -71,8 +70,7 @@ func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
 
 // getCompaniesByIDs loads specified companies.
 var getCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
-	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
-	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
+	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", int64sToJson(ids))
 }
 
 // AddCompanies adds new companies.

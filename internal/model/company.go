@@ -3,6 +3,7 @@ package model
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"time"
 )
@@ -69,7 +70,7 @@ func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
 }
 
 // getCompaniesByIDs loads specified companies.
-func getCompaniesByIDs(tx *sql.Tx, ids []int64) ([]*Company, error) {
+var getCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
 	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
 	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
 }
@@ -98,4 +99,25 @@ func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
 		return 0, err
 	}
 	return rs.RowsAffected()
+}
+
+// UpdateCompanies updates company names.
+func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, error) {
+	updates := args.([]interface{})
+	ids := make([]int64, len(updates))
+	for i, company := range updates {
+		values := company.(map[string]interface{})
+		ids[i] = int64(values["id"].(int))
+		name := values["name"].(string)
+		rs, err := runUpdate(tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?", name, user, ids[i])
+		if err != nil {
+			return nil, err
+		}
+		if count, err := rs.RowsAffected(); err != nil {
+			return nil, err
+		} else if count == 0 {
+			return nil, fmt.Errorf("company not found: %d", ids[i])
+		}
+	}
+	return getCompaniesByIDs(tx, ids)
 }

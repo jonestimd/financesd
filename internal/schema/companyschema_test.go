@@ -84,36 +84,86 @@ func Test_resolveAccounts(t *testing.T) {
 	})
 }
 
-func Test_addCompanyFields_Resolve(t *testing.T) {
+func Test_updateCompany_Resolve_add(t *testing.T) {
 	names := []interface{}{"The Company"}
-	companies := []*model.Company{{ID: 42, Name: names[0].(string)}}
-	expectedErr := errors.New("test error")
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		mockAddCompanies := mocka.Function(t, &addCompanies, companies, expectedErr)
-		defer mockAddCompanies.Restore()
-		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).addArg("names", names)
+	tests := []struct {
+		name      string
+		companies interface{}
+		err       error
+	}{
+		{"returns new companies", []*model.Company{{ID: 42, Name: names[0].(string)}}, nil},
+		{"returns error", nil, errors.New("test error")},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+				mockAddCompanies := mocka.Function(t, &addCompanies, test.companies, test.err)
+				defer mockAddCompanies.Restore()
+				params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).addArg("add", names)
 
-		result, err := addCompaniesFields.Resolve(params.ResolveParams)
+				result, err := updateCompaniesFields.Resolve(params.ResolveParams)
 
-		assert.Same(t, expectedErr, err)
-		assert.Equal(t, companies, result)
-		assert.Equal(t, []interface{}{tx, asStrings(names), "somebody"}, mockAddCompanies.GetFirstCall().Arguments())
-	})
+				assert.Equal(t, test.err, err)
+				assert.Equal(t, test.companies, result)
+				assert.Equal(t, []interface{}{tx, asStrings(names), "somebody"}, mockAddCompanies.GetFirstCall().Arguments())
+			})
+		})
+	}
 }
 
-func Test_deleteCompanyFields_Resolve(t *testing.T) {
+func Test_updateCompany_Resolve_delete(t *testing.T) {
 	ids := []interface{}{1, 3}
-	expectedErr := errors.New("test error")
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		count := int64(2)
-		mockDeleteCompanies := mocka.Function(t, &deleteCompanies, count, expectedErr)
-		defer mockDeleteCompanies.Restore()
-		params := newResolveParams(tx, companyQuery).addArg("ids", ids)
+	tests := []struct {
+		name      string
+		companies interface{}
+		err       error
+	}{
+		{"returns new companies", []*model.Company{}, nil},
+		{"returns error", nil, errors.New("test error")},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+				count := int64(2)
+				mockDeleteCompanies := mocka.Function(t, &deleteCompanies, count, test.err)
+				defer mockDeleteCompanies.Restore()
+				params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("delete", ids)
 
-		result, err := deleteCompaniesFields.Resolve(params.ResolveParams)
+				result, err := updateCompaniesFields.Resolve(params.ResolveParams)
 
-		assert.Same(t, expectedErr, err)
-		assert.Equal(t, count, result)
-		assert.Equal(t, []interface{}{tx, asInts(ids), "somebody"}, mockDeleteCompanies.GetFirstCall().Arguments())
-	})
+				assert.Equal(t, test.err, err)
+				assert.Equal(t, test.companies, result)
+				assert.Equal(t, []interface{}{tx, asInts(ids), "somebody"}, mockDeleteCompanies.GetFirstCall().Arguments())
+			})
+		})
+	}
+}
+
+func Test_updateCompany_Resolve_update(t *testing.T) {
+	id := 42
+	name := "new name"
+	args := []interface{}{map[string]interface{}{"id": id, "name": name}}
+	tests := []struct {
+		name      string
+		companies interface{}
+		err       error
+	}{
+		{"returns new companies", []*model.Company{}, nil},
+		{"returns error", nil, errors.New("test error")},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+				mockUpdateCompanies := mocka.Function(t, &updateCompanies, test.companies, test.err)
+				defer mockUpdateCompanies.Restore()
+				params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("update", args)
+
+				result, err := updateCompaniesFields.Resolve(params.ResolveParams)
+
+				assert.Equal(t, test.err, err)
+				assert.Equal(t, test.companies, result)
+				assert.Equal(t, []interface{}{tx, args, "somebody"}, mockUpdateCompanies.GetFirstCall().Arguments())
+			})
+		})
+	}
 }

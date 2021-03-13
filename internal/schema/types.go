@@ -2,9 +2,13 @@ package schema
 
 import "github.com/graphql-go/graphql"
 
-// newList creates a non-null list of non-null values.
-func newList(ofType graphql.Type) *graphql.NonNull {
-	return graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(ofType)))
+// nonNullList creates a non-null list of non-null values.
+func nonNullList(ofType graphql.Type) *graphql.NonNull {
+	return graphql.NewNonNull(newList(ofType))
+}
+
+func newList(ofType graphql.Type) *graphql.List {
+	return graphql.NewList(graphql.NewNonNull(ofType))
 }
 
 func asStrings(arg interface{}) []string {

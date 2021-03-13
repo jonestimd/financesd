@@ -6,8 +6,7 @@ import (
 
 const accountQuery = "accounts"
 const companyQuery = "companies"
-const addCompaniesMutation = "addCompanies"
-const deleteCompaniesMutation = "deleteCompanies"
+const updateCompaniesMutation = "updateCompanies"
 const payeeQuery = "payees"
 const assetsQuery = "assets"
 const securityQuery = "securities"
@@ -26,8 +25,7 @@ var queries = graphql.Fields{
 }
 
 var mutations = graphql.Fields{
-	addCompaniesMutation:    addCompaniesFields,
-	deleteCompaniesMutation: deleteCompaniesFields,
+	updateCompaniesMutation: updateCompaniesFields,
 }
 
 // New creates the GraphQL schema.

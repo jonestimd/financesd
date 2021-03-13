@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -244,6 +245,60 @@ func Test_DeleteCompanies(t *testing.T) {
 				runUpdateStub.GetCall(0).Arguments())
 			assert.Equal(t, count, result)
 			assert.Nil(t, err)
+		})
+	})
+}
+
+func Test_UpdateCompanies(t *testing.T) {
+	updates := []interface{}{
+		map[string]interface{}{"id": 42, "name": "rename 42"},
+		map[string]interface{}{"id": 96, "name": "rename 96"},
+	}
+	tests := []struct {
+		name        string
+		result      driver.Result
+		updateError error
+		getError    error
+		message     string
+	}{
+		{"returns update error", nil, errors.New("database error"), nil, "database error"},
+		{"returns count error", sqlmock.NewErrorResult(errors.New("database error")), nil, nil, "database error"},
+		{"returns not found error", sqlmock.NewResult(0, 0), nil, nil, "company not found: 42"},
+		{"returns getCompanies error", sqlmock.NewResult(0, 1), nil, errors.New("database error"), "database error"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+				runUpdateStub := mocka.Function(t, &runUpdate, test.result, test.updateError)
+				defer runUpdateStub.Restore()
+				getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, nil, test.getError)
+				defer getCompaniesStub.Restore()
+
+				_, err := UpdateCompanies(tx, updates, "somebody")
+
+				assert.EqualError(t, err, test.message)
+			})
+		})
+	}
+	t.Run("returns companies", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			companies := []*Company{{ID: 42, Name: "new name"}}
+			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, 1), nil)
+			defer runUpdateStub.Restore()
+			getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, companies, nil)
+			defer getCompaniesStub.Restore()
+
+			result, err := UpdateCompanies(tx, updates, "somebody")
+
+			assert.Equal(t, companies, result)
+			assert.Nil(t, err)
+			assert.Equal(t, 2, runUpdateStub.CallCount())
+			assert.Equal(t, []interface{}{tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?",
+				[]interface{}{"rename 42", "somebody", int64(42)}}, runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?",
+				[]interface{}{"rename 96", "somebody", int64(96)}}, runUpdateStub.GetCall(1).Arguments())
+			assert.Equal(t, 1, getCompaniesStub.CallCount())
+			assert.Equal(t, []interface{}{tx, []int64{42, 96}}, getCompaniesStub.GetCall(0).Arguments())
 		})
 	})
 }

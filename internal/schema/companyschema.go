@@ -18,10 +18,12 @@ var companySchema = graphql.NewObject(graphql.ObjectConfig{
 	}),
 })
 
+var companyList = nonNullList(companySchema)
+
 func companyQueryFields() *graphql.Field {
 	companySchema.AddFieldConfig("accounts", &graphql.Field{Type: graphql.NewList(accountSchema), Resolve: resolveAccounts})
 	return &graphql.Field{
-		Type: graphql.NewList(companySchema),
+		Type: companyList,
 		Args: graphql.FieldConfigArgument{
 			"id":   {Type: graphql.ID, Description: "company ID"},
 			"name": {Type: graphql.String, Description: "unique company name"},
@@ -54,28 +56,44 @@ func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {
 	return company.GetAccounts(tx)
 }
 
-var addCompaniesFields = &graphql.Field{
-	Type: newList(companySchema),
-	Args: graphql.FieldConfigArgument{
-		"names": {Type: newList(graphql.String), Description: "unique company names"},
+var companyInput = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name: "companyInput",
+	Fields: graphql.InputObjectConfigFieldMap{
+		"id":   {Type: graphql.NewNonNull(graphql.Int), Description: "ID of the company to update."},
+		"name": {Type: graphql.NewNonNull(graphql.String), Description: "New name for the company."},
 	},
-	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		user := p.Context.Value(UserKey).(string)
-		names := asStrings(p.Args["names"])
-		return addCompanies(tx, names, user)
-	},
-}
+})
 
-var deleteCompaniesFields = &graphql.Field{
-	Type: graphql.NewNonNull(graphql.Int),
+var updateCompaniesFields = &graphql.Field{
+	Type:        companyList,
+	Description: "Add, update and/or delete companies.",
 	Args: graphql.FieldConfigArgument{
-		"ids": {Type: newList(graphql.Int), Description: "IDs of companies to delete"},
+		"add":    {Type: newList(graphql.String), Description: "Unique names of companies to add."},
+		"update": {Type: newList(companyInput), Description: "Changes to be made to existing companies."},
+		"delete": {Type: newList(graphql.Int), Description: "IDs of companies to delete."},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		var err error
+		companies := make([]*model.Company, 0)
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
-		ids := asInts(p.Args["ids"])
-		return deleteCompanies(tx, ids, user)
+		if ids, ok := p.Args["delete"]; ok {
+			if _, err = deleteCompanies(tx, asInts(ids), user); err != nil {
+				return nil, err
+			}
+		}
+		if updates, ok := p.Args["update"]; ok {
+			if companies, err = updateCompanies(tx, updates, user); err != nil {
+				return nil, err
+			}
+		}
+		if names, ok := p.Args["add"]; ok {
+			if added, err := addCompanies(tx, asStrings(names), user); err != nil {
+				return nil, err
+			} else {
+				companies = append(companies, added...)
+			}
+		}
+		return companies, nil
 	},
 }

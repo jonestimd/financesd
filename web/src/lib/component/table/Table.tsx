@@ -4,7 +4,9 @@ import {useSelection} from '../scroll/selectionHooks';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
-import {IColumn, HeaderRow, Row} from './Row';
+import HeaderRow from './HeaderRow';
+import Row from './Row';
+import {IColumn} from './Column';
 
 export interface ITableProps<T> {
     columns: IColumn<T>[];

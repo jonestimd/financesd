@@ -1,7 +1,9 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import Table from './Table';
-import {HeaderRow, IColumn, Row} from './Row';
+import HeaderRow from './HeaderRow';
+import Row from './Row';
+import {IColumn} from './Column';
 import {mockSelectionHook} from 'src/test/mockHooks';
 import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';

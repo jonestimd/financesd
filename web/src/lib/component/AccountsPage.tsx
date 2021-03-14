@@ -5,7 +5,7 @@ import {observer} from 'mobx-react-lite';
 import * as formats from '../formats';
 import TopAppBar from './TopAppBar';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import {AccountModel} from '../model/AccountModel';
 import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';

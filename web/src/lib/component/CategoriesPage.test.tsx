@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import {newCategoryModel} from 'src/test/categoryFactory';
 import CategoriesPage from './CategoriesPage';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {CategoryModel} from '../model/CategoryModel';
 import amountType from '../i18n/amountType';

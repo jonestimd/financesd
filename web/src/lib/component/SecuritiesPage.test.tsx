@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import {newSecurityModel} from 'src/test/securityFactory';
 import SecuritiesPage from './SecuritiesPage';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {SecurityModel} from '../model/SecurityModel';
 import {ObservableMap} from 'mobx';

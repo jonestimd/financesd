@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import {newGroupModel} from 'src/test/groupFactory';
 import GroupsPage from './GroupsPage';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {GroupModel} from '../model/GroupModel';
 import {ObservableMap} from 'mobx';

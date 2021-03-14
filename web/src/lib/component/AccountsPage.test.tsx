@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 import AccountsPage from './AccountsPage';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {AccountModel} from '../model/AccountModel';
 import {Link} from 'react-router-dom';

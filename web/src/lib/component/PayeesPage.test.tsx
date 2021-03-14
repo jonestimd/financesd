@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import {newPayeeModel} from 'src/test/payeeFactory';
 import PayeesPage from './PayeesPage';
 import Table from './table/Table';
-import {IColumn} from './table/Row';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {PayeeModel} from '../model/PayeeModel';
 import {ObservableMap} from 'mobx';

@@ -99,6 +99,9 @@ func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
 	return rs.RowsAffected()
 }
 
+const updateCompanySQL = `update company set name = ?, change_date = current_timestamp, change_user = ?, version = version+1
+where id = ? and version = ?`
+
 // UpdateCompanies updates company names.
 func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, error) {
 	updates := args.([]interface{})
@@ -107,14 +110,15 @@ func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, err
 		values := company.(map[string]interface{})
 		ids[i] = int64(values["id"].(int))
 		name := values["name"].(string)
-		rs, err := runUpdate(tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?", name, user, ids[i])
+		version := int64(values["version"].(int))
+		rs, err := runUpdate(tx, updateCompanySQL, name, user, ids[i], version)
 		if err != nil {
 			return nil, err
 		}
 		if count, err := rs.RowsAffected(); err != nil {
 			return nil, err
 		} else if count == 0 {
-			return nil, fmt.Errorf("company not found: %d", ids[i])
+			return nil, fmt.Errorf("company not found (%d) or incorrect version (%d)", ids[i], version)
 		}
 	}
 	return getCompaniesByIDs(tx, ids)

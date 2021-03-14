@@ -249,8 +249,8 @@ func Test_DeleteCompanies(t *testing.T) {
 
 func Test_UpdateCompanies(t *testing.T) {
 	updates := []interface{}{
-		map[string]interface{}{"id": 42, "name": "rename 42"},
-		map[string]interface{}{"id": 96, "name": "rename 96"},
+		map[string]interface{}{"id": 42, "name": "rename 42", "version": 1},
+		map[string]interface{}{"id": 96, "name": "rename 96", "version": 1},
 	}
 	tests := []struct {
 		name        string
@@ -261,7 +261,7 @@ func Test_UpdateCompanies(t *testing.T) {
 	}{
 		{"returns update error", nil, errors.New("database error"), nil, "database error"},
 		{"returns count error", sqlmock.NewErrorResult(errors.New("database error")), nil, nil, "database error"},
-		{"returns not found error", sqlmock.NewResult(0, 0), nil, nil, "company not found: 42"},
+		{"returns not found error", sqlmock.NewResult(0, 0), nil, nil, "company not found (42) or incorrect version (1)"},
 		{"returns getCompanies error", sqlmock.NewResult(0, 1), nil, errors.New("database error"), "database error"},
 	}
 	for _, test := range tests {
@@ -291,10 +291,10 @@ func Test_UpdateCompanies(t *testing.T) {
 			assert.Equal(t, companies, result)
 			assert.Nil(t, err)
 			assert.Equal(t, 2, runUpdateStub.CallCount())
-			assert.Equal(t, []interface{}{tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?",
-				[]interface{}{"rename 42", "somebody", int64(42)}}, runUpdateStub.GetCall(0).Arguments())
-			assert.Equal(t, []interface{}{tx, "update company set name = ?, change_date = current_timestamp, change_user = ? where id = ?",
-				[]interface{}{"rename 96", "somebody", int64(96)}}, runUpdateStub.GetCall(1).Arguments())
+			assert.Equal(t, []interface{}{tx, updateCompanySQL, []interface{}{"rename 42", "somebody", int64(42), int64(1)}},
+				runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, updateCompanySQL, []interface{}{"rename 96", "somebody", int64(96), int64(1)}},
+				runUpdateStub.GetCall(1).Arguments())
 			assert.Equal(t, 1, getCompaniesStub.CallCount())
 			assert.Equal(t, []interface{}{tx, []int64{42, 96}}, getCompaniesStub.GetCall(0).Arguments())
 		})

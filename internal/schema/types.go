@@ -28,3 +28,9 @@ func asInts(arg interface{}) []int {
 	}
 	return values
 }
+
+var nonNullInt = graphql.NewNonNull(graphql.Int)
+var nonNullString = graphql.NewNonNull(graphql.String)
+
+var intList = graphql.NewList(nonNullInt)
+var stringList = graphql.NewList(nonNullString)

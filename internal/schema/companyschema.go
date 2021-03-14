@@ -59,8 +59,9 @@ func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {
 var companyInput = graphql.NewInputObject(graphql.InputObjectConfig{
 	Name: "companyInput",
 	Fields: graphql.InputObjectConfigFieldMap{
-		"id":   {Type: graphql.NewNonNull(graphql.Int), Description: "ID of the company to update."},
-		"name": {Type: graphql.NewNonNull(graphql.String), Description: "New name for the company."},
+		"id":      {Type: nonNullInt, Description: "ID of the company to update."},
+		"name":    {Type: nonNullString, Description: "New name for the company."},
+		"version": {Type: nonNullInt, Description: "Current version of the company."},
 	},
 })
 
@@ -68,9 +69,9 @@ var updateCompaniesFields = &graphql.Field{
 	Type:        companyList,
 	Description: "Add, update and/or delete companies.",
 	Args: graphql.FieldConfigArgument{
-		"add":    {Type: newList(graphql.String), Description: "Unique names of companies to add."},
+		"add":    {Type: stringList, Description: "Unique names of companies to add."},
 		"update": {Type: newList(companyInput), Description: "Changes to be made to existing companies."},
-		"delete": {Type: newList(graphql.Int), Description: "IDs of companies to delete."},
+		"delete": {Type: intList, Description: "IDs of companies to delete."},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		var err error

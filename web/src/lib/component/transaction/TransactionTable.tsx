@@ -1,7 +1,7 @@
 import React, {useCallback, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
-import {IColumn} from '../table/Table';
+import {IColumn} from '../table/Row';
 import HeaderDetailTable from '../table/HeaderDetailTable';
 import TransactionModel, {ITransactionDetail} from '../../model/TransactionModel';
 import * as formats from '../../formats';

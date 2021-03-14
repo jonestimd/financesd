@@ -1,7 +1,8 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import classNames from 'classnames';
-import {HeaderRow, Row, IColumn, IRow, selectionOptions} from './Table';
+import {IRow, selectionOptions} from './Table';
+import {HeaderRow, Row, IColumn} from './Row';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useScroll} from '../scroll/scrollHooks';

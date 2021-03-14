@@ -2,7 +2,8 @@ import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Row';
 import {GroupModel} from '../model/GroupModel';
 import {translate} from '../i18n/localize';
 

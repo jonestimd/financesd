@@ -1,11 +1,10 @@
 import React from 'react';
-import {mount, ReactWrapper, shallow} from 'enzyme';
-import Table, {IColumn} from './Table';
+import {shallow} from 'enzyme';
+import Table from './Table';
+import {HeaderRow, IColumn, Row} from './Row';
 import {mockSelectionHook} from 'src/test/mockHooks';
 import TableHead from '@material-ui/core/TableHead';
-import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
-import TableRow from '@material-ui/core/TableRow';
 
 class TestRow {
     constructor(
@@ -14,14 +13,6 @@ class TestRow {
         readonly c2: string | number,
         readonly c3: string
     ) { }
-}
-
-function expectCellText(row: ReactWrapper, ...text: string[]) {
-    expect(row.find(TableCell).map((cell) => cell.text())).toEqual(text);
-}
-
-function expectCellClasses(row: ReactWrapper, ...classes: string[]) {
-    expect(row.find(TableCell).map((cell) => cell.prop('className'))).toEqual(classes);
 }
 
 describe('Table', () => {
@@ -47,25 +38,22 @@ describe('Table', () => {
         expect(container).toHaveProp('tabIndex', 0);
     });
     it('displays header row', () => {
-        const component = mount(<Table columns={columns} data={data} />);
+        const component = shallow(<Table columns={columns} data={data} />);
 
         const header = component.find(TableHead);
 
-        expectCellText(header, 'first', 'second', 'THIRD');
-        expectCellClasses(header, 'col1', 'undefined', '');
+        expect(header.find(HeaderRow)).toHaveProp('columns', columns);
     });
     it('populates table body using data', () => {
-        const component = mount(<Table columns={columns} data={data} />);
+        const component = shallow(<Table columns={columns} data={data} />);
 
         const body = component.find(TableBody);
 
-        const rows = body.find(TableRow);
+        const rows = body.find(Row);
         expect(rows).toHaveLength(data.length);
         expect(rows.at(0)).toHaveClassName('selected');
-        expectCellText(rows.at(0), 'a1', 'a2', 'a3');
-        expectCellClasses(rows.at(0), 'col1 selected', 'string', '');
+        expect(rows.at(0)).toHaveProp('row', data[0]);
         expect(rows.at(1)).not.toHaveClassName('selected');
-        expectCellText(rows.at(1), 'b1', '20', 'b3');
-        expectCellClasses(rows.at(1), 'col1 selected', 'number', '');
+        expect(rows.at(1)).toHaveProp('row', data[1]);
     });
 });

@@ -3,7 +3,7 @@ import {mount, shallow} from 'enzyme';
 import HeaderDetailTable from './HeaderDetailTable';
 import IMixedRowTableModel from 'src/lib/model/IMixedRowTableModel';
 import {sortedIndex} from 'lodash';
-import {HeaderRow, IColumn, Row} from './Table';
+import {HeaderRow, IColumn, Row} from './Row';
 import {mockHooks} from 'src/test/mockHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
 import TableHead from '@material-ui/core/TableHead';

@@ -29,7 +29,7 @@ const myTheme = createMuiTheme({
         },
         MuiTableCell: {
             root: {
-                padding: '1px 3px',
+                padding: '2px 3px 1px',
                 lineHeight: 1.5,
             },
             head: {

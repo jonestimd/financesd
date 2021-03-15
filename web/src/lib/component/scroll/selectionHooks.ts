@@ -44,31 +44,49 @@ export interface ISelectionOptions {
 export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, rowSelector, headerSelector}: ISelectionOptions) {
     const [row, setRow] = React.useState(initialRow);
     const [column, setColumn] = React.useState(0);
+    const moveDown = (target: HTMLElement, n: number) => setRow((r) => ensureVisible(target, Math.min(r + n, rows - 1), rowSelector, headerSelector));
+    const moveUp = (target: HTMLElement, n: number) => setRow((r) => ensureVisible(target, Math.max(0, r - n), rowSelector, headerSelector));
+    const moveLeft = () => setColumn(column === 0 ? columns - 1 : column - 1);
+    const moveRight = () => setColumn(column === columns - 1 ? 0 : column + 1);
     return {
         row, column,
         onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
             const {currentTarget, key, ctrlKey} = event;
             const pageSize = getPageSize(currentTarget, rowSelector);
-            event.stopPropagation();
+            if (key !== 'Escape') event.stopPropagation();
             // TODO always make new selection visible
             switch (key) {
-                case 'ArrowRight': setColumn((c) => c === columns - 1 ? 0 : c + 1); break;
-                case 'ArrowLeft': setColumn((c) => c === 0 ? columns - 1 : c - 1); break;
+                case 'ArrowRight': moveRight(); break;
+                case 'ArrowLeft': moveLeft(); break;
+                case 'Tab':
+                    if (event.shiftKey) {
+                        if (row > 0 || column > 0) {
+                            event.preventDefault();
+                            if (column === 0) moveUp(currentTarget, 1);
+                            moveLeft();
+                        }
+                    }
+                    else if (row < rows-1 || column < columns-1) {
+                        event.preventDefault();
+                        if (column === columns - 1) moveDown(currentTarget, 1);
+                        moveRight();
+                    }
+                    break;
                 case 'ArrowUp':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - 1), rowSelector, headerSelector));
+                    moveUp(currentTarget, 1);
                     break;
                 case 'ArrowDown':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.min(r + 1, rows - 1), rowSelector, headerSelector));
+                    moveDown(currentTarget, 1);
                     break;
                 case 'PageUp':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - pageSize), rowSelector, headerSelector));
+                    moveUp(currentTarget, pageSize);
                     break;
                 case 'PageDown':
                     event.preventDefault();
-                    if (rows > 0) setRow((r) => ensureVisible(currentTarget, Math.min(r + pageSize, rows - 1), rowSelector, headerSelector));
+                    moveDown(currentTarget, pageSize);
                     break;
                 case 'Home':
                     event.preventDefault();

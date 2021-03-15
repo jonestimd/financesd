@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import classNames from 'classnames';
 import {useSelection} from '../scroll/selectionHooks';
 import MuiTable from '@material-ui/core/Table';
@@ -30,13 +30,22 @@ export const selectionOptions = {
 
 const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
     const selection = useSelection({rows: data.length, columns: columns.length, ...selectionOptions});
+    const [editCell, setEditCell] = useState<{row: number, col: number} | undefined>(undefined);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const stopEditing = () => {
+        setEditCell(undefined);
+        containerRef.current?.focus();
+    };
     return (
-        <div className='scroll-container' onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0}>
+        <div className='scroll-container' onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0} ref={containerRef}>
             <MuiTable className={classNames('table', className)}>
                 <TableHead><HeaderRow columns={columns} /></TableHead>
                 <TableBody>
                     {data.map((row, index) =>
-                        <Row key={row.id} row={row} className={rowClass(index, selection)} columns={columns} selection={selection} />
+                        <Row<T> key={row.id} row={row} className={rowClass(index, selection)} columns={columns} selection={selection}
+                            onClick={(col) => setEditCell({row: index, col})}
+                            editCell={editCell?.row === index && editCell.col}
+                            onCommit={stopEditing} />
                     )}
                 </TableBody>
             </MuiTable>

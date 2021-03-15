@@ -12,6 +12,23 @@ table.table {
         }
     }
 
+    td {
+        &.changed {
+            background-color: lightskyblue;
+        }
+        &.editing {
+            padding: 1px;
+            .MuiInputBase-root {
+                font-size: inherit;
+                background-color: $mdc-theme-background;
+                padding: 4px 2px 2px;
+            }
+            .MuiInputBase-input {
+                padding: 0;
+            }
+        }
+    }
+
     thead {
         font-weight: 500;
         th {

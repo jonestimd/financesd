@@ -58,4 +58,37 @@ describe('Table', () => {
         expect(rows.at(1)).not.toHaveClassName('selected');
         expect(rows.at(1)).toHaveProp('row', data[1]);
     });
+    it('sets editing cell on row click', () => {
+        const col = 1;
+        const component = shallow(<Table columns={columns} data={data} />);
+
+        component.find(Row).at(1).prop('onClick')?.(col);
+
+        expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+        expect(component.find(Row).at(1)).toHaveProp('editCell', col);
+    });
+    it('ends editing on row commit', () => {
+        const mockRef = {current: {focus: jest.fn()}};
+        jest.spyOn(React, 'useRef').mockReturnValue(mockRef);
+        const col = 1;
+        const component = shallow(<Table columns={columns} data={data} />);
+        component.find(Row).at(1).prop('onClick')?.(col);
+
+        component.find(Row).at(1).prop('onCommit')?.();
+
+        expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+        expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+        expect(mockRef.current.focus).toBeCalledTimes(1);
+    });
+    it('handles null ref (that should never happen)', () => {
+        jest.spyOn(React, 'useRef').mockReturnValue({current: null});
+        const col = 1;
+        const component = shallow(<Table columns={columns} data={data} />);
+        component.find(Row).at(1).prop('onClick')?.(col);
+
+        component.find(Row).at(1).prop('onCommit')?.();
+
+        expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+        expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+    });
 });

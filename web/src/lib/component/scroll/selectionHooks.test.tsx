@@ -51,8 +51,8 @@ describe('selectionHooks', () => {
             const headerHeight = 15;
             const pageSize = containerHeight / rowHeight;
 
-            const mockKeyEvent = (key: string, ctrlKey: boolean) => ({
-                currentTarget: container, key, ctrlKey,
+            const mockKeyEvent = (key: string, ctrlKey: boolean, shiftKey = false) => ({
+                currentTarget: container, key, ctrlKey, shiftKey,
                 stopPropagation: jest.fn(),
                 preventDefault: jest.fn(),
             } as unknown as React.KeyboardEvent<HTMLElement>);
@@ -124,24 +124,45 @@ describe('selectionHooks', () => {
             );
 
             const columnTests = [
-                {name: 'selects previous column on left arrow', key: 'ArrowLeft', ctrl: false, initialColumn: 2, expectedColumn: 1},
-                {name: 'wraps to last column on left arrow', key: 'ArrowLeft', ctrl: false, initialColumn: 0, expectedColumn: columns - 1},
-                {name: 'selects next column on right arrow', key: 'ArrowRight', ctrl: false, initialColumn: 0, expectedColumn: 1},
-                {name: 'wraps to first column on right arrow', key: 'ArrowRight', ctrl: false, initialColumn: columns - 1, expectedColumn: 0},
-                {name: 'selects first column on home', key: 'Home', ctrl: false, initialColumn: columns - 1, expectedColumn: 0},
-                {name: 'remains at current column on ctrl+home', key: 'Home', ctrl: true, initialColumn: 1, expectedColumn: 1},
-                {name: 'selects last column on end', key: 'End', ctrl: false, initialColumn: 0, expectedColumn: columns - 1},
-                {name: 'remains at current column on ctrl+end', key: 'End', ctrl: true, initialColumn: 1, expectedColumn: 1},
+                {name: 'selects previous column on left arrow', key: 'ArrowLeft', ctrl: false,
+                    initial: {column: 2}, expected: {column: 1}},
+                {name: 'wraps to last column on left arrow', key: 'ArrowLeft', ctrl: false,
+                    initial: {column: 0}, expected: {column: columns - 1}},
+                {name: 'selects next column on right arrow', key: 'ArrowRight', ctrl: false,
+                    initial: {column: 0}, expected: {column: 1}},
+                {name: 'wraps to first column on right arrow', key: 'ArrowRight', ctrl: false,
+                    initial: {column: columns - 1}, expected: {column: 0}},
+                {name: 'selects first column on home', key: 'Home', ctrl: false,
+                    initial: {column: columns - 1}, expected: {column: 0}},
+                {name: 'remains at current column on ctrl+home', key: 'Home', ctrl: true,
+                    initial: {column: 1}, expected: {column: 1}},
+                {name: 'selects last column on end', key: 'End', ctrl: false,
+                    initial: {column: 0}, expected: {column: columns - 1}},
+                {name: 'remains at current column on ctrl+end', key: 'End', ctrl: true,
+                    initial: {column: 1}, expected: {column: 1}},
+                {name: 'selects next column on tab', key: 'Tab', ctrl: false,
+                    initial: {column: 0}, expected: {column: 1}},
+                {name: 'wraps to next row on tab', key: 'Tab', ctrl: false,
+                    initial: {column: columns - 1, row: 0}, expected: {column: 0, row: 1}},
+                {name: 'remains on last cell row on tab', key: 'Tab', ctrl: false,
+                    initial: {column: columns - 1, row: rows - 1}, expected: {column: columns - 1, row: rows - 1}},
+                {name: 'selects previous column on shift tab', key: 'Tab', ctrl: false, shift: true,
+                    initial: {column: 2}, expected: {column: 1}},
+                {name: 'wraps to previous row on shift tab', key: 'Tab', ctrl: false, shift: true,
+                    initial: {column: 0, row: 1}, expected: {column: columns - 1, row: 0}},
+                {name: 'remains on first cell on shift tab', key: 'Tab', ctrl: false, shift: true,
+                    initial: {column: 0, row: 0}, expected: {column: 0, row: 0}},
             ];
-            columnTests.forEach(({name, initialColumn, key, ctrl, expectedColumn}) =>
+            columnTests.forEach(({name, initial, key, ctrl, shift, expected}) =>
                 it(name, () => {
-                    setup(options);
-                    for (let index = 0; index < initialColumn; index++) hook.onKeyDown!(mockKeyEvent('ArrowRight', false));
-                    const event = mockKeyEvent(key, ctrl);
+                    setup({...options, initialRow: initial.row});
+                    for (let index = 0; index < initial.column; index++) hook.onKeyDown!(mockKeyEvent('ArrowRight', false));
+                    const event = mockKeyEvent(key, ctrl, shift);
 
                     hook.onKeyDown!(event);
 
-                    expect(hook.column).toEqual(expectedColumn);
+                    expect(hook.column).toEqual(expected.column);
+                    if (expected.row) expect(hook.row).toEqual(expected.row);
                 })
             );
         });

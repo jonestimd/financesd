@@ -1,7 +1,14 @@
-import {ReactNode} from "react";
+import React, {ReactNode} from "react";
 import classNames from "classnames";
+import {ICellEditorProps} from "./CellEditor";
 
 type ClassSupplier<T> = string | ((row?: T) => string);
+
+export interface IColumnEditor<T> {
+    Component: React.JSXElementConstructor<ICellEditorProps<string>>;
+    getValue: (row: T) => string;
+    setValue: (row: T, value: string) => void;
+}
 
 export interface IColumn<T> {
     key: string;
@@ -9,6 +16,7 @@ export interface IColumn<T> {
     colspan?: number;
     header?: (key: string) => ReactNode;
     render: (row: T) => React.ReactNode;
+    editor?: IColumnEditor<T>;
 }
 
 function evalSupplier<T>(supplier?: ClassSupplier<T>, row?: T): string {

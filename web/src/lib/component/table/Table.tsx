@@ -28,23 +28,36 @@ export const selectionOptions = {
     headerSelector: 'thead',
 };
 
+const startEdit = (e: React.KeyboardEvent<HTMLElement>) => {
+    return !e.ctrlKey && !e.altKey && (e.key.length === 1 || e.key === 'F2') || e.key === 'Delete' || e.key === 'Backspace';
+};
+
 const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
     const selection = useSelection({rows: data.length, columns: columns.length, ...selectionOptions});
-    const [editCell, setEditCell] = useState<{row: number, col: number} | undefined>(undefined);
+    const [editCell, setEditCell] = useState<{row: number, column: number} | undefined>(undefined);
     const containerRef = useRef<HTMLDivElement>(null);
     const stopEditing = () => {
         setEditCell(undefined);
         containerRef.current?.focus();
     };
+    const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+        if (startEdit(e)) {
+            if (columns[selection.column].editor) {
+                const {row, column} = selection;
+                setEditCell({row, column});
+            }
+        }
+        else selection.onKeyDown(e);
+    };
     return (
-        <div className='scroll-container' onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0} ref={containerRef}>
+        <div className='scroll-container' onKeyDown={onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0} ref={containerRef}>
             <MuiTable className={classNames('table', className)}>
                 <TableHead><HeaderRow columns={columns} /></TableHead>
                 <TableBody>
                     {data.map((row, index) =>
                         <Row<T> key={row.id} row={row} className={rowClass(index, selection)} columns={columns} selection={selection}
-                            onClick={(col) => setEditCell({row: index, col})}
-                            editCell={editCell?.row === index && editCell.col}
+                            onClick={(column) => setEditCell({row: index, column})}
+                            editCell={editCell?.row === index && editCell.column}
                             onCommit={stopEditing} />
                     )}
                 </TableBody>

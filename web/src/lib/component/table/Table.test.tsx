@@ -7,19 +7,25 @@ import {IColumn} from './Column';
 import {mockSelectionHook} from 'src/test/mockHooks';
 import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
+import TextCellEditor from './TextCellEditor';
 
 class TestRow {
     constructor(
         readonly id: string,
-        readonly c1: string,
+        public c1: string,
         readonly c2: string | number,
         readonly c3: string
     ) { }
 }
 
 describe('Table', () => {
+    const editor = {
+        Component: TextCellEditor,
+        getValue: (r: TestRow) => r.c1,
+        setValue: (r: TestRow, value: string) => r.c1 = value,
+    };
     const columns: IColumn<TestRow>[] = [
-        {key: 'first', className: 'col1', render: (row) => row.c1},
+        {key: 'first', className: 'col1', render: (row) => row.c1, editor},
         {key: 'second', className: (row) => typeof row?.c2, render: (row) => row.c2, colspan: 2},
         {key: 'third', render: (row) => row.c3, header: (key) => key.toUpperCase()},
     ];
@@ -35,7 +41,6 @@ describe('Table', () => {
 
         const container = component.find('.scroll-container');
         expect(container).toExist();
-        expect(container).toHaveProp('onKeyDown', selection.onKeyDown);
         expect(container).toHaveProp('onMouseDown', selection.onMouseDown);
         expect(container).toHaveProp('tabIndex', 0);
     });
@@ -90,5 +95,50 @@ describe('Table', () => {
 
         expect(component.find(Row).at(0)).toHaveProp('editCell', false);
         expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+    });
+    describe('onKeyDown', () => {
+        it('calls selection hook for non-printable char on editable cell', () => {
+            const selection = mockSelectionHook(1, 0);
+            const component = shallow(<Table columns={columns} data={data} />);
+
+            const event = {ctrlKey: false, altKey: false, key: 'Left'};
+            component.simulate('keydown', event);
+
+            expect(selection.onKeyDown).toBeCalledWith(event);
+            expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+            expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+        });
+        it('does not start editing for printable char on non-editable cell', () => {
+            const selection = mockSelectionHook(1, 1);
+            const component = shallow(<Table columns={columns} data={data} />);
+
+            component.simulate('keydown', {ctrlKey: false, altKey: false, key: 'x'});
+
+            expect(selection.onKeyDown).not.toBeCalled();
+            expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+            expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+        });
+        const startEditTests = [
+            {name: 'printable char', ctrlKey: false, altKey: false, key: 'x'},
+            {name: 'F2', ctrlKey: false, altKey: false, key: 'F2'},
+            {name: 'Backspace', ctrlKey: false, key: 'Backspace'},
+            {name: 'alt+Backspace', altKey: false, key: 'Backspace'},
+            {name: 'ctrl+Backspace', ctrlKey: true, key: 'Backspace'},
+            {name: 'Delete', ctrlKey: false, key: 'Delete'},
+            {name: 'alt+Delete', altKey: true, key: 'Delete'},
+            {name: 'ctrl+Delete', ctrlKey: true, key: 'Delete'},
+        ];
+        startEditTests.forEach(({name, ctrlKey, altKey, key}) => {
+            it(`starts editing for ${name} on editable cell`, () => {
+                const selection = mockSelectionHook(1, 0);
+                const component = shallow(<Table columns={columns} data={data} />);
+
+                component.simulate('keydown', {ctrlKey, altKey, key});
+
+                expect(selection.onKeyDown).not.toBeCalled();
+                expect(component.find(Row).at(0)).toHaveProp('editCell', false);
+                expect(component.find(Row).at(1)).toHaveProp('editCell', 0);
+            });
+        });
     });
 });

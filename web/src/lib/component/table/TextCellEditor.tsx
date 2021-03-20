@@ -16,6 +16,7 @@ const TextCellEditor: React.FC<ICellEditorProps<string>> = ({value, onCommit}) =
     return (
         <InputBase value={text} autoFocus fullWidth
             onChange={(e) => setText(e.target.value)}
+            onBlur={() => onCommit(text)}
             onKeyDown={onKeyDown} />
     );
 };

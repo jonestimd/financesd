@@ -47,4 +47,12 @@ describe('TextCellEditor', () => {
         expect(stopPropagation).not.toBeCalled();
         expect(onCommit).not.toBeCalled();
     });
+    it('commits value on blur', () => {
+        const component = shallow(<TextCellEditor {...props} />);
+
+        component.simulate('change', {target: {value: 'new value'}});
+        component.simulate('blur');
+
+        expect(onCommit).toBeCalled();
+    });
 });

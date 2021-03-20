@@ -1,5 +1,5 @@
-import {newSecurity} from "src/test/securityFactory";
-import {SecurityModel} from "./SecurityModel";
+import {newSecurity} from 'src/test/securityFactory';
+import {SecurityModel} from './SecurityModel';
 
 describe('SecurityModel', () => {
     const security = newSecurity();

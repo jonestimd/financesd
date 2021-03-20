@@ -1,6 +1,6 @@
-import {newAccount, newAccountModel, newCompanyModel} from "src/test/accountFactory";
-import settingsStore from "../store/settingsStore";
-import {AccountModel} from "./AccountModel";
+import {newAccount, newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import settingsStore from '../store/settingsStore';
+import {AccountModel} from './AccountModel';
 
 describe('AccountModel', () => {
     const account = newAccount();

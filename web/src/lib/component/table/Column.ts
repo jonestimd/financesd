@@ -1,6 +1,6 @@
-import React, {ReactNode} from "react";
-import classNames from "classnames";
-import {ICellEditorProps} from "./CellEditor";
+import React, {ReactNode} from 'react';
+import classNames from 'classnames';
+import {ICellEditorProps} from './CellEditor';
 
 type ClassSupplier<T> = string | ((row?: T) => string);
 

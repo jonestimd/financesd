@@ -1,4 +1,4 @@
-import MessageStore from "./MessageStore";
+import MessageStore from './MessageStore';
 
 describe('MessageStore', () => {
     describe('addProgressMessage', () => {

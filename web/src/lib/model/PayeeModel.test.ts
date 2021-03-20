@@ -1,5 +1,5 @@
-import {newPayee} from "src/test/payeeFactory";
-import {PayeeModel} from "./PayeeModel";
+import {newPayee} from 'src/test/payeeFactory';
+import {PayeeModel} from './PayeeModel';
 
 describe('PayeeModel', () => {
     const payee = newPayee();

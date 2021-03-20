@@ -1,10 +1,10 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {AccountModel} from "../model/AccountModel";
-import {newAccount, newAccountModel, newCompany, newCompanyModel} from "src/test/accountFactory";
-import {loadingAccounts, query} from "./AccountStore";
-import {CompanyModel} from "../model/CompanyModel";
+import {AccountModel} from '../model/AccountModel';
+import {newAccount, newAccountModel, newCompany, newCompanyModel} from 'src/test/accountFactory';
+import {loadingAccounts, query} from './AccountStore';
+import {CompanyModel} from '../model/CompanyModel';
 
 describe('AccountStore', () => {
     const {accountStore, messageStore} = new RootStore();

@@ -1,4 +1,4 @@
-import {addToMap, compareBy, compareByName, IName, sortValuesByName} from "./entityUtils";
+import {addToMap, compareBy, compareByName, IName, sortValuesByName} from './entityUtils';
 
 describe('entityUtils', () => {
     const item1 = {name: 'abc'};

@@ -1,6 +1,6 @@
-import {reaction} from "mobx";
-import {createDiv} from "src/test/htmlUtils";
-import SelectionModel from "./SelectionModel";
+import {reaction} from 'mobx';
+import {createDiv} from 'src/test/htmlUtils';
+import SelectionModel from './SelectionModel';
 
 function testAction(get: () => void, actionToTest: () => void) {
     const listen = jest.fn();

@@ -1,8 +1,8 @@
-import {newDetail} from "src/test/detailFactory";
-import {newTx} from "src/test/transactionFactory";
-import {RootStore} from "../store/RootStore";
-import TransactionModel from "./TransactionModel";
-import TransactionTableModel from "./TransactionTableModel";
+import {newDetail} from 'src/test/detailFactory';
+import {newTx} from 'src/test/transactionFactory';
+import {RootStore} from '../store/RootStore';
+import TransactionModel from './TransactionModel';
+import TransactionTableModel from './TransactionTableModel';
 
 describe('TransactionTableModel', () => {
     const {categoryStore} = new RootStore();

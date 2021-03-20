@@ -1,4 +1,4 @@
-import {ISecurity, SecurityModel} from "src/lib/model/SecurityModel";
+import {ISecurity, SecurityModel} from 'src/lib/model/SecurityModel';
 
 let nextId = 0;
 

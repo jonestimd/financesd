@@ -1,6 +1,6 @@
-import {ICategory, CategoryModel} from "src/lib/model/CategoryModel";
-import CategoryStore from "src/lib/store/CategoryStore";
-import MessageStore from "src/lib/store/MessageStore";
+import {ICategory, CategoryModel} from 'src/lib/model/CategoryModel';
+import CategoryStore from 'src/lib/store/CategoryStore';
+import MessageStore from 'src/lib/store/MessageStore';
 
 let nextId = 0;
 

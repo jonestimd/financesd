@@ -9,6 +9,8 @@ import {IColumn} from './table/Column';
 import {AccountModel} from '../model/AccountModel';
 import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';
+import CompaniesDialog from './CompaniesDialog';
+import {Icon, IconButton} from '@material-ui/core';
 
 const columns: IColumn<AccountModel>[] = [
     {key: 'account.company', render: (account) => account.companyName},

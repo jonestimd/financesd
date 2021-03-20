@@ -1,4 +1,4 @@
-import {newAccountModel, newCompanyModel} from "src/test/accountFactory";
+import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 
 describe('CompanyModel', () => {
     describe('filteredAccounts', () => {

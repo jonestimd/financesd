@@ -1,6 +1,6 @@
-import {computed, makeObservable, observable} from "mobx";
-import {AccountModel} from "./AccountModel";
-import {compareByName} from "./entityUtils";
+import {computed, makeObservable, observable} from 'mobx';
+import {AccountModel} from './AccountModel';
+import {compareByName} from './entityUtils';
 
 export interface ICompany {
     id: string;
@@ -13,6 +13,7 @@ export class CompanyModel implements ICompany {
     @observable name: string;
     @observable version: number;
     @observable readonly accounts: AccountModel[];
+    // @observable private _newName?: string;
 
     constructor(company: ICompany, accounts: AccountModel[] = []) {
         this.id = company.id;

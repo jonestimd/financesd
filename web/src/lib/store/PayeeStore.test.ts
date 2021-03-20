@@ -1,9 +1,9 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {loadingPayees, query} from "./PayeeStore";
-import {newPayee, newPayeeModel} from "src/test/payeeFactory";
-import {PayeeModel} from "../model/PayeeModel";
+import {loadingPayees, query} from './PayeeStore';
+import {newPayee, newPayeeModel} from 'src/test/payeeFactory';
+import {PayeeModel} from '../model/PayeeModel';
 
 describe('PayeeStore', () => {
     const {payeeStore, messageStore} = new RootStore();

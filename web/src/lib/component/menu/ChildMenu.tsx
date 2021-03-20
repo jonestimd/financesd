@@ -11,7 +11,7 @@ interface IChildMenuProps {
 const ChildMenu: React.FC<IChildMenuProps> = ({children, name, onBack}) => {
     return (
         <MenuList>
-            <MenuItem onClick={onBack} divider><Icon>chevron_left</Icon>{translate("menu.back")}</MenuItem>
+            <MenuItem onClick={onBack} divider><Icon>chevron_left</Icon>{translate('menu.back')}</MenuItem>
             {name && <MenuItem className='menu-title' disabled divider>{name}</MenuItem>}
             {children}
         </MenuList>

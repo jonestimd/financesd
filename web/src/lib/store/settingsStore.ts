@@ -1,4 +1,4 @@
-import {makeObservable, observable, runInAction} from "mobx";
+import {makeObservable, observable, runInAction} from 'mobx';
 
 const hideClosedAccounts = 'hideClosedAccounts';
 

@@ -1,4 +1,4 @@
-import {action, makeObservable, observable} from "mobx";
+import {action, makeObservable, observable} from 'mobx';
 
 const defaultRowHeight = 24;
 

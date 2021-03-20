@@ -1,9 +1,9 @@
-import {newCategory, newCategoryModel} from "src/test/categoryFactory";
-import {RootStore} from "./RootStore";
+import {newCategory, newCategoryModel} from 'src/test/categoryFactory';
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {loadingCategories, query} from "./CategoryStore";
-import {CategoryModel} from "../model/CategoryModel";
+import {loadingCategories, query} from './CategoryStore';
+import {CategoryModel} from '../model/CategoryModel';
 
 describe('CategoryStore', () => {
     const {categoryStore, messageStore} = new RootStore();

@@ -1,4 +1,4 @@
-import {IPayee, PayeeModel} from "src/lib/model/PayeeModel";
+import {IPayee, PayeeModel} from 'src/lib/model/PayeeModel';
 
 let nextId = 0;
 

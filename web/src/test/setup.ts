@@ -10,7 +10,7 @@ expect.extend({
         const diff = Object.keys(actual).filter((key) => received.prop(key) !== actual[key]);
         if (diff.length === 0) return {
             pass: true,
-            message: () => `expected prop values not to match`,
+            message: () => 'expected prop values not to match',
         };
         return {
             pass: false,

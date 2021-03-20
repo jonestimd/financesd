@@ -1,7 +1,7 @@
-import TransactionTableModel from "../model/TransactionTableModel";
-import {RootStore} from "./RootStore";
+import TransactionTableModel from '../model/TransactionTableModel';
+import {RootStore} from './RootStore';
 import * as agent from '../agent';
-import {loadingTransactions, query} from "./TransactionStore";
+import {loadingTransactions, query} from './TransactionStore';
 
 describe('TransactionStore', () => {
     const accountId = '1';

@@ -1,9 +1,9 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {loadingSecurities, query} from "./SecurityStore";
-import {newSecurity, newSecurityModel} from "src/test/securityFactory";
-import {SecurityModel} from "../model/SecurityModel";
+import {loadingSecurities, query} from './SecurityStore';
+import {newSecurity, newSecurityModel} from 'src/test/securityFactory';
+import {SecurityModel} from '../model/SecurityModel';
 
 describe('SecurityStore', () => {
     const {securityStore, messageStore} = new RootStore();

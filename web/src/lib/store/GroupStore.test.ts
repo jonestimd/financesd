@@ -1,9 +1,9 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {newGroup, newGroupModel} from "src/test/groupFactory";
-import {GroupModel} from "../model/GroupModel";
-import {loadingGroups, query} from "./GroupStore";
+import {newGroup, newGroupModel} from 'src/test/groupFactory';
+import {GroupModel} from '../model/GroupModel';
+import {loadingGroups, query} from './GroupStore';
 
 describe('GroupStore', () => {
     const {groupStore, messageStore} = new RootStore();

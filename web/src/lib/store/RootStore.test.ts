@@ -1,5 +1,5 @@
-import MessageStore from "./MessageStore";
-import {RootStore} from "./RootStore";
+import MessageStore from './MessageStore';
+import {RootStore} from './RootStore';
 
 describe('RootStore', () => {
     it('creates other stores', () => {

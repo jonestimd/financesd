@@ -3,16 +3,15 @@ import {TableRow, TableCell} from '@material-ui/core';
 import {IHeaderProps} from './HeaderRow';
 import {columnClasses, IColumnEditor} from './Column';
 import classNames from 'classnames';
+import {observer} from 'mobx-react-lite';
+import {ICell} from '../../model/SelectionModel';
 
 interface IRowProps<T> extends IHeaderProps<T> {
     row: T;
     onClick?: (col: number) => void;
     editCell?: number | false;
     onCommit?: () => void;
-    selection?: {
-        row?: number;
-        column?: number;
-    };
+    selection?: Pick<ICell, 'column'>;
 }
 
 interface IEditorProps<T> extends IColumnEditor<T> {
@@ -28,8 +27,8 @@ const Editor = <T extends unknown>({Component, row, getValue, setValue, onCommit
     return <Component value={getValue(row)} onCommit={endEdit} />;
 };
 
-const Row = <T extends unknown>({row, className, columns, onClick, editCell, onCommit, selection = {}}: IRowProps<T>) => {
-    const classes = columnClasses(columns, selection.column, row);
+const Row = <T extends unknown>({row, className, columns, onClick, editCell, onCommit, selection}: IRowProps<T>) => {
+    const classes = columnClasses(columns, selection?.column, row);
     return (
         <TableRow className={className}>
             {columns.map(({key, render, colspan, editor}, index) => {
@@ -44,4 +43,4 @@ const Row = <T extends unknown>({row, className, columns, onClick, editCell, onC
     );
 };
 
-export default Row;
+export default observer(Row);

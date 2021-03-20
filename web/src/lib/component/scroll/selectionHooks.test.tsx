@@ -1,6 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {useSelection, ISelectionOptions} from './selectionHooks';
+import {createDiv} from 'src/test/htmlUtils';
 
 const hook: Partial<ReturnType<typeof useSelection>> = {};
 
@@ -13,12 +14,6 @@ function setup(options: ISelectionOptions) {
     return component;
 }
 const document = new Document();
-
-function createDiv() {
-    const div = document.createElement('div');
-    div.scrollTo = jest.fn();
-    return div;
-}
 
 describe('selectionHooks', () => {
     const rows = 1245;

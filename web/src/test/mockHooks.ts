@@ -22,6 +22,7 @@ export function mockSelectionHook(row = 0, column = 0) {
     const selection = {
         row,
         column,
+        setCell: jest.fn(),
         onKeyDown: jest.fn(),
         onMouseDown: jest.fn(),
     };

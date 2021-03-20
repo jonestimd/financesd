@@ -4,10 +4,10 @@ import Table from './Table';
 import HeaderRow from './HeaderRow';
 import Row from './Row';
 import {IColumn} from './Column';
-import {mockSelectionHook} from 'src/test/mockHooks';
 import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TextCellEditor from './TextCellEditor';
+import SelectionModel from 'src/lib/model/SelectionModel';
 
 class TestRow {
     constructor(
@@ -35,14 +35,13 @@ describe('Table', () => {
     ];
 
     it('tracks selected cell', () => {
-        const selection = mockSelectionHook();
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
 
-        const component = shallow(<Table columns={columns} data={data} />);
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
         const container = component.find('.scroll-container');
         expect(container).toExist();
         expect(container).toHaveProp('onMouseDown', selection.onMouseDown);
-        expect(container).toHaveProp('tabIndex', 0);
     });
     it('displays header row', () => {
         const component = shallow(<Table columns={columns} data={data} />);
@@ -52,7 +51,8 @@ describe('Table', () => {
         expect(header.find(HeaderRow)).toHaveProp('columns', columns);
     });
     it('populates table body using data', () => {
-        const component = shallow(<Table columns={columns} data={data} />);
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
         const body = component.find(TableBody);
 
@@ -64,26 +64,21 @@ describe('Table', () => {
         expect(rows.at(1)).toHaveProp('row', data[1]);
     });
     it('sets editing cell on row click', () => {
-        const col = 1;
-        const component = shallow(<Table columns={columns} data={data} />);
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
-        component.find(Row).at(1).prop('onClick')?.(col);
+        component.find(Row).at(1).prop('onClick')?.(1);
 
-        expect(component.find(Row).at(0)).toHaveProp('editCell', false);
-        expect(component.find(Row).at(1)).toHaveProp('editCell', col);
+        expect(selection.editCell).toEqual({row: 1, column: 1});
     });
     it('ends editing on row commit', () => {
-        const mockRef = {current: {focus: jest.fn()}};
-        jest.spyOn(React, 'useRef').mockReturnValue(mockRef);
-        const col = 1;
-        const component = shallow(<Table columns={columns} data={data} />);
-        component.find(Row).at(1).prop('onClick')?.(col);
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        jest.spyOn(selection, 'stopEditing');
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
         component.find(Row).at(1).prop('onCommit')?.();
 
-        expect(component.find(Row).at(0)).toHaveProp('editCell', false);
-        expect(component.find(Row).at(1)).toHaveProp('editCell', false);
-        expect(mockRef.current.focus).toBeCalledTimes(1);
+        expect(selection.stopEditing).toBeCalledTimes(1);
     });
     it('handles null ref (that should never happen)', () => {
         jest.spyOn(React, 'useRef').mockReturnValue({current: null});
@@ -96,27 +91,39 @@ describe('Table', () => {
         expect(component.find(Row).at(0)).toHaveProp('editCell', false);
         expect(component.find(Row).at(1)).toHaveProp('editCell', false);
     });
+    it('edits a cell', () => {
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        selection.cell.row = 1;
+        selection.editCell = selection.cell;
+
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
+
+        const rows = component.find(Row);
+        expect(rows.at(0)).toHaveProp('editCell', false);
+        expect(rows.at(1)).toHaveProp('editCell', 0);
+    });
     describe('onKeyDown', () => {
         it('calls selection hook for non-printable char on editable cell', () => {
-            const selection = mockSelectionHook(1, 0);
-            const component = shallow(<Table columns={columns} data={data} />);
+            const selection = new SelectionModel({rows: 2, columns: columns.length});
+            jest.spyOn(selection, 'onKeyDown').mockReturnValue();
+            const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
             const event = {ctrlKey: false, altKey: false, key: 'Left'};
             component.simulate('keydown', event);
 
             expect(selection.onKeyDown).toBeCalledWith(event);
-            expect(component.find(Row).at(0)).toHaveProp('editCell', false);
-            expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+            expect(selection.editCell).toBeUndefined();
         });
         it('does not start editing for printable char on non-editable cell', () => {
-            const selection = mockSelectionHook(1, 1);
-            const component = shallow(<Table columns={columns} data={data} />);
+            const selection = new SelectionModel({rows: 2, columns: columns.length});
+            selection.cell.column = 1;
+            jest.spyOn(selection, 'onKeyDown').mockReturnValue();
+            const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
             component.simulate('keydown', {ctrlKey: false, altKey: false, key: 'x'});
 
             expect(selection.onKeyDown).not.toBeCalled();
-            expect(component.find(Row).at(0)).toHaveProp('editCell', false);
-            expect(component.find(Row).at(1)).toHaveProp('editCell', false);
+            expect(selection.editCell).toBeUndefined();
         });
         const startEditTests = [
             {name: 'printable char', ctrlKey: false, altKey: false, key: 'x'},
@@ -130,14 +137,15 @@ describe('Table', () => {
         ];
         startEditTests.forEach(({name, ctrlKey, altKey, key}) => {
             it(`starts editing for ${name} on editable cell`, () => {
-                const selection = mockSelectionHook(1, 0);
-                const component = shallow(<Table columns={columns} data={data} />);
+                const selection = new SelectionModel({rows: 2, columns: columns.length});
+                selection.cell.row = 1;
+                jest.spyOn(selection, 'onKeyDown');
+                const component = shallow(<Table columns={columns} data={data} selection={selection} />);
 
                 component.simulate('keydown', {ctrlKey, altKey, key});
 
                 expect(selection.onKeyDown).not.toBeCalled();
-                expect(component.find(Row).at(0)).toHaveProp('editCell', false);
-                expect(component.find(Row).at(1)).toHaveProp('editCell', 0);
+                expect(selection.editCell).toEqual({row: 1, column: 0});
             });
         });
     });

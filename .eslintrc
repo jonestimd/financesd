@@ -14,6 +14,7 @@
     "rules": {
         "eol-last": "error",
         "arrow-parens": ["error", "always"],
+        "arrow-spacing": ["error", {"before": true, "after": true}],
         "indent": "off",
         "@typescript-eslint/indent": ["error"],
         "@typescript-eslint/comma-dangle": ["error", "always-multiline"],

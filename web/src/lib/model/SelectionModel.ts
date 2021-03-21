@@ -16,7 +16,7 @@ function isTableCell(elem: EventTarget): elem is HTMLTableCellElement {
     return elem instanceof Element && elem.tagName.toLocaleLowerCase() === 'td';
 }
 
-interface IOptions {
+export interface IOptions {
     rows: number;
     columns: number;
     rowSelector?: string;
@@ -90,8 +90,12 @@ export default class SelectionModel {
     private ensureVisible() {
         const container = this.container;
         if (container) {
-            const rowElement = container.querySelectorAll(this.rowSelector)[this.cell.row - this.rowOffset];
-            rowElement?.scrollIntoView();
+            const {clientHeight, scrollTop} = container;
+            const headerHeight = this.headerSelector ? getHeight(container, this.headerSelector) ?? defaultRowHeight : 0;
+            const rowHeight = getHeight(container, this.rowSelector) ?? defaultRowHeight;
+            const rowTop = this.cell.row * rowHeight;
+            if (rowTop < scrollTop) container.scrollTo({top: rowTop});
+            else if (rowTop + rowHeight > scrollTop + clientHeight) container.scrollTo({top: rowTop + headerHeight - clientHeight + rowHeight});
         }
     }
 

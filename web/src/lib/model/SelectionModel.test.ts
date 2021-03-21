@@ -18,8 +18,8 @@ describe('SelectionModel', () => {
     const options = {rows, columns, rowSelector};
     const container = createDiv();
 
-    function setupModel(rowIndex: number) {
-        const model = new SelectionModel(options);
+    function setupModel(rowIndex: number, headerSelector?: string) {
+        const model = new SelectionModel({...options, headerSelector});
         model.cell.row = rowIndex;
         model.containerRef(container);
         return model;
@@ -108,12 +108,6 @@ describe('SelectionModel', () => {
             preventDefault: jest.fn(),
         } as unknown as React.KeyboardEvent<HTMLElement>);
 
-        function setupChildren(rowIndex: number) {
-            const children = new Array(rows).fill(null);
-            children[rowIndex] = row;
-            jest.spyOn(container, 'querySelectorAll').mockReturnValue(children as unknown as NodeListOf<Element>);
-        }
-
         beforeEach(() => {
             jest.spyOn(container, 'getBoundingClientRect').mockReturnValue({height: containerHeight} as DOMRect);
             jest.spyOn(container, 'clientHeight', 'get').mockReturnValue(containerHeight);
@@ -135,19 +129,20 @@ describe('SelectionModel', () => {
         });
         it('scrolls up to selected row', () => {
             const initialRow = pageSize * 2;
-            setupChildren(initialRow - pageSize);
+            jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((initialRow - pageSize / 2) * rowHeight);
 
-            setupModel(initialRow).onKeyDown(mockKeyEvent('PageUp', false));
+            setupModel(initialRow, headerSelector).onKeyDown(mockKeyEvent('PageUp', false));
 
-            expect(row.scrollIntoView).toBeCalled();
+            expect(container.scrollTo).toBeCalledWith({top: (initialRow - pageSize) * rowHeight});
         });
         it('scrolls down to selected row', () => {
             const initialRow = pageSize * 2;
-            setupChildren(initialRow + pageSize);
+            jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((initialRow - pageSize / 2) * rowHeight);
 
-            setupModel(initialRow).onKeyDown(mockKeyEvent('PageDown', false));
+            setupModel(initialRow, headerSelector).onKeyDown(mockKeyEvent('PageDown', false));
 
-            expect(row.scrollIntoView).toBeCalled();
+            const finalRow = initialRow + pageSize;
+            expect(container.scrollTo).toBeCalledWith({top: finalRow * rowHeight + headerHeight - containerHeight + rowHeight});
         });
         const rowTests = [
             {name: 'selects previous row on up arrow', key: 'ArrowUp', ctrl: false, initialRow: 9, expectedRow: 8},

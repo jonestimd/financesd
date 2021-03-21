@@ -1,14 +1,6 @@
-import {reaction} from 'mobx';
 import {createDiv} from 'src/test/htmlUtils';
+import {testAction} from 'src/test/mobxUtils';
 import SelectionModel from './SelectionModel';
-
-function testAction(get: () => void, actionToTest: () => void) {
-    const listen = jest.fn();
-    const dispose = reaction(get, listen);
-    actionToTest();
-    dispose();
-    expect(listen).toBeCalledTimes(1);
-}
 
 describe('SelectionModel', () => {
     const rows = 1245;

@@ -50,7 +50,7 @@ describe('GroupStore', () => {
             expect(groupStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingGroups);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingGroups);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query);
             expect(groupStore.groups).toStrictEqual([new GroupModel(group)]);
         });
         it('does nothing is already loading', async () => {

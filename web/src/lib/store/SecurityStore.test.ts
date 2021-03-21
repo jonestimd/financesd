@@ -50,7 +50,7 @@ describe('SecurityStore', () => {
             expect(securityStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingSecurities);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingSecurities);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query);
             expect(securityStore.securities).toStrictEqual([new SecurityModel(security)]);
         });
         it('does nothing is already loading', async () => {

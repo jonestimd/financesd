@@ -55,7 +55,7 @@ describe('CategoryStore', () => {
             expect(categoryStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingCategories);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingCategories);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query);
             expect(categoryStore.categories).toStrictEqual([new CategoryModel(category, categoryStore)]);
         });
         it('does nothing is already loading', async () => {

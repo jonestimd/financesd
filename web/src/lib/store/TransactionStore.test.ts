@@ -54,7 +54,7 @@ describe('TransactionStore', () => {
 
             expect(transactionStore['pendingAccounts']).toHaveLength(0);
             expect(transactionStore.getTransactionsModel(accountId)).toBeInstanceOf(TransactionTableModel);
-            expect(agent.graphql).not.toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).not.toBeCalledWith(query);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingTransactions);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingTransactions);
         });

@@ -50,7 +50,7 @@ describe('PayeeStore', () => {
             expect(payeeStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingPayees);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingPayees);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query);
             expect(payeeStore.payees).toStrictEqual([new PayeeModel(payee)]);
         });
         it('does nothing is already loading', async () => {

@@ -40,7 +40,7 @@ export default class CategoryStore {
     private _loadCategories = flow(function* (this: CategoryStore): LoadResult<CategoryResponse> {
         this.loading = true;
         try {
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
+            const {data} = yield agent.graphql(query);
             addToMap(this.categoriesById, data.categories.map((category) => new CategoryModel(category, this)));
         } catch (err) {
             console.error('error gettting categories', err); // TODO show toast

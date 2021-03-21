@@ -69,7 +69,7 @@ export default class AccountStore {
     private _loadAccounts = flow(function* (this: AccountStore): LoadResult<AccountsResponse> {
         this.loading = true;
         try {
-            const {data: {accounts, companies}} = yield agent.graphql('/finances/api/v1/graphql', query);
+            const {data: {accounts, companies}} = yield agent.graphql(query);
             addToMap(this.companiesById, companies.map((company) => new CompanyModel(company)));
             addToMap(this.accountsById, accounts.map((account) => new AccountModel(account, this.companiesById.get('' + account.companyId))));
             for (const account of this.accounts) {

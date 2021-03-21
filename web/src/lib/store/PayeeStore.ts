@@ -44,7 +44,7 @@ export default class PayeeStore {
     private _loadPayees = flow(function* (this: PayeeStore): LoadResult<PayeesResponse> {
         this.loading = true;
         try {
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
+            const {data} = yield agent.graphql(query);
             addToMap(this.payeesById, data.payees.map((payee) => new PayeeModel(payee)));
         } catch (err) {
             console.error('error gettting payees', err); // TODO show toast

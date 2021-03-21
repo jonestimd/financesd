@@ -44,7 +44,7 @@ export default class TransactionStore {
         this.pendingAccounts.push(accountId);
         try {
             const variables = {accountId};
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query, variables);
+            const {data} = yield agent.graphql(query, variables);
             this.transactionsByAccountId.set(accountId, new TransactionTableModel(data.transactions, this.rootStore.categoryStore));
         } catch (err) {
             console.error('error gettting transactions', err);

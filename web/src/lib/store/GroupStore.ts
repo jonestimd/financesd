@@ -42,7 +42,7 @@ export default class GroupStore {
     private _loadGroups = flow(function* (this: GroupStore): LoadResult<GroupsResponse> {
         this.loading = true;
         try {
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
+            const {data} = yield agent.graphql(query);
             addToMap(this.groupsById, data.groups.map((group) => new GroupModel(group)));
         } catch (err) {
             console.error('error gettting groups', err); // TODO show toast

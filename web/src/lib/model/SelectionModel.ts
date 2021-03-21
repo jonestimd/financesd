@@ -50,7 +50,7 @@ export default class SelectionModel {
     readonly columns: number;
     readonly rowSelector: string;
     readonly headerSelector?: string;
-    private container: HTMLElement | null = null;
+    container: HTMLElement | null = null;
 
     constructor(options: IOptions) {
         this.rows = options.rows;
@@ -64,11 +64,6 @@ export default class SelectionModel {
         this.container = container;
         this.container?.focus();
     };
-
-    @action
-    setRows(rows: number) {
-        this.rows = rows;
-    }
 
     @action
     setCell(row: number, column: number) {
@@ -171,8 +166,12 @@ export default class SelectionModel {
     };
 
     @action
-    stopEditing = () => {
+    stopEditing() {
         this.setEditCell(undefined);
         this.container?.focus();
-    };
+    }
+
+    rowClass(index: number): string {
+        return index === this.cell.row ? 'selected': '';
+    }
 }

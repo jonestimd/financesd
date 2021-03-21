@@ -63,6 +63,26 @@ describe('Table', () => {
         expect(rows.at(1)).not.toHaveClassName('selected');
         expect(rows.at(1)).toHaveProp('row', data[1]);
     });
+    it('uses selection.validate', () => {
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        const validate = jest.fn();
+        Object.assign(selection, {validate});
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
+
+        component.find(Row).at(0).prop('validate')?.(data[0], 'key');
+
+        expect(validate).toBeCalledWith(data[0], 'key');
+    });
+    it('uses selection.isEditable', () => {
+        const selection = new SelectionModel({rows: 2, columns: columns.length});
+        const isEditable = jest.fn();
+        Object.assign(selection, {isEditable});
+        const component = shallow(<Table columns={columns} data={data} selection={selection} />);
+
+        component.find(Row).at(0).prop('isEditable')?.(data[0], 'key');
+
+        expect(isEditable).toBeCalledWith(data[0], 'key');
+    });
     it('sets editing cell on row click', () => {
         const selection = new SelectionModel({rows: 2, columns: columns.length});
         const component = shallow(<Table columns={columns} data={data} selection={selection} />);
@@ -103,6 +123,12 @@ describe('Table', () => {
         expect(rows.at(1)).toHaveProp('editCell', 0);
     });
     describe('onKeyDown', () => {
+        it('does nothing if no selection', () => {
+            const component = shallow(<Table columns={columns} data={data} />);
+
+            const event = {ctrlKey: false, altKey: false, key: 'Left'};
+            component.simulate('keydown', event);
+        });
         it('calls selection hook for non-printable char on editable cell', () => {
             const selection = new SelectionModel({rows: 2, columns: columns.length});
             jest.spyOn(selection, 'onKeyDown').mockReturnValue();

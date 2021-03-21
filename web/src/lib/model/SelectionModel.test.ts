@@ -53,15 +53,6 @@ describe('SelectionModel', () => {
             expect(model['container']).toBe(container);
         });
     });
-    describe('setRows', () => {
-        it('sets the row count', () => {
-            const model = new SelectionModel({rows: 19, columns: 3});
-
-            testAction(() => model.rows, () => model.setRows(20));
-
-            expect(model.rows).toEqual(20);
-        });
-    });
     describe('setCell', () => {
         it('sets the selected cell', () => {
             const model = new SelectionModel({rows: 19, columns: 3});
@@ -88,6 +79,25 @@ describe('SelectionModel', () => {
 
             expect(model.cell).toEqual({row: 5, column: 1});
             expect(model.editCell).toBeUndefined();
+        });
+    });
+    describe('stopEditing', () => {
+        it('clears edit cell', () => {
+            const model = new SelectionModel({rows: 19, columns: 3});
+            model.setEditCell({row: 5, column: 1});
+
+            testAction(() => model.editCell, () => model.stopEditing());
+
+            expect(model.editCell).toBeUndefined();
+        });
+        it('returns focus to container', () => {
+            const model = new SelectionModel({rows: 19, columns: 3});
+            model.container = createDiv();
+            jest.spyOn(model.container, 'focus');
+
+            model.stopEditing();
+
+            expect(model.container.focus).toBeCalledTimes(1);
         });
     });
     describe('onKeyDown', () => {

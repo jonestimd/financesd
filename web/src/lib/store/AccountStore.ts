@@ -34,7 +34,7 @@ export interface IUpdateCompanies {
     update: Pick<ICompany, 'id' | 'name' | 'version'>[];
 }
 
-export const loadingAccounts = 'Loading accounts...'; // TODO localization
+export const loadingAccounts = 'Loading accounts...';
 export const savingCompanies = 'Saving companies...';
 
 export default class AccountStore {

@@ -1,4 +1,5 @@
 import {action, makeObservable, observable} from 'mobx';
+import {translate} from '../i18n/localize';
 
 export interface IMessageStore {
     addProgressMessage(message: string): void;
@@ -16,12 +17,12 @@ export default class MessageStore implements IMessageStore {
 
     @action
     addProgressMessage(message: string) {
-        this.progressMessages.push(message);
+        this.progressMessages.push(translate(message));
     }
 
     @action
     removeProgressMessage(message: string) {
-        const index = this.progressMessages.indexOf(message);
+        const index = this.progressMessages.indexOf(translate(message));
         if (index >= 0) this.progressMessages.splice(index, 1);
     }
 

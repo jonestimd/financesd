@@ -6,7 +6,7 @@ import * as formats from '../formats';
 import TopAppBar from './TopAppBar';
 import Table from './table/Table';
 import {IColumn} from './table/Column';
-import {AccountModel} from '../model/AccountModel';
+import {AccountModel} from '../model/account/AccountModel';
 import accountType from '../i18n/accountType';
 import {translate} from '../i18n/localize';
 import CompaniesDialog from './CompaniesDialog';
@@ -26,12 +26,16 @@ const columns: IColumn<AccountModel>[] = [
 const AccountsPage: React.FC = observer(() => {
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
+    const [showCompanies, setShowCompanies] = React.useState(false);
     return (
         <div className='account-list'>
-            <TopAppBar title={translate('menu.accounts')} currentPage='menu.accounts' />
+            <TopAppBar title={translate('menu.accounts')} currentPage='menu.accounts'>
+                <IconButton onClick={() => setShowCompanies(true)}><Icon>account_balance</Icon></IconButton>
+            </TopAppBar>
+            {showCompanies ? <CompaniesDialog onClose={() => setShowCompanies(false)} /> : null}
             <Table columns={columns} data={accounts} />
         </div>
     );
-});
+}, {forwardRef: true});
 
 export default AccountsPage;

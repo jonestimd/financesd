@@ -6,10 +6,12 @@ import AccountsPage from './AccountsPage';
 import Table from './table/Table';
 import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
-import {AccountModel} from '../model/AccountModel';
+import {AccountModel} from '../model/account/AccountModel';
 import {Link} from 'react-router-dom';
 import accountType from '../i18n/accountType';
 import * as formats from '../formats';
+import {IconButton} from '@material-ui/core';
+import CompaniesDialog from './CompaniesDialog';
 
 describe('AccountsPage', () => {
     const rootStore = new RootStore();
@@ -49,6 +51,17 @@ describe('AccountsPage', () => {
 
                 expect(column?.render(account)).toEqual(value);
             });
+        });
+    });
+    describe('companies button', () => {
+        it('displays companies dialog', () => {
+            const component = shallow(<AccountsPage />);
+
+            component.find(IconButton).simulate('click');
+
+            expect(component.find(CompaniesDialog)).toExist();
+            component.find(CompaniesDialog).prop('onClose')();
+            expect(component.find(CompaniesDialog)).not.toExist();
         });
     });
 });

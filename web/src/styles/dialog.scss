@@ -1,0 +1,35 @@
+// $dialog-title-height: 58px !default;
+// $dialog-button-bar-height: 52.5px !default;
+
+.MuiDialog-root {
+    .scroll-container {
+        top: 0;
+        bottom: 0;
+        border-bottom: 1px solid $table-border;
+    }
+}
+.MuiDialogContent-root {
+    position: relative;
+}
+
+.MuiDialog-root.modal {
+    z-index: $modal-zindex;
+}
+
+.MuiDialogTitle-root {
+    display: flex;
+    align-items: center;
+    .MuiTypography-root {
+        flex-grow: 1;
+    }
+    .MuiIconButton-label .MuiIcon-root {
+        font-size: 20px;
+    }
+}
+
+#company-list {
+    .MuiDialog-paper {
+        height: calc(100% - 20px);
+        max-height: 30em;
+    }
+}

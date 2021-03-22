@@ -1,15 +1,21 @@
+$mdc-theme-background: #fafafa !default;
 $mdc-theme-primary: #6200ee !default; // baseline purple, 500 tone
 $mdc-theme-secondary: rgb(84, 110, 122) !default; // #54647a
+$mdc-theme-text-secondary: rgba(0, 0, 0, 0.54) !default;
 $mdc-theme-on-primary: #ffffff !default;
 $mdc-theme-on-secondary: #ffffff !default;
 
-$transaction-hover-background: #dddddd !default;
+$table-border: #c0c0c0 !default;
+$table-odd-background: #e0f0f5 !default;
 
 $app-margin: 0 !default;
 $app-bar-height: 48px !default;
 $side-bar-width: 300px !default;
+$modal-zindex: 1300 !default;
 
 $selection-background: #dfd0e0 !default;
+
+$transaction-hover-background: #dddddd !default;
 
 .hidden {
     display: none;
@@ -20,7 +26,6 @@ body {
 }
 
 .MuiAppBar-root {
-    z-index: 1301;
     .MuiToolBar-root {
         h6.MuiTypography-root {
             flex-grow: 1;
@@ -255,5 +260,6 @@ table.security-transactions {
 
 @import 'scrollable.scss';
 @import 'table.scss';
+@import 'dialog.scss';
 @import 'progress.scss';
 @import 'icons.scss';

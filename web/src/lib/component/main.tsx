@@ -21,6 +21,9 @@ const myTheme = createMuiTheme({
         primary: {main: '#6200ee'},
         secondary: {main: 'rgb(84, 110, 122)'},
     },
+    zIndex: {
+        modal: undefined,
+    },
     overrides: {
         MuiTable: {
             root: {

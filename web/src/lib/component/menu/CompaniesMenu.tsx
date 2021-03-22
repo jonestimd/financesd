@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
 import {Checkbox, Icon, ListItem, ListItemText, MenuItem} from '@material-ui/core';
 import ChildMenu from './ChildMenu';
-import {CompanyModel} from '../../model/CompanyModel';
+import {CompanyModel} from '../../model/account/CompanyModel';
 import {MenuAccount} from './AccountsMenu';
 import settingsStore from '../../store/settingsStore';
 import {translate} from '../../i18n/localize';

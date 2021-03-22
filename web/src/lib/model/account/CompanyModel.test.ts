@@ -1,4 +1,4 @@
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {newAccountModel, newCompany, newCompanyModel} from 'src/test/accountFactory';
 
 describe('CompanyModel', () => {
     describe('filteredAccounts', () => {
@@ -8,6 +8,16 @@ describe('CompanyModel', () => {
             jest.spyOn(company.accounts[1], 'hide', 'get').mockReturnValue(false);
 
             expect(company.filteredAccounts).toEqual(company.accounts.slice(1));
+        });
+    });
+    describe('update', () => {
+        it('sets name and version', () => {
+            const company = newCompanyModel({}, newAccountModel(), newAccountModel());
+
+            company.update(newCompany({name: 'new name', version: 99}));
+
+            expect(company.name).toEqual('new name');
+            expect(company.version).toEqual(99);
         });
     });
 });

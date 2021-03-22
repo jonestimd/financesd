@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import {CompanyModel} from '../../model/CompanyModel';
+import {CompanyModel} from '../../model/account/CompanyModel';
 import MainMenu from './MainMenu';
 import CompaniesMenu from './CompaniesMenu';
 import AccountsMenu from './AccountsMenu';

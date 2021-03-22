@@ -1,5 +1,5 @@
-import {AccountModel, IAccount} from 'src/lib/model/AccountModel';
-import {CompanyModel, ICompany} from 'src/lib/model/CompanyModel';
+import {AccountModel, IAccount} from 'src/lib/model/account/AccountModel';
+import {CompanyModel, ICompany} from 'src/lib/model/account/CompanyModel';
 
 let nextId = 0;
 

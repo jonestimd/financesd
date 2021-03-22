@@ -11,7 +11,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import TopAppBar from '../TopAppBar';
 import {mockUseEffect} from 'src/test/mockHooks';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {AccountModel} from 'src/lib/model/AccountModel';
+import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {TextField} from '@material-ui/core';
 
 const accountId = '123';

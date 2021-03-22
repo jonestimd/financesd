@@ -5,7 +5,7 @@ import MessageStore from 'src/lib/store/MessageStore';
 import CategoryStore from 'src/lib/store/CategoryStore';
 import {CategoryModel} from 'src/lib/model/CategoryModel';
 import AccountStore from 'src/lib/store/AccountStore';
-import {AccountModel} from 'src/lib/model/AccountModel';
+import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {newDetail} from 'src/test/detailFactory';
 
 const detail = newDetail();

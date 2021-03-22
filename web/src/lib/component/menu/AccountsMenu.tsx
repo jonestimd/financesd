@@ -2,9 +2,9 @@ import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {Link, useHistory} from 'react-router-dom';
 import {MenuItem, ListItemText} from '@material-ui/core';
-import {CompanyModel} from '../../model/CompanyModel';
+import {CompanyModel} from '../../model/account/CompanyModel';
 import ChildMenu from './ChildMenu';
-import {AccountModel} from '../../model/AccountModel';
+import {AccountModel} from '../../model/account/AccountModel';
 
 type IMenuAccountProps = Pick<AccountModel, 'id' | 'name' | 'company'>;
 

@@ -1,6 +1,6 @@
-import settingsStore from '../store/settingsStore';
+import settingsStore from '../../store/settingsStore';
 import {CompanyModel} from './CompanyModel';
-import {compareByName} from './entityUtils';
+import {compareByName} from '../entityUtils';
 
 export interface IAccount {
     id: string;

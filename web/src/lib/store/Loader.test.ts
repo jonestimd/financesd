@@ -3,15 +3,15 @@ import {RootStore} from './RootStore';
 import * as agent from '../agent';
 
 describe('Loader', () => {
-    const {messageStore} = new RootStore();
-    const loader = new Loader(messageStore);
+    const {messageStore, alertStore} = new RootStore();
+    const loader = new Loader(messageStore, alertStore);
 
     beforeEach(() => {
         jest.spyOn(messageStore, 'addProgressMessage').mockReturnValue();
         jest.spyOn(messageStore, 'removeProgressMessage').mockReturnValue();
     });
     describe('load', () => {
-        const message = 'loading...';
+        const message = 'Loading...';
         const query = '{ entities {id name} }';
         const variables = {x: 123};
         const updater = jest.fn();
@@ -19,6 +19,7 @@ describe('Loader', () => {
 
         beforeEach(() => {
             jest.spyOn(console, 'error').mockImplementation(() => {});
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
         });
         it('calls updater', async () => {
             const result = {entities: []};
@@ -50,6 +51,7 @@ describe('Loader', () => {
             expect(completer).toBeCalledTimes(1);
             expect(messageStore.addProgressMessage).toBeCalledWith(message);
             expect(messageStore.removeProgressMessage).toBeCalledWith(message);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error ' + message.toLowerCase());
         });
         it('calls completer after agent error', async () => {
             jest.spyOn(agent, 'graphql').mockRejectedValue(new Error('network error'));
@@ -60,6 +62,7 @@ describe('Loader', () => {
             expect(completer).toBeCalledTimes(1);
             expect(messageStore.addProgressMessage).toBeCalledWith(message);
             expect(messageStore.removeProgressMessage).toBeCalledWith(message);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error ' + message.toLowerCase());
         });
     });
 });

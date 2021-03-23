@@ -6,7 +6,7 @@ import {loadingCategories, query} from './CategoryStore';
 import {CategoryModel} from '../model/CategoryModel';
 
 describe('CategoryStore', () => {
-    const {categoryStore, messageStore} = new RootStore();
+    const {categoryStore, messageStore, alertStore} = new RootStore();
 
     beforeEach(() => {
         categoryStore['categoriesById'].clear();
@@ -55,7 +55,7 @@ describe('CategoryStore', () => {
             expect(categoryStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingCategories);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingCategories);
-            expect(agent.graphql).toBeCalledWith(query);
+            expect(agent.graphql).toBeCalledWith(query, undefined);
             expect(categoryStore.categories).toStrictEqual([new CategoryModel(category, categoryStore)]);
         });
         it('does nothing is already loading', async () => {
@@ -85,13 +85,15 @@ describe('CategoryStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await categoryStore.loadCategories();
 
             expect(categoryStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingCategories);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingCategories);
-            expect(console.error).toBeCalledWith('error gettting categories', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading categories');
+            expect(console.error).toBeCalledWith('error from Loading categories', error);
         });
     });
 });

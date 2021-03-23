@@ -1,6 +1,7 @@
 import {IMessageStore} from './MessageStore';
 import {graphql, IGraphqlResponse} from '../agent';
 import {flow} from 'mobx';
+import AlertStore from './AlertStore';
 
 type LoadResult<T> = Generator<Promise<IGraphqlResponse<T>>, boolean, IGraphqlResponse<T>>;
 
@@ -13,9 +14,11 @@ interface IOptions<T> {
 
 export default class Loader {
     private readonly messageStore: IMessageStore;
+    private readonly alertStore: AlertStore;
 
-    constructor(messageStore: IMessageStore) {
+    constructor(messageStore: IMessageStore, alertStore: AlertStore) {
         this.messageStore = messageStore;
+        this.alertStore = alertStore;
     }
 
     load = flow(function*<T>(this: Loader, message: string, {query, variables, updater, completer}: IOptions<T>): LoadResult<T> {
@@ -27,6 +30,7 @@ export default class Loader {
             return true;
         } catch (err) {
             console.error('error from ' + message, err);
+            this.alertStore.addAlert('error', `Error ${message.toLowerCase()}`);
             return false;
         } finally {
             this.messageStore.removeProgressMessage(message);

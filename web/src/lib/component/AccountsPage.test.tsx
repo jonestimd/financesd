@@ -19,7 +19,7 @@ describe('AccountsPage', () => {
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue(rootStore);
-        jest.spyOn(rootStore.accountStore, 'loadAccounts').mockResolvedValue();
+        jest.spyOn(rootStore.accountStore, 'loadAccounts').mockResolvedValue(true);
     });
     it('displays app bar and table of accounts', () => {
         const accounts = [account];

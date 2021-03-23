@@ -5,7 +5,7 @@ import {loadingTransactions, query} from './TransactionStore';
 
 describe('TransactionStore', () => {
     const accountId = '1';
-    const {transactionStore, categoryStore, messageStore} = new RootStore();
+    const {transactionStore, categoryStore, messageStore, alertStore} = new RootStore();
     const tableModel = new TransactionTableModel([], categoryStore);
 
     beforeEach(() => {
@@ -62,12 +62,14 @@ describe('TransactionStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await transactionStore.loadTransactions(accountId);
 
             expect(transactionStore['pendingAccounts']).toHaveLength(0);
             expect(transactionStore.getTransactionsModel(accountId)).toBe(TransactionTableModel.EMPTY);
-            expect(console.error).toBeCalledWith('error gettting transactions', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading transactions');
+            expect(console.error).toBeCalledWith('error from Loading transactions', error);
         });
     });
 });

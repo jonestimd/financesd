@@ -6,7 +6,7 @@ import {newSecurity, newSecurityModel} from 'src/test/securityFactory';
 import {SecurityModel} from '../model/SecurityModel';
 
 describe('SecurityStore', () => {
-    const {securityStore, messageStore} = new RootStore();
+    const {securityStore, messageStore, alertStore} = new RootStore();
 
     beforeEach(() => {
         securityStore['securitiesById'].clear();
@@ -50,7 +50,7 @@ describe('SecurityStore', () => {
             expect(securityStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingSecurities);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingSecurities);
-            expect(agent.graphql).toBeCalledWith(query);
+            expect(agent.graphql).toBeCalledWith(query, undefined);
             expect(securityStore.securities).toStrictEqual([new SecurityModel(security)]);
         });
         it('does nothing is already loading', async () => {
@@ -80,13 +80,15 @@ describe('SecurityStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await securityStore.loadSecurities();
 
             expect(securityStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingSecurities);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingSecurities);
-            expect(console.error).toBeCalledWith('error gettting securities', error);
+            expect(console.error).toBeCalledWith('error from Loading securities', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading securities');
         });
     });
 });

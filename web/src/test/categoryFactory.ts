@@ -1,4 +1,5 @@
 import {ICategory, CategoryModel} from 'src/lib/model/CategoryModel';
+import AlertStore from 'src/lib/store/AlertStore';
 import CategoryStore from 'src/lib/store/CategoryStore';
 import MessageStore from 'src/lib/store/MessageStore';
 
@@ -21,7 +22,7 @@ interface ModelOverrides extends Partial<ICategory> {
     categoryStore?: CategoryStore;
 }
 
-export const defaultCategoryStore = new CategoryStore(new MessageStore());
+export const defaultCategoryStore = new CategoryStore(new MessageStore(), new AlertStore());
 
 export function newCategoryModel({categoryStore, ...overrides}: ModelOverrides = {}): CategoryModel {
     return new CategoryModel(newCategory(overrides), categoryStore ?? defaultCategoryStore);

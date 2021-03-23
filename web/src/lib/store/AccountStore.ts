@@ -1,11 +1,10 @@
-import * as agent from '../agent';
 import {AccountModel, IAccount} from '../model/account/AccountModel';
 import {CompanyModel, ICompany} from '../model/account/CompanyModel';
 import {addToMap, sortValues, sortValuesByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
-import {computed, flow, makeObservable, ObservableMap} from 'mobx';
-import {LoadResult} from './interfaces';
+import {computed, makeObservable, ObservableMap} from 'mobx';
 import Loader from './Loader';
+import AlertStore from './AlertStore';
 
 const accountFields = `
 fragment accountFields on account {
@@ -26,7 +25,10 @@ mutation update($add: [String!], $delete: [Int!], $update: [companyInput!]) {
     companies: updateCompanies(add: $add, delete: $delete, update: $update) {...companyFields}
 }`;
 
-type AccountsResponse = agent.IGraphqlResponse<{accounts: IAccount[], companies: ICompany[]}>;
+interface IAccountsResponse {
+    accounts: IAccount[];
+    companies: ICompany[];
+}
 
 export interface IUpdateCompanies {
     add: string[];
@@ -34,20 +36,18 @@ export interface IUpdateCompanies {
     update: Pick<ICompany, 'id' | 'name' | 'version'>[];
 }
 
-export const loadingAccounts = 'Loading accounts...';
-export const savingCompanies = 'Saving companies...';
+export const loadingAccounts = 'Loading accounts';
+export const savingCompanies = 'Saving companies';
 
 export default class AccountStore {
     private loading = false;
     private companiesById = new ObservableMap<string, CompanyModel>();
     private accountsById = new ObservableMap<string, AccountModel>();
-    private messageStore: IMessageStore;
     private loader: Loader;
 
-    constructor(messageStore: IMessageStore) {
+    constructor(messageStore: IMessageStore, alertStore: AlertStore) {
         makeObservable(this);
-        this.messageStore = messageStore;
-        this.loader = new Loader(messageStore);
+        this.loader = new Loader(messageStore, alertStore);
     }
 
     @computed
@@ -79,29 +79,21 @@ export default class AccountStore {
         return this.accountsById.get('' + id);
     }
 
-    loadAccounts(): Promise<void> | undefined {
-        if (!this.loading && Object.keys(this.accounts).length === 0) {
-            this.messageStore.addProgressMessage(loadingAccounts);
-            return this._loadAccounts();
+    loadAccounts(): Promise<boolean> | undefined {
+        if (!this.loading && this.accountsById.size === 0) {
+            this.loading = true;
+            return this.loader.load<IAccountsResponse>(loadingAccounts, {query,
+                updater: ({accounts, companies}) => {
+                    addToMap(this.companiesById, companies.map((company) => new CompanyModel(company)));
+                    addToMap(this.accountsById, accounts.map((account) => new AccountModel(account, this.companiesById.get('' + account.companyId))));
+                    for (const account of this.accounts) {
+                        account.company?.accounts.push(account);
+                    }
+                },
+                completer: () => this.loading = false,
+            });
         }
     }
-
-    private _loadAccounts = flow(function* (this: AccountStore): LoadResult<AccountsResponse> {
-        this.loading = true;
-        try {
-            const {data: {accounts, companies}} = yield agent.graphql(query);
-            addToMap(this.companiesById, companies.map((company) => new CompanyModel(company)));
-            addToMap(this.accountsById, accounts.map((account) => new AccountModel(account, this.companiesById.get('' + account.companyId))));
-            for (const account of this.accounts) {
-                account.company?.accounts.push(account);
-            }
-        } catch (err) {
-            console.error('error gettting accounts', err);
-        } finally {
-            this.loading = false;
-            this.messageStore.removeProgressMessage(loadingAccounts);
-        }
-    });
 
     saveCompanies(variables: IUpdateCompanies) {
         return this.loader.load<{companies: ICompany[]}>(savingCompanies, {query: updateCompaniesQuery, variables, updater: ({companies}) => {

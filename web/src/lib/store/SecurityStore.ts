@@ -1,9 +1,9 @@
-import * as agent from '../agent';
 import {SecurityModel, ISecurity} from '../model/SecurityModel';
 import {sortValuesByName, addToMap} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
-import {computed, flow, makeObservable, ObservableMap} from 'mobx';
-import {LoadResult} from './interfaces';
+import {computed, makeObservable, ObservableMap} from 'mobx';
+import Loader from './Loader';
+import AlertStore from './AlertStore';
 
 export const query = `{
     securities {
@@ -11,9 +11,7 @@ export const query = `{
     }
 }`;
 
-type SecurityResponse = agent.IGraphqlResponse<{securities: ISecurity[]}>;
-
-export const loadingSecurities = 'Loading securities...';
+export const loadingSecurities = 'Loading securities';
 
 export interface ISecurityStore {
     getSecurity: (id: string | number) => SecurityModel;
@@ -23,11 +21,11 @@ export interface ISecurityStore {
 export default class SecurityStore {
     private loading = false;
     private securitiesById = new ObservableMap<string, SecurityModel>();
-    private messageStore: IMessageStore;
+    private loader: Loader;
 
-    constructor(messageStore: IMessageStore) {
+    constructor(messageStore: IMessageStore, alertStore: AlertStore) {
         makeObservable(this);
-        this.messageStore = messageStore;
+        this.loader = new Loader(messageStore, alertStore);
     }
 
     @computed
@@ -39,23 +37,13 @@ export default class SecurityStore {
         return this.securitiesById.get('' + id);
     }
 
-    loadSecurities(): Promise<void> | undefined {
+    loadSecurities(): Promise<boolean> | undefined {
         if (!this.loading && this.securitiesById.size === 0) {
-            this.messageStore.addProgressMessage(loadingSecurities);
-            return this._loadSecurities();
+            this.loading = true;
+            return this.loader.load<{securities: ISecurity[]}>(loadingSecurities, {query,
+                updater: ({securities}) => addToMap(this.securitiesById, securities.map((security) => new SecurityModel(security))),
+                completer: () => this.loading = false,
+            });
         }
     }
-
-    private _loadSecurities = flow(function* (this: SecurityStore): LoadResult<SecurityResponse> {
-        this.loading = true;
-        try {
-            const {data} = yield agent.graphql(query);
-            addToMap(this.securitiesById, data.securities.map((security) => new SecurityModel(security)));
-        } catch (err) {
-            console.error('error gettting securities', err); // TODO show toast
-        } finally {
-            this.loading = false;
-            this.messageStore.removeProgressMessage(loadingSecurities);
-        }
-    });
 }

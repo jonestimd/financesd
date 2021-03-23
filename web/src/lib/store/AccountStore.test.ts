@@ -7,7 +7,7 @@ import {loadingAccounts, query, savingCompanies, updateCompaniesQuery} from './A
 import {CompanyModel} from '../model/account/CompanyModel';
 
 describe('AccountStore', () => {
-    const {accountStore, messageStore} = new RootStore();
+    const {accountStore, messageStore, alertStore} = new RootStore();
 
     beforeEach(() => {
         accountStore['companiesById'].clear();
@@ -95,9 +95,10 @@ describe('AccountStore', () => {
             await accountStore.loadAccounts();
 
             expect(accountStore['loading']).toBe(false);
+            expect(messageStore.addProgressMessage).toBeCalledTimes(1);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingAccounts);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingAccounts);
-            expect(agent.graphql).toBeCalledWith(query);
+            expect(agent.graphql).toBeCalledWith(query, undefined);
             expect(accountStore.companies).toEqual([new CompanyModel(company)]);
             expect(accountStore.accounts).toStrictEqual([new AccountModel(account)]);
         });
@@ -128,13 +129,15 @@ describe('AccountStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await accountStore.loadAccounts();
 
             expect(accountStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingAccounts);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingAccounts);
-            expect(console.error).toBeCalledWith('error gettting accounts', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading accounts');
+            expect(console.error).toBeCalledWith('error from Loading accounts', error);
         });
     });
     describe('saveCompanies', () => {

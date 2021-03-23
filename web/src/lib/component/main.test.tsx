@@ -25,11 +25,11 @@ describe('main', () => {
         beforeEach(() => {
             const mockRootStore = RootStore as jest.MockedClass<typeof RootStore>;
             mockRootStore.mockReturnValue(rootStore);
-            jest.spyOn(accountStore, 'loadAccounts').mockResolvedValue();
-            jest.spyOn(categoryStore, 'loadCategories').mockResolvedValue();
-            jest.spyOn(groupStore, 'loadGroups').mockResolvedValue();
-            jest.spyOn(payeeStore, 'loadPayees').mockResolvedValue();
-            jest.spyOn(securityStore, 'loadSecurities').mockResolvedValue();
+            jest.spyOn(accountStore, 'loadAccounts').mockResolvedValue(true);
+            jest.spyOn(categoryStore, 'loadCategories').mockResolvedValue(true);
+            jest.spyOn(groupStore, 'loadGroups').mockResolvedValue(true);
+            jest.spyOn(payeeStore, 'loadPayees').mockResolvedValue(true);
+            jest.spyOn(securityStore, 'loadSecurities').mockResolvedValue(true);
             mockUseEffect();
             const container = document.createElement('div');
             jest.spyOn(document, 'querySelector').mockReturnValue(container);

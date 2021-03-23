@@ -11,6 +11,7 @@ import PayeesPage from './PayeesPage';
 import SecuritiesPage from './SecuritiesPage';
 import GroupsPage from './GroupsPage';
 import {createMuiTheme, StylesProvider, ThemeProvider} from '@material-ui/core/styles';
+import AlertContainer from './AlertContainer';
 
 const history = createBrowserHistory();
 
@@ -65,6 +66,7 @@ export const Routes: React.FC = () => {
                 <ThemeProvider theme={myTheme}>
                     <main className='app-main'>
                         <ProgressMessage />
+                        <AlertContainer />
                         <Router history={history}>
                             <Switch>
                                 <Route exact path='/finances' component={AccountsPage} />

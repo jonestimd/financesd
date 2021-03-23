@@ -257,6 +257,18 @@ table.security-transactions {
     }
 }
 
+.MuiSnackbarContent-message {
+    .material-icons {
+        vertical-align: bottom;
+        margin-right: 5px;
+    }
+}
+.MuiSnackbarContent-action {
+    .MuiButton-textPrimary {
+        color: scale-color($mdc-theme-primary, $lightness: 30%);
+    }
+}
+
 @import 'scrollable.scss';
 @import 'table.scss';
 @import 'dialog.scss';

@@ -3,7 +3,7 @@
   "version": "1.0.0-alpha",
   "description": "Finances web UI",
   "scripts": {
-    "prebuild": "tslint --project web && tsc -p web/tsconfig.json --noEmit",
+    "prebuild": "npm run pretest && tsc -p web/tsconfig.json --noEmit",
     "build": "rm -fr web/dist && mkdir -p web/dist && webpack -p && rm -rf web/dist/styles.js*",
     "build:dev": "rm -fr web/dist && mkdir -p web/dist && webpack -w",
     "pretest": "eslint --ext .ts,.tsx web",
@@ -53,7 +53,6 @@
     "react-dom": "^16.14.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
-    "sass": "^1.30.0",
     "sass-loader": "^8.0.2",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3",

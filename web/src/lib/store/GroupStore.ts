@@ -13,7 +13,7 @@ export const loadingGroups = 'Loading groups';
 
 export default class GroupStore {
     private loading = false;
-    private groupsById = new ObservableMap<string, GroupModel>();
+    private groupsById = new ObservableMap<number, GroupModel>();
     private loader: Loader;
 
     constructor(messageStore: IMessageStore, alertStore: AlertStore) {
@@ -26,8 +26,8 @@ export default class GroupStore {
         return sortValuesByName(this.groupsById);
     }
 
-    getGroup(id?: string | number): GroupModel | undefined {
-        return this.groupsById.get('' + id);
+    getGroup(id?: number): GroupModel | undefined {
+        return typeof id === 'number' ? this.groupsById.get(id) : undefined;
     }
 
     loadGroups(): Promise<boolean> | undefined {

@@ -3,7 +3,7 @@ import {computed} from 'mobx';
 export type AmountType = 'DEBIT_DEPOSIT' | 'ASSET_VALUE';
 
 export interface ICategory {
-    id: string;
+    id: number;
     code: string;
     description?: string;
     amountType: AmountType;
@@ -15,11 +15,11 @@ export interface ICategory {
 }
 
 interface ICategoryStore {
-    getCategory: (id: string | number) => CategoryModel | undefined;
+    getCategory: (id: number) => CategoryModel | undefined;
 }
 
 export class CategoryModel implements ICategory {
-    id: string;
+    id: number;
     code: string;
     description?: string;
     amountType: AmountType;

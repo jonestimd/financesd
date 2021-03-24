@@ -6,7 +6,7 @@ let nextId = 0;
 
 export function newTx(overrides: Partial<ITransaction> = {}): ITransaction {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         date: '2020-01-01',
         details: [],
         cleared: false,

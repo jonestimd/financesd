@@ -7,7 +7,7 @@ let nextId = 0;
 
 export function newCategory(overrides: Partial<ICategory> = {}): ICategory {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         code: `Category ${nextId}`,
         version: 1,
         amountType: 'DEBIT_DEPOSIT',

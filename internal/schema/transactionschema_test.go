@@ -17,7 +17,7 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 	getTransactions := mocka.Function(t, &getAccountTransactions, transactions, nil)
 	defer getTransactions.Restore()
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		accountID := "123"
+		accountID := 123
 		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo")).addArg("accountId", accountID)
 
 		result, err := transactionQueryFields.Resolve(params.ResolveParams)
@@ -25,19 +25,6 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, transactions, result)
 		assert.Equal(t, []interface{}{tx, int64(123)}, getTransactions.GetFirstCall().Arguments())
-	})
-}
-
-func Test_transactionQueryFields_Resolve_requiresAccountID(t *testing.T) {
-	getTransactions := mocka.Function(t, &getAccountTransactions, nil, nil)
-	defer getTransactions.Restore()
-	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		params := newResolveParams(tx, transactionQuery, newField("", "id"), newField("", "memo")).addArg("accountId", "abc")
-
-		_, err := transactionQueryFields.Resolve(params.ResolveParams)
-
-		assert.NotNil(t, err)
-		assert.Equal(t, 0, getTransactions.CallCount())
 	})
 }
 

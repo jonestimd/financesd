@@ -4,7 +4,7 @@ import * as agent from '../agent';
 import {loadingTransactions, query} from './TransactionStore';
 
 describe('TransactionStore', () => {
-    const accountId = '1';
+    const accountId = 1;
     const {transactionStore, categoryStore, messageStore, alertStore} = new RootStore();
     const tableModel = new TransactionTableModel([], categoryStore);
 
@@ -13,7 +13,7 @@ describe('TransactionStore', () => {
     });
     describe('getTransactionsModel', () => {
         it('returns empty model for unknown account', () => {
-            expect(transactionStore.getTransactionsModel('-99')).toBe(TransactionTableModel.EMPTY);
+            expect(transactionStore.getTransactionsModel(-99)).toBe(TransactionTableModel.EMPTY);
         });
         it('returns table model for account', () => {
             transactionStore['transactionsByAccountId'].set(accountId, tableModel);

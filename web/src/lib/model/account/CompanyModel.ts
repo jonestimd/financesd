@@ -3,13 +3,13 @@ import {AccountModel} from './AccountModel';
 import {compareByName} from '../entityUtils';
 
 export interface ICompany {
-    id: string;
+    id: number;
     name: string;
     version: number;
 }
 
 export class CompanyModel implements ICompany {
-    readonly id: string;
+    readonly id: number;
     @observable name: string;
     @observable version: number;
     @observable readonly accounts: AccountModel[];

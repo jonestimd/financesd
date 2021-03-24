@@ -11,7 +11,7 @@ type IMenuAccountProps = Pick<AccountModel, 'id' | 'name' | 'company'>;
 export const MenuAccount = observer<IMenuAccountProps>(({id, name, company}) => {
     const history = useHistory();
     const match = /^\/finances\/account\/(\d+)$/.exec(history.location.pathname);
-    const currentAccount = (match && id === match[1]) ?? false;
+    const currentAccount = (match && `${id}` === match[1]) ?? false;
     const showCompany = company?.filteredAccounts.length === 1;
     return (
         <MenuItem component={Link} to={`/finances/account/${id}`} selected={currentAccount}>

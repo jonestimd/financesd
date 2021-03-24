@@ -30,7 +30,7 @@ export interface ITableProps<T> {
 }
 
 export interface IRow {
-    id: string;
+    id: number;
 }
 
 const rowClass = (index: number) => ({odd: index % 2});

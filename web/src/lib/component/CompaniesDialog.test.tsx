@@ -29,7 +29,7 @@ describe('CompaniesDialog', () => {
             const component = shallow(<CompaniesDialog onClose={onClose} />);
             const column = component.find(Table).prop<IColumn<CompanyRow>[]>('columns')[0];
 
-            expect(column.render(new CompanyRow({id: '', name: 'the company'}))).toEqual('the company');
+            expect(column.render(new CompanyRow({id: -1, name: 'the company'}))).toEqual('the company');
         });
         it('highlight changes', () => {
             const component = shallow(<CompaniesDialog onClose={onClose} />);
@@ -44,7 +44,7 @@ describe('CompaniesDialog', () => {
 
             const editor = column.editor!;
 
-            const row = new CompanyRow({id: '', name: 'the name'});
+            const row = new CompanyRow({id: -1, name: 'the name'});
             expect(editor.Component).toEqual(TextCellEditor);
             expect(editor.getValue(row)).toEqual(row.name);
             editor.setValue(row, 'new name');
@@ -56,7 +56,7 @@ describe('CompaniesDialog', () => {
             const component = shallow(<CompaniesDialog onClose={onClose} />);
             const column = component.find(Table).prop<IColumn<CompanyRow>[]>('columns')[1];
 
-            expect(column.render(new CompanyRow({id: '', name: '', accounts: [newAccountModel()]}))).toEqual(1);
+            expect(column.render(new CompanyRow({id: -1, name: '', accounts: [newAccountModel()]}))).toEqual(1);
         });
     });
     describe('close button', () => {
@@ -90,7 +90,7 @@ describe('CompaniesDialog', () => {
             expect(component.find(DialogActions).find(IconButton).at(1)).toBeDisabled();
         });
         it('is disabled for company with accounts', () => {
-            jest.spyOn(model, 'selected', 'get').mockReturnValue(new CompanyRow({id: '', name: '', accounts: [newAccountModel()]}));
+            jest.spyOn(model, 'selected', 'get').mockReturnValue(new CompanyRow({id: -1, name: '', accounts: [newAccountModel()]}));
 
             const component = shallow(<CompaniesDialog onClose={onClose} />);
 

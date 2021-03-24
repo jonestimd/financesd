@@ -34,10 +34,9 @@ describe('CategoryStore', () => {
             categoryStore['categoriesById'].set(category.id, category);
 
             expect(categoryStore.getCategory(category.id)).toBe(category);
-            expect(categoryStore.getCategory(parseInt(category.id))).toBe(category);
         });
         it('returns undefined for unknown ID', () => {
-            expect(categoryStore.getCategory('-99')).toBeUndefined();
+            expect(categoryStore.getCategory(-99)).toBeUndefined();
         });
     });
     describe('loadCategories', () => {

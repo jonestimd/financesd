@@ -2,7 +2,6 @@ package schema
 
 import (
 	"database/sql"
-	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/model"
@@ -13,7 +12,7 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "account",
 	Description: "a financial account",
 	Fields: addAudit(graphql.Fields{
-		"id":               &graphql.Field{Type: graphql.ID},
+		"id":               &graphql.Field{Type: graphql.Int},
 		"companyId":        &graphql.Field{Type: graphql.Int},
 		"company":          &graphql.Field{Type: companySchema, Resolve: resolveCompany},
 		"name":             &graphql.Field{Type: graphql.String},
@@ -30,17 +29,14 @@ var accountSchema = graphql.NewObject(graphql.ObjectConfig{
 var accountQueryFields = &graphql.Field{
 	Type: graphql.NewList(accountSchema),
 	Args: graphql.FieldConfigArgument{
-		"id":   {Type: graphql.ID, Description: "account ID"},
+		"id":   {Type: graphql.Int, Description: "account ID"},
 		"name": {Type: graphql.String, Description: "unique account name"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		if idArg, ok := p.Args["id"]; ok {
-			id, err := strconv.ParseInt(idArg.(string), 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			return getAccountByID(tx, id)
+			id := idArg.(int)
+			return getAccountByID(tx, int64(id))
 		}
 		if nameArg, ok := p.Args["name"]; ok {
 			name, _ := nameArg.(string)

@@ -3,7 +3,7 @@ import {CompanyModel} from './CompanyModel';
 import {compareByName} from '../entityUtils';
 
 export interface IAccount {
-    id: string;
+    id: number;
     companyId?: number;
     type: string;
     name: string;
@@ -20,7 +20,7 @@ export class AccountModel implements IAccount {
         return a1.compareTo(a2);
     }
 
-    id: string;
+    id: number;
     companyId?: number;
     type: string;
     name: string;

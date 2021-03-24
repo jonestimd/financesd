@@ -75,10 +75,9 @@ describe('AccountStore', () => {
             accountStore['accountsById'].set(account.id, account);
 
             expect(accountStore.getAccount(account.id)).toBe(account);
-            expect(accountStore.getAccount(parseInt(account.id))).toBe(account);
         });
         it('returns undefined for unknown ID', () => {
-            expect(accountStore.getAccount('23')).toBeUndefined();
+            expect(accountStore.getAccount(23)).toBeUndefined();
         });
     });
     describe('loadAccounts', () => {
@@ -152,14 +151,14 @@ describe('AccountStore', () => {
         });
         it('calls updateCompanies and adds new company', async () => {
             const changes = {add: ['new name'], update: [], delete: []};
-            jest.spyOn(agent, 'graphql').mockResolvedValue({data: {companies: [{id: '-9', name: 'new name', version: 0}]}});
+            jest.spyOn(agent, 'graphql').mockResolvedValue({data: {companies: [{id: -9, name: 'new name', version: 0}]}});
 
             expect(await accountStore.saveCompanies(changes)).toBe(true);
 
             expect(agent.graphql).toBeCalledWith(updateCompaniesQuery, changes);
             expect(messageStore.addProgressMessage).toBeCalledWith(savingCompanies);
             expect(messageStore.removeProgressMessage).toBeCalledWith(savingCompanies);
-            expect(accountStore['companiesById'].get('-9')).toEqual(expect.objectContaining({name: 'new name', version: 0}));
+            expect(accountStore['companiesById'].get(-9)).toEqual(expect.objectContaining({name: 'new name', version: 0}));
         });
         it('calls updateCompanies and updates company', async () => {
             const changes = {add: [], update: [{id: company1.id, name: 'rename', version: company1.version}], delete: []};
@@ -175,7 +174,7 @@ describe('AccountStore', () => {
             expect(accountStore['companiesById'].get(company1.id)).toEqual(expect.objectContaining({name: 'rename', version: 2}));
         });
         it('calls updateCompanies and removes company', async () => {
-            const changes = {add: [], update: [], delete: [parseInt(company2.id)]};
+            const changes = {add: [], update: [], delete: [company2.id]};
             jest.spyOn(agent, 'graphql').mockResolvedValue({data: {companies: []}});
 
             expect(await accountStore.saveCompanies(changes)).toBe(true);

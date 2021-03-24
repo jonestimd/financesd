@@ -15,7 +15,7 @@ export const loadingPayees = 'Loading payees';
 
 export default class PayeeStore {
     private loading = false;
-    private payeesById = new ObservableMap<string, PayeeModel>();
+    private payeesById = new ObservableMap<number, PayeeModel>();
     private loader: Loader;
 
     constructor(messageStore: IMessageStore, alertStore: AlertStore) {
@@ -28,8 +28,8 @@ export default class PayeeStore {
         return sortValuesByName(this.payeesById);
     }
 
-    getPayee(id?: string | number): PayeeModel | undefined {
-        return this.payeesById.get('' + id);
+    getPayee(id?: number): PayeeModel | undefined {
+        return typeof id === 'number' ? this.payeesById.get(id) : undefined;
     }
 
     loadPayees(): Promise<boolean> | undefined {

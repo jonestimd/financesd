@@ -4,7 +4,7 @@ let nextId = 0;
 
 export function newGroup(overrides: Partial<IGroup> = {}): IGroup {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         name: `Group ${nextId}`,
         transactionCount: 0,
         version: 1,

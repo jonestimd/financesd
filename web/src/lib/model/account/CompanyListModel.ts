@@ -16,7 +16,7 @@ export default class CompanyListModel extends ListModel<CompanyRow> {
 
     @action
     addCompany() {
-        this.add((id) => new CompanyRow({id: `-${id}`}));
+        this.add((id) => new CompanyRow({id: -id}));
     }
 
     validate = (row: CompanyRow, key: string) => {
@@ -32,7 +32,7 @@ export default class CompanyListModel extends ListModel<CompanyRow> {
     async save() {
         const changes = {
             add: this.pendingAdds.map((c) => c.name),
-            delete: Array.from(this.pendingDeletes).map((c) => parseInt(c.id)),
+            delete: Array.from(this.pendingDeletes).map((c) => c.id),
             update: this.changes.map(({id, name, version}) => ({id, name, version})),
         };
         const success = await this.accountStore.saveCompanies(changes);

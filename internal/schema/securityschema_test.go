@@ -81,9 +81,8 @@ func Test_securityQueryFields_Resolve_all(t *testing.T) {
 			err      bool
 		}{
 			{name: "returns all securities", stub: getAll, stubArgs: []interface{}{tx}},
-			{name: "returns security with ID", argName: "id", argValue: "42", stub: getByID, stubArgs: []interface{}{tx, int64(42)}},
+			{name: "returns security with ID", argName: "id", argValue: 42, stub: getByID, stubArgs: []interface{}{tx, int64(42)}},
 			{name: "returns security with symbol", argName: "symbol", argValue: symbol, stub: getBySymbol, stubArgs: []interface{}{tx, symbol}},
-			{name: "returns error for invalid ID", argName: "id", argValue: "abc", stub: getByID, err: true},
 		}
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {

@@ -14,10 +14,10 @@ import TableBody from '@material-ui/core/TableBody';
 let nextId = 1;
 
 class TestData {
-    readonly id: string;
+    readonly id: number;
 
     constructor(readonly c1: string, readonly c2: string | number, readonly c3: string) {
-        this.id = `${nextId++}`;
+        this.id = nextId++;
     }
 }
 

@@ -2,7 +2,6 @@ package schema
 
 import (
 	"database/sql"
-	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/model"
@@ -13,7 +12,7 @@ var companySchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "company",
 	Description: "a financial company",
 	Fields: addAudit(graphql.Fields{
-		"id":   &graphql.Field{Type: graphql.ID},
+		"id":   &graphql.Field{Type: graphql.Int},
 		"name": &graphql.Field{Type: graphql.String},
 	}),
 })
@@ -25,17 +24,14 @@ func companyQueryFields() *graphql.Field {
 	return &graphql.Field{
 		Type: companyList,
 		Args: graphql.FieldConfigArgument{
-			"id":   {Type: graphql.ID, Description: "company ID"},
+			"id":   {Type: graphql.Int, Description: "company ID"},
 			"name": {Type: graphql.String, Description: "unique company name"},
 		},
 		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 			tx := p.Context.Value(DbContextKey).(*sql.Tx)
 			if idArg, ok := p.Args["id"]; ok {
-				id, err := strconv.ParseInt(idArg.(string), 10, 64)
-				if err != nil {
-					return nil, err
-				}
-				return getCompanyByID(tx, id)
+				id := idArg.(int)
+				return getCompanyByID(tx, int64(id))
 			}
 			if nameArg, ok := p.Args["name"]; ok {
 				name, _ := nameArg.(string)

@@ -33,9 +33,8 @@ func Test_companyQueryFields_Resolve(t *testing.T) {
 			err      bool
 		}{
 			{name: "returns all companies", stub: getAll, stubArgs: []interface{}{tx}},
-			{name: "returns company with ID", argName: "id", argValue: "123", stub: byID, stubArgs: []interface{}{tx, int64(123)}},
+			{name: "returns company with ID", argName: "id", argValue: 123, stub: byID, stubArgs: []interface{}{tx, int64(123)}},
 			{name: "returns company with name", argName: "name", argValue: name, stub: byName, stubArgs: []interface{}{tx, name}},
-			{name: "returns error for invalid ID", argName: "id", argValue: "abc", stub: byID, err: true},
 		}
 		for _, test := range tests {
 			t.Run(test.name, func(t *testing.T) {

@@ -8,7 +8,7 @@ import * as formats from '../../formats';
 import classNames from 'classnames';
 
 interface IProps {
-    accountId?: string;
+    accountId?: number;
 }
 
 const securityAccountTypes = ['BROKERAGE', '_401K'];

@@ -11,7 +11,7 @@ export const loadingCategories = 'Loading categories';
 
 export default class CategoryStore {
     private loading = false;
-    private categoriesById = new ObservableMap<string, CategoryModel>();
+    private categoriesById = new ObservableMap<number, CategoryModel>();
     private loader: Loader;
 
     constructor(messageStore: IMessageStore, alertStore: AlertStore) {
@@ -24,8 +24,8 @@ export default class CategoryStore {
         return sortValues(this.categoriesById, compareBy((category) => category.displayName));
     }
 
-    getCategory(id?: string | number): CategoryModel | undefined {
-        return this.categoriesById.get('' + id);
+    getCategory(id?: number): CategoryModel | undefined {
+        return typeof id === 'number' ? this.categoriesById.get(id) : undefined;
     }
 
     loadCategories(): Promise<boolean> | undefined {

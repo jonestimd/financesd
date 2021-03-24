@@ -1,12 +1,12 @@
 export interface IPayee {
-    id: string;
+    id: number;
     name: string;
     version: number;
     transactionCount: number;
 }
 
 export class PayeeModel implements IPayee {
-    id: string;
+    id: number;
     name: string;
     version: number;
     transactionCount: number;

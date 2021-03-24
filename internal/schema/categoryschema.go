@@ -10,7 +10,7 @@ var categorySchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "category",
 	Description: "the type of a transaction",
 	Fields: addAudit(graphql.Fields{
-		"id":               &graphql.Field{Type: graphql.ID},
+		"id":               &graphql.Field{Type: graphql.Int},
 		"code":             &graphql.Field{Type: graphql.String},
 		"description":      &graphql.Field{Type: graphql.String},
 		"amountType":       &graphql.Field{Type: graphql.String},

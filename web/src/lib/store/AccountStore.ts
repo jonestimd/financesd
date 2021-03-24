@@ -41,8 +41,8 @@ export const savingCompanies = 'Saving companies';
 
 export default class AccountStore {
     private loading = false;
-    private companiesById = new ObservableMap<string, CompanyModel>();
-    private accountsById = new ObservableMap<string, AccountModel>();
+    private companiesById = new ObservableMap<number, CompanyModel>();
+    private accountsById = new ObservableMap<number, AccountModel>();
     private loader: Loader;
 
     constructor(messageStore: IMessageStore, alertStore: AlertStore) {
@@ -75,8 +75,12 @@ export default class AccountStore {
         return this.companies.filter((company) => company.filteredAccounts.length > 0);
     }
 
-    getAccount(id?: string | number) {
-        return this.accountsById.get('' + id);
+    getAccount(id?: number) {
+        return typeof id === 'number' ? this.accountsById.get(id) : undefined;
+    }
+
+    getCompany(id?: number) {
+        return typeof id === 'number' ? this.companiesById.get(id) : undefined;
     }
 
     loadAccounts(): Promise<boolean> | undefined {
@@ -85,7 +89,7 @@ export default class AccountStore {
             return this.loader.load<IAccountsResponse>(loadingAccounts, {query,
                 updater: ({accounts, companies}) => {
                     addToMap(this.companiesById, companies.map((company) => new CompanyModel(company)));
-                    addToMap(this.accountsById, accounts.map((account) => new AccountModel(account, this.companiesById.get('' + account.companyId))));
+                    addToMap(this.accountsById, accounts.map((account) => new AccountModel(account, this.getCompany(account.companyId))));
                     for (const account of this.accounts) {
                         account.company?.accounts.push(account);
                     }
@@ -97,7 +101,7 @@ export default class AccountStore {
 
     saveCompanies(variables: IUpdateCompanies) {
         return this.loader.load<{companies: ICompany[]}>(savingCompanies, {query: updateCompaniesQuery, variables, updater: ({companies}) => {
-            variables.delete.forEach((id) => this.companiesById.delete(`${id}`));
+            variables.delete.forEach((id) => this.companiesById.delete(id));
             companies.forEach((c) => {
                 if (this.companiesById.has(c.id)) this.companiesById.get(c.id)?.update(c);
                 else this.companiesById.set(c.id, new CompanyModel(c));

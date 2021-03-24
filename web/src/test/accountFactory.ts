@@ -5,7 +5,7 @@ let nextId = 0;
 
 export function newCompany(overrides: Partial<ICompany> = {}): ICompany {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         name: `Company ${nextId}`,
         version: 1,
         ...overrides,
@@ -20,7 +20,7 @@ export function newCompanyModel(overrides: Partial<ICompany> = {}, ...accounts: 
 
 export function newAccount(overrides: Partial<IAccount> = {}): IAccount {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         name: `Account ${nextId}`,
         type: 'Bank',
         closed: false,
@@ -32,5 +32,5 @@ export function newAccount(overrides: Partial<IAccount> = {}): IAccount {
 }
 
 export function newAccountModel(overrides: Partial<IAccount> = {}, company?: CompanyModel) {
-    return new AccountModel(newAccount({...overrides, companyId: company && parseInt(company.id)}), company);
+    return new AccountModel(newAccount({...overrides, companyId: company && company.id}), company);
 }

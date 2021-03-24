@@ -32,7 +32,7 @@ describe('CompanyListModel', () => {
         it('returns empty array for unknown key', () => {
             const model = new CompanyListModel({columns: 2}, accountStore);
 
-            expect(model.validate(new CompanyRow({id: ''}), '??')).toHaveLength(0);
+            expect(model.validate(new CompanyRow({id: -1}), '??')).toHaveLength(0);
         });
         it('returns empty array for valid name', () => {
             const model = new CompanyListModel({columns: 2}, accountStore);
@@ -42,7 +42,7 @@ describe('CompanyListModel', () => {
         it('returns error for empty name', () => {
             const model = new CompanyListModel({columns: 2}, accountStore);
 
-            expect(model.validate(new CompanyRow({id: ''}), nameKey)).toContain('Name is required');
+            expect(model.validate(new CompanyRow({id: -1}), nameKey)).toContain('Name is required');
         });
         it('returns error for duplicate name', () => {
             const model = new CompanyListModel({columns: 2}, accountStore);
@@ -73,7 +73,7 @@ describe('CompanyListModel', () => {
             jest.spyOn(accountStore, 'saveCompanies').mockResolvedValue(true);
             const model = prepareModel();
             const add = model.pendingAdds.map((c) => c.name);
-            const del = model.pendingDeletes.map((c) => parseInt(c.id));
+            const del = model.pendingDeletes.map((c) => c.id);
             const update = model.changes.map(({id, name, version}) => ({id, name, version}));
 
             expect(await model.save()).toBe(true);

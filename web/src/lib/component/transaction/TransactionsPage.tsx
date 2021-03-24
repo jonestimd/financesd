@@ -16,8 +16,9 @@ interface IProps {
 
 type ViewMode = 'list' | 'table';
 
-const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId}}}) => {
+const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId: accountParam}}}) => {
     const history = useHistory();
+    const accountId = accountParam.length && parseInt(accountParam);
     const {accountStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => void transactionStore.loadTransactions(accountId), [transactionStore, accountId]);
     const account = accountStore.getAccount(accountId);

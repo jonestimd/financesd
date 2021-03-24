@@ -10,7 +10,7 @@ var groupSchema = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "group",
 	Description: "alternate categorization for transaction details",
 	Fields: addAudit(graphql.Fields{
-		"id":               &graphql.Field{Type: graphql.ID},
+		"id":               &graphql.Field{Type: graphql.Int},
 		"name":             &graphql.Field{Type: graphql.String},
 		"description":      &graphql.Field{Type: graphql.String},
 		"transactionCount": &graphql.Field{Type: graphql.Int},

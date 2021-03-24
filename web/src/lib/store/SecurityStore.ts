@@ -20,7 +20,7 @@ export interface ISecurityStore {
 
 export default class SecurityStore {
     private loading = false;
-    private securitiesById = new ObservableMap<string, SecurityModel>();
+    private securitiesById = new ObservableMap<number, SecurityModel>();
     private loader: Loader;
 
     constructor(messageStore: IMessageStore, alertStore: AlertStore) {
@@ -33,8 +33,8 @@ export default class SecurityStore {
         return sortValuesByName(this.securitiesById);
     }
 
-    getSecurity(id?: string | number): SecurityModel | undefined {
-        return this.securitiesById.get('' + id);
+    getSecurity(id?: number): SecurityModel | undefined {
+        return typeof id === 'number' ? this.securitiesById.get(id) : undefined;
     }
 
     loadSecurities(): Promise<boolean> | undefined {

@@ -29,10 +29,9 @@ describe('SecurityStore', () => {
             securityStore['securitiesById'].set(security.id, security);
 
             expect(securityStore.getSecurity(security.id)).toBe(security);
-            expect(securityStore.getSecurity(parseInt(security.id))).toBe(security);
         });
         it('returns undefined for unknown ID', () => {
-            expect(securityStore.getSecurity('-99')).toBeUndefined();
+            expect(securityStore.getSecurity(-99)).toBeUndefined();
         });
     });
     describe('loadSecurities', () => {

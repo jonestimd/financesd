@@ -29,10 +29,9 @@ describe('GroupStore', () => {
             groupStore['groupsById'].set(group.id, group);
 
             expect(groupStore.getGroup(group.id)).toBe(group);
-            expect(groupStore.getGroup(parseInt(group.id))).toBe(group);
         });
         it('returns undefined for unknown ID', () => {
-            expect(groupStore.getGroup('-99')).toBeUndefined();
+            expect(groupStore.getGroup(-99)).toBeUndefined();
         });
     });
     describe('loadGroups', () => {

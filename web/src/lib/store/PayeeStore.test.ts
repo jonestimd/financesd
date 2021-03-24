@@ -29,10 +29,9 @@ describe('PayeeStore', () => {
             payeeStore['payeesById'].set(payee.id, payee);
 
             expect(payeeStore.getPayee(payee.id)).toBe(payee);
-            expect(payeeStore.getPayee(parseInt(payee.id))).toBe(payee);
         });
         it('returns undefined for unknown ID', () => {
-            expect(payeeStore.getPayee('-99')).toBeUndefined();
+            expect(payeeStore.getPayee(-99)).toBeUndefined();
         });
     });
     describe('loadPayees', () => {

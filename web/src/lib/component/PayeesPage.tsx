@@ -15,12 +15,10 @@ const columns: IColumn<PayeeModel>[] = [
 const PayeesPage: React.FC = observer(() => {
     const {payeeStore} = React.useContext(RootStoreContext);
     const payees = payeeStore.payees;
-    return (
-        <div className='payee-list'>
-            <TopAppBar title={translate('menu.payees')} currentPage='menu.payees' />
-            <Table columns={columns} data={payees} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.payees')} currentPage='menu.payees' />
+        <Table columns={columns} data={payees} />
+    </>;
 });
 
 export default PayeesPage;

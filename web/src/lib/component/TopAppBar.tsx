@@ -22,7 +22,7 @@ const TopAppBar: React.FC<ITopAppBarProps> = ({title, currentPage, children}) =>
     const history = useHistory();
     history.listen(hideMenu);
     return <>
-        <AppBar position='fixed'>
+        <AppBar position='relative'>
             <Toolbar variant='dense' disableGutters>
                 <IconButton onClick={toggleMenu} color='inherit'><Icon>menu</Icon></IconButton>
                 {title ? <Typography variant='h6'>{title}</Typography> : null}

@@ -21,12 +21,10 @@ const columns: IColumn<CategoryModel>[] = [
 const CategoriesPage: React.FC = observer(() => {
     const {categoryStore} = React.useContext(RootStoreContext);
     const categories = categoryStore.categories;
-    return (
-        <div className='category-list'>
-            <TopAppBar title={translate('menu.categories')} currentPage='menu.categories' />
-            <Table columns={columns} data={categories} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.categories')} currentPage='menu.categories' />
+        <Table columns={columns} data={categories} />
+    </>;
 });
 
 export default CategoriesPage;

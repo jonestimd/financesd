@@ -16,12 +16,10 @@ const columns: IColumn<GroupModel>[] = [
 const SecuritiesPage: React.FC = observer(() => {
     const {groupStore} = React.useContext(RootStoreContext);
     const groups = groupStore.groups;
-    return (
-        <div className='groups-list'>
-            <TopAppBar title={translate('menu.groups')} currentPage='menu.groups' />
-            <Table columns={columns} data={groups} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.groups')} currentPage='menu.groups' />
+        <Table columns={columns} data={groups} />
+    </>;
 });
 
 export default SecuritiesPage;

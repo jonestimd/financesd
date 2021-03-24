@@ -22,12 +22,10 @@ const columns: IColumn<SecurityModel>[] = [
 const SecuritiesPage: React.FC = observer(() => {
     const {securityStore} = React.useContext(RootStoreContext);
     const securities = securityStore.securities;
-    return (
-        <div className='securities-list'>
-            <TopAppBar title={translate('menu.securities')} currentPage='menu.securities' />
-            <Table columns={columns} data={securities} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.securities')} currentPage='menu.securities' />
+        <Table columns={columns} data={securities} />
+    </>;
 });
 
 export default SecuritiesPage;

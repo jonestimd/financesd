@@ -23,7 +23,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     React.useEffect(() => void transactionStore.loadTransactions(accountId), [transactionStore, accountId]);
     const account = accountStore.getAccount(accountId);
     const [mode, setMode] = React.useState<ViewMode>('list');
-    return<>
+    return <>
         <TopAppBar currentPage='transactions'>
             <Autocomplete options={accountStore.accounts} loading={accountStore.accounts.length === 0}
                 openOnFocus={true} size='small'

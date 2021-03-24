@@ -27,15 +27,13 @@ const AccountsPage: React.FC = observer(() => {
     const {accountStore} = React.useContext(RootStoreContext);
     const accounts = accountStore.accounts;
     const [showCompanies, setShowCompanies] = React.useState(false);
-    return (
-        <div className='account-list'>
-            <TopAppBar title={translate('menu.accounts')} currentPage='menu.accounts'>
-                <IconButton onClick={() => setShowCompanies(true)}><Icon>account_balance</Icon></IconButton>
-            </TopAppBar>
-            {showCompanies ? <CompaniesDialog onClose={() => setShowCompanies(false)} /> : null}
-            <Table columns={columns} data={accounts} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.accounts')} currentPage='menu.accounts'>
+            <IconButton onClick={() => setShowCompanies(true)}><Icon>account_balance</Icon></IconButton>
+        </TopAppBar>
+        {showCompanies ? <CompaniesDialog onClose={() => setShowCompanies(false)} /> : null}
+        <Table columns={columns} data={accounts} />
+    </>;
 }, {forwardRef: true});
 
 export default AccountsPage;

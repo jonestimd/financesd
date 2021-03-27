@@ -1,7 +1,7 @@
 import React from 'react';
 import {mount, shallow} from 'enzyme';
 import Row from './Row';
-import TableCell from '@material-ui/core/TableCell';
+import {TableCell} from '@material-ui/core';
 import {IColumn} from './Column';
 import TextCellEditor from './TextCellEditor';
 import {Icon} from '@material-ui/core';

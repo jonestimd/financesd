@@ -1,8 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import MuiTable from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableHead from '@material-ui/core/TableHead';
+import {Table as MuiTable, TableBody, TableHead} from '@material-ui/core';
 import HeaderRow from './HeaderRow';
 import Row, {IRowProps} from './Row';
 import {IColumn} from './Column';

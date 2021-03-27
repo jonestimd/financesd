@@ -8,8 +8,7 @@ import Row from './Row';
 import {IColumn} from './Column';
 import {mockHooks} from 'src/test/mockHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
-import TableHead from '@material-ui/core/TableHead';
-import TableBody from '@material-ui/core/TableBody';
+import {TableHead, TableBody} from '@material-ui/core';
 
 let nextId = 1;
 

@@ -2,7 +2,7 @@ import TransactionModel, {ITransaction} from './TransactionModel';
 import CategoryStore from '../store/CategoryStore';
 import {computed, makeObservable, observable} from 'mobx';
 import IMixedRowTableModel from './IMixedRowTableModel';
-import sortedIndex from 'lodash/sortedIndex';
+import {sortedIndex} from 'lodash';
 import MessageStore from '../store/MessageStore';
 import AlertStore from '../store/AlertStore';
 

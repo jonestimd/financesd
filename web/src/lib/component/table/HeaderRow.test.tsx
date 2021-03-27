@@ -1,6 +1,6 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import TableCell from '@material-ui/core/TableCell';
+import {TableCell} from '@material-ui/core';
 import {IColumn} from './Column';
 import HeaderRow from './HeaderRow';
 

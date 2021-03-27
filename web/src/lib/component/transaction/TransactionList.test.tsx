@@ -6,7 +6,7 @@ import TransactionTableModel from 'src/lib/model/TransactionTableModel';
 import ListViewport, {IProps} from '../scroll/ListViewport';
 import {newTxModel} from 'src/test/transactionFactory';
 import Memo from './Memo';
-import Checkbox from '@material-ui/core/Checkbox';
+import {Checkbox} from '@material-ui/core';
 import Payee from './Payee';
 import Security from './Security';
 import TxDetail from './TxDetail';

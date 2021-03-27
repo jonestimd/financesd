@@ -4,8 +4,7 @@ import Table from './Table';
 import HeaderRow from './HeaderRow';
 import Row from './Row';
 import {IColumn} from './Column';
-import TableHead from '@material-ui/core/TableHead';
-import TableBody from '@material-ui/core/TableBody';
+import {TableHead, TableBody} from '@material-ui/core';
 import TextCellEditor from './TextCellEditor';
 import SelectionModel from 'src/lib/model/SelectionModel';
 

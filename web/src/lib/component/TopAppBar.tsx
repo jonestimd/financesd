@@ -1,10 +1,5 @@
 import React from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import {Drawer} from '@material-ui/core';
+import {AppBar, Drawer, Icon, IconButton, Toolbar, Typography} from '@material-ui/core';
 import PageMenu from './menu/PageMenu';
 import {useHistory} from 'react-router';
 

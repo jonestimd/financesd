@@ -9,11 +9,7 @@ import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
 import {useScroll} from '../scroll/scrollHooks';
 import {useSelection} from '../scroll/selectionHooks';
-import Table from '@material-ui/core/Table';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableBody from '@material-ui/core/TableBody';
+import {Table, TableRow, TableCell, TableHead, TableBody} from '@material-ui/core';
 
 export interface IHeaderDetailTableProps<T, S> {
     className?: string;

@@ -33,10 +33,10 @@ describe('Category', () => {
     it('shows transfer account', () => {
         const name = 'the other account';
         const relatedDetail = {
-            id: '2',
+            id: 2,
             amount: -detail.amount,
             transaction: {
-                id: '20',
+                id: 20,
                 accountId: 456,
             },
         };

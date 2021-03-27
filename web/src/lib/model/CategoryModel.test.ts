@@ -6,7 +6,7 @@ import {CategoryModel} from './CategoryModel';
 describe('CategoryModel', () => {
     const {categoryStore} = new RootStore();
     const parent = newCategoryModel({categoryStore});
-    const category = newCategory({parentId: parseInt(parent.id)});
+    const category = newCategory({parentId: parent.id});
     categoryStore['categoriesById'].set(parent.id, parent);
 
     describe('constructor', () => {

@@ -25,7 +25,7 @@ describe('TransactionModel', () => {
         it('ignores asset quantities', () => {
             const category = newCategoryModel({amountType: 'ASSET_VALUE'});
             categoryStore['categoriesById'].set(category.id, category);
-            const details = [newDetail({amount: 12.34}), newDetail({transactionCategoryId: parseInt(category.id)})];
+            const details = [newDetail({amount: 12.34}), newDetail({transactionCategoryId: category.id})];
             const model = newTxModel({details, categoryStore});
 
             expect(model.subtotal).toEqual(details[0].amount);

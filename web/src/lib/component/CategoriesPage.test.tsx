@@ -14,7 +14,7 @@ describe('CategoriesPage', () => {
     const rootStore = new RootStore();
     const {categoryStore} = rootStore;
     const parent = newCategoryModel({categoryStore});
-    const category = newCategoryModel({categoryStore, parentId: parseInt(parent.id)});
+    const category = newCategoryModel({categoryStore, parentId: parent.id});
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue(rootStore);

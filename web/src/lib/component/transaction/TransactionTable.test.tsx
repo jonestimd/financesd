@@ -26,8 +26,8 @@ describe('TransactionTable', () => {
     const payee = newPayeeModel();
     const security = newSecurityModel();
     const txModel = newTxModel({
-        payeeId: parseInt(payee.id),
-        securityId: parseInt(security.id),
+        payeeId: payee.id,
+        securityId: security.id,
         referenceNumber: '123',
         memo: 'tx memo',
         details: [newDetail()],
@@ -118,8 +118,8 @@ describe('TransactionTable', () => {
         const group = newGroupModel();
         const category = newCategoryModel();
         const detail = newDetail({
-            transactionGroupId: parseInt(group.id),
-            transactionCategoryId: parseInt(category.id),
+            transactionGroupId: group.id,
+            transactionCategoryId: category.id,
             memo: 'detail memo',
             assetQuantity: 9.234567,
             amount: 456.23,
@@ -153,7 +153,7 @@ describe('TransactionTable', () => {
         });
         it('displays transfer account', () => {
             const relatedAccount = newAccountModel();
-            const relatedTx = {accountId: parseInt(relatedAccount.id)};
+            const relatedTx = {accountId: relatedAccount.id};
             const relatedDetail = {transaction: relatedTx};
             jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(relatedAccount);
             const component = shallow(<TransactionTable accountId={account.id} />);

@@ -11,7 +11,7 @@ import SelectionModel from 'src/lib/model/SelectionModel';
 
 class TestRow {
     constructor(
-        readonly id: string,
+        readonly id: number,
         public c1: string,
         readonly c2: string | number,
         readonly c3: string
@@ -30,8 +30,8 @@ describe('Table', () => {
         {key: 'third', render: (row) => row.c3, header: (key) => key.toUpperCase()},
     ];
     const data = [
-        new TestRow('r1', 'a1', 'a2', 'a3'),
-        new TestRow('r2', 'b1', 20, 'b3'),
+        new TestRow(1, 'a1', 'a2', 'a3'),
+        new TestRow(2, 'b1', 20, 'b3'),
     ];
 
     it('tracks selected cell', () => {

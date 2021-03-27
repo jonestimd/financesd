@@ -10,7 +10,7 @@ interface IProps {
 
 const TxDetail: React.FC<IProps> = ({detail}) => {
     return (
-        <div className='detail chip' id={detail.id}>
+        <div className='detail chip' id={`${detail.id}`}>
             <span><Currency>{detail.amount}</Currency></span>
             <Category detail={detail} />
             <Group id={detail.transactionGroupId} />

@@ -2,12 +2,6 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import {mockUseEffect} from 'src/test/mockHooks';
 import {RootStore, RootStoreContext} from '../store/RootStore';
-import AccountStore from '../store/AccountStore';
-import MessageStore from '../store/MessageStore';
-import CategoryStore from '../store/CategoryStore';
-import GroupStore from '../store/GroupStore';
-import PayeeStore from '../store/PayeeStore';
-import SecurityStore from '../store/SecurityStore';
 import * as history from 'history';
 import type * as main from './main';
 import ProgressMessage from './ProgressMessage';
@@ -22,24 +16,20 @@ import GroupsPage from './GroupsPage';
 jest.mock('../store/RootStore');
 
 describe('main', () => {
-    const messageStore = new MessageStore();
-    const accountStore = new AccountStore(messageStore);
-    const categoryStore = new CategoryStore(messageStore);
-    const groupStore = new GroupStore(messageStore);
-    const payeeStore = new PayeeStore(messageStore);
-    const securityStore = new SecurityStore(messageStore);
-    const rootStore = {messageStore, accountStore, categoryStore, groupStore, payeeStore, securityStore};
+    const {RootStore: RealRootStore} = jest.requireActual<{RootStore: typeof RootStore}>('../store/RootStore');
+    const rootStore = new RealRootStore();
+    const {accountStore, categoryStore, groupStore, payeeStore, securityStore} = rootStore;
     const browserHistory = {location: {pathName: 'here'}, listen: jest.fn()};
 
     describe('Routes', () => {
         beforeEach(() => {
             const mockRootStore = RootStore as jest.MockedClass<typeof RootStore>;
-            mockRootStore.mockReturnValue(rootStore as RootStore);
-            jest.spyOn(accountStore, 'loadAccounts').mockResolvedValue();
-            jest.spyOn(categoryStore, 'loadCategories').mockResolvedValue();
-            jest.spyOn(groupStore, 'loadGroups').mockResolvedValue();
-            jest.spyOn(payeeStore, 'loadPayees').mockResolvedValue();
-            jest.spyOn(securityStore, 'loadSecurities').mockResolvedValue();
+            mockRootStore.mockReturnValue(rootStore);
+            jest.spyOn(accountStore, 'loadAccounts').mockResolvedValue(true);
+            jest.spyOn(categoryStore, 'loadCategories').mockResolvedValue(true);
+            jest.spyOn(groupStore, 'loadGroups').mockResolvedValue(true);
+            jest.spyOn(payeeStore, 'loadPayees').mockResolvedValue(true);
+            jest.spyOn(securityStore, 'loadSecurities').mockResolvedValue(true);
             mockUseEffect();
             const container = document.createElement('div');
             jest.spyOn(document, 'querySelector').mockReturnValue(container);
@@ -63,7 +53,7 @@ describe('main', () => {
         });
         jest.isolateModules(() => {
             it('reuses existing root store', () => {
-                window.rootStore = rootStore as RootStore;
+                window.rootStore = rootStore;
                 const {Routes} = jest.requireActual<typeof main>('./main');
 
                 const component = shallow(<Routes />);
@@ -75,7 +65,7 @@ describe('main', () => {
         });
         jest.isolateModules(() => {
             it('renders progress indicator and routes', () => {
-                window.rootStore = rootStore as RootStore;
+                window.rootStore = rootStore;
                 const {Routes} = jest.requireActual<typeof main>('./main');
 
                 const component = shallow(<Routes />);

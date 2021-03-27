@@ -2,10 +2,10 @@ import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Column';
 import {GroupModel} from '../model/GroupModel';
 import {translate} from '../i18n/localize';
-import PageMenu from './PageMenu';
 
 const columns: IColumn<GroupModel>[] = [
     {key: 'group.name', render: (group) => group.name},
@@ -16,12 +16,10 @@ const columns: IColumn<GroupModel>[] = [
 const SecuritiesPage: React.FC = observer(() => {
     const {groupStore} = React.useContext(RootStoreContext);
     const groups = groupStore.groups;
-    return (
-        <div className='groups-list'>
-            <TopAppBar title={translate('menu.groups')} menuItems={<PageMenu currentPage='menu.groups' />} />
-            <Table columns={columns} data={groups} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.groups')} currentPage='menu.groups' />
+        <Table columns={columns} data={groups} />
+    </>;
 });
 
 export default SecuritiesPage;

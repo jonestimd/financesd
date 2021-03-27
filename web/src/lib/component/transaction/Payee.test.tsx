@@ -1,19 +1,16 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import TransactionModel from 'src/lib/model/TransactionModel';
-import MessageStore from 'src/lib/store/MessageStore';
-import PayeeStore from 'src/lib/store/PayeeStore';
 import {PayeeModel} from 'src/lib/model/PayeeModel';
 import Payee from './Payee';
 import {newTx} from 'src/test/transactionFactory';
-import CategoryStore from 'src/lib/store/CategoryStore';
+import {RootStore} from 'src/lib/store/RootStore';
 
 const txData = newTx();
 
 describe('Payee', () => {
-    const messageStore = new MessageStore();
-    const payeeStore = new PayeeStore(messageStore);
-    const categoryStore = new CategoryStore(messageStore);
+    const rootStore = new RootStore();
+    const {payeeStore, categoryStore} = rootStore;
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({payeeStore});

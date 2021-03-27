@@ -1,4 +1,4 @@
-import {addToMap, compareBy, compareByName, IName, sortValuesByName} from "./entityUtils";
+import {addToMap, compareBy, compareByName, IName, sortValuesByName} from './entityUtils';
 
 describe('entityUtils', () => {
     const item1 = {name: 'abc'};
@@ -42,10 +42,10 @@ describe('entityUtils', () => {
     });
     describe('addToMap', () => {
         it('adds items to map using id property', () => {
-            const entry1 = {id: '1', name: 'abc'};
-            const entry2 = {id: '2', name: 'xyz'};
+            const entry1 = {id: 1, name: 'abc'};
+            const entry2 = {id: 2, name: 'xyz'};
 
-            const map = new Map<string, typeof entry1>();
+            const map = new Map<number, typeof entry1>();
             addToMap(map, [entry1, entry2]);
 
             expect(map.get(entry1.id)).toBe(entry1);

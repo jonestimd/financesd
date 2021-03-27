@@ -88,9 +88,8 @@ func Test_companySource_loadCompanies(t *testing.T) {
 	t.Run("loads companies", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			cs := &companySource{companyIDs: []int64{10, 20}}
-			jsonIDs, _ := json.Marshal(cs.companyIDs)
 			mockDB.ExpectQuery("select * from company where json_contains(?, cast(id as json))").
-				WithArgs(jsonIDs).
+				WithArgs("[10,20]").
 				WillReturnRows(sqltest.MockRows("id").AddRow(cs.companyIDs[0]).AddRow(cs.companyIDs[1]))
 
 			assert.Nil(t, cs.loadCompanies(tx))

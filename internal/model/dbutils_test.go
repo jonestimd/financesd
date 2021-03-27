@@ -10,6 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_intsToJson(t *testing.T) {
+	values := []int{1, 3, 5, 2, 4, 6}
+
+	result := intsToJson(values)
+
+	assert.Equal(t, result, "[1,3,5,2,4,6]")
+}
+
 func Test_runQuery_populatesModel(t *testing.T) {
 	name := "the company"
 	query := "select * from company where name = ?"
@@ -35,5 +43,57 @@ func Test_runQuery_returnsQueryError(t *testing.T) {
 
 		assert.Same(t, expectedErr, err)
 		assert.Nil(t, result)
+	})
+}
+
+func Test_runInsert_returnsID(t *testing.T) {
+	id := int64(42)
+	name := "the company"
+	query := "insert into company (name) values(?)"
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		prepare := mock.ExpectPrepare(query)
+		prepare.ExpectExec().
+			WithArgs(name).
+			WillReturnResult(sqlmock.NewResult(id, 1))
+		prepare.WillBeClosed()
+
+		result, err := runInsert(tx, query, name)
+
+		assert.Nil(t, err)
+		assert.Equal(t, id, result)
+		assert.Nil(t, mock.ExpectationsWereMet())
+	})
+}
+
+func Test_runInsert_returnsPrepareError(t *testing.T) {
+	expectedErr := errors.New("prepare failed")
+	query := "insert into company (name) values(?)"
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		mock.ExpectPrepare(query).WillReturnError(expectedErr)
+
+		result, err := runInsert(tx, query, "new company")
+
+		assert.Equal(t, int64(0), result)
+		assert.Same(t, expectedErr, err)
+		assert.Nil(t, mock.ExpectationsWereMet())
+	})
+}
+
+func Test_runInsert_returnsExecError(t *testing.T) {
+	expectedErr := errors.New("query failed")
+	name := "the company"
+	query := "insert into company (name) values(?)"
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		prepare := mock.ExpectPrepare(query)
+		prepare.ExpectExec().
+			WithArgs(name).
+			WillReturnError(expectedErr)
+		prepare.WillBeClosed()
+
+		result, err := runInsert(tx, query, name)
+
+		assert.Equal(t, int64(0), result)
+		assert.Same(t, expectedErr, err)
+		assert.Nil(t, mock.ExpectationsWereMet())
 	})
 }

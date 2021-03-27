@@ -1,12 +1,12 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {loadingPayees, query} from "./PayeeStore";
-import {newPayee, newPayeeModel} from "src/test/payeeFactory";
-import {PayeeModel} from "../model/PayeeModel";
+import {loadingPayees, query} from './PayeeStore';
+import {newPayee, newPayeeModel} from 'src/test/payeeFactory';
+import {PayeeModel} from '../model/PayeeModel';
 
 describe('PayeeStore', () => {
-    const {payeeStore, messageStore} = new RootStore();
+    const {payeeStore, messageStore, alertStore} = new RootStore();
 
     beforeEach(() => {
         payeeStore['payeesById'].clear();
@@ -29,10 +29,9 @@ describe('PayeeStore', () => {
             payeeStore['payeesById'].set(payee.id, payee);
 
             expect(payeeStore.getPayee(payee.id)).toBe(payee);
-            expect(payeeStore.getPayee(parseInt(payee.id))).toBe(payee);
         });
         it('returns undefined for unknown ID', () => {
-            expect(payeeStore.getPayee('-99')).toBeUndefined();
+            expect(payeeStore.getPayee(-99)).toBeUndefined();
         });
     });
     describe('loadPayees', () => {
@@ -50,7 +49,7 @@ describe('PayeeStore', () => {
             expect(payeeStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingPayees);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingPayees);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query, undefined);
             expect(payeeStore.payees).toStrictEqual([new PayeeModel(payee)]);
         });
         it('does nothing is already loading', async () => {
@@ -80,13 +79,15 @@ describe('PayeeStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await payeeStore.loadPayees();
 
             expect(payeeStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingPayees);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingPayees);
-            expect(console.error).toBeCalledWith('error gettting payees', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading payees');
+            expect(console.error).toBeCalledWith('error from Loading payees', error);
         });
     });
 });

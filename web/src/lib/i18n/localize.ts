@@ -17,5 +17,5 @@ const defaultBundle = {
 export function translate(key: string, bundle: IBundle = defaultBundle) {
     const translations = bundle[navigator.language];
     if (translations && translations[key]) return translations[key];
-    return bundle[defaultKey][key] || key;
+    return bundle[defaultKey][key] ?? key;
 }

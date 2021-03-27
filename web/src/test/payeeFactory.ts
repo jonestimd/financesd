@@ -1,10 +1,10 @@
-import {IPayee, PayeeModel} from "src/lib/model/PayeeModel";
+import {IPayee, PayeeModel} from 'src/lib/model/PayeeModel';
 
 let nextId = 0;
 
 export function newPayee(overrides: Partial<IPayee> = {}): IPayee {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         name: `Payee ${nextId}`,
         version: 1,
         transactionCount: 42,

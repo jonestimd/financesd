@@ -12,7 +12,7 @@ import {Checkbox, Typography} from '@material-ui/core';
 import ListViewport from '../scroll/ListViewport';
 
 interface IProps {
-    accountId?: string;
+    accountId?: number;
 }
 
 const TransactionPrototype: React.FC = () => (

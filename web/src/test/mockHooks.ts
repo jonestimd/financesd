@@ -18,10 +18,11 @@ export function mockScrollHook(overrides: Partial<ScrollHook> = {}) {
     return scroll;
 }
 
-export function mockSelectionHook() {
+export function mockSelectionHook(row = 0, column = 0) {
     const selection = {
-        row: 0,
-        column: 0,
+        row,
+        column,
+        setCell: jest.fn(),
         onKeyDown: jest.fn(),
         onMouseDown: jest.fn(),
     };

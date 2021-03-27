@@ -2,11 +2,11 @@ import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Column';
 import {CategoryModel} from '../model/CategoryModel';
 import amountType from '../i18n/amountType';
 import {translate} from '../i18n/localize';
-import PageMenu from './PageMenu';
 
 const columns: IColumn<CategoryModel>[] = [
     {key: 'category.parent', render: (category) => category.parent?.displayName ?? null},
@@ -21,12 +21,10 @@ const columns: IColumn<CategoryModel>[] = [
 const CategoriesPage: React.FC = observer(() => {
     const {categoryStore} = React.useContext(RootStoreContext);
     const categories = categoryStore.categories;
-    return (
-        <div className='category-list'>
-            <TopAppBar title={translate('menu.categories')} menuItems={<PageMenu currentPage='menu.categories' />} />
-            <Table columns={columns} data={categories} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.categories')} currentPage='menu.categories' />
+        <Table columns={columns} data={categories} />
+    </>;
 });
 
 export default CategoriesPage;

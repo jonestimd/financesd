@@ -1,11 +1,10 @@
-import * as agent from '../agent';
 import {ITransaction} from '../model/TransactionModel';
-import {flow, ObservableMap} from 'mobx';
+import {ObservableMap} from 'mobx';
 import {RootStore} from './RootStore';
 import TransactionTableModel from '../model/TransactionTableModel';
-import {LoadResult} from './interfaces';
+import Loader from './Loader';
 
-export const query = `query($accountId: ID!) {
+export const query = `query($accountId: Int!) {
     transactions(accountId: $accountId) {
         id date referenceNumber payeeId securityId memo cleared
         details {
@@ -15,42 +14,33 @@ export const query = `query($accountId: ID!) {
     }
 }`;
 
-type TransactionsResponse = agent.IGraphqlResponse<{transactions: ITransaction[]}>;
-
-export const loadingTransactions = 'Loading transactions...';
+export const loadingTransactions = 'Loading transactions';
 
 export default class TransactionStore {
-    private pendingAccounts: string[] = [];
-    private transactionsByAccountId = new ObservableMap<string, TransactionTableModel>();
+    private pendingAccounts: number[] = [];
+    private transactionsByAccountId = new ObservableMap<number, TransactionTableModel>();
     private rootStore: RootStore;
+    private loader: Loader;
 
     constructor(rootStore: RootStore) {
         // makeObservable(this);
         this.rootStore = rootStore;
+        this.loader = new Loader(rootStore.messageStore, rootStore.alertStore);
     }
 
-    getTransactionsModel(accountId?: string): TransactionTableModel {
-        return accountId && this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
+    getTransactionsModel(accountId?: number): TransactionTableModel {
+        return typeof accountId === 'number' && this.transactionsByAccountId.get(accountId) || TransactionTableModel.EMPTY;
     }
 
-    async loadTransactions(accountId: string): Promise<void> {
+    loadTransactions(accountId: number): Promise<boolean> | undefined {
         if (!this.transactionsByAccountId.has(accountId) && this.pendingAccounts.indexOf(accountId) < 0) {
-            this.rootStore.messageStore.addProgressMessage(loadingTransactions);
-            await this._loadTransactions(accountId);
+            this.pendingAccounts.push(accountId);
+            return this.loader.load<{transactions: ITransaction[]}>(loadingTransactions, {query, variables: {accountId},
+                updater: ({transactions}) => {
+                    this.transactionsByAccountId.set(accountId, new TransactionTableModel(transactions, this.rootStore.categoryStore));
+                },
+                completer: () => this.pendingAccounts.splice(this.pendingAccounts.indexOf(accountId), 1),
+            });
         }
     }
-
-    private _loadTransactions = flow(function* (this: TransactionStore, accountId: string): LoadResult<TransactionsResponse> {
-        this.pendingAccounts.push(accountId);
-        try {
-            const variables = {accountId};
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query, variables);
-            this.transactionsByAccountId.set(accountId, new TransactionTableModel(data.transactions, this.rootStore.categoryStore));
-        } catch (err) {
-            console.error('error gettting transactions', err);
-        } finally {
-            this.pendingAccounts.splice(this.pendingAccounts.indexOf(accountId), 1);
-            this.rootStore.messageStore.removeProgressMessage(loadingTransactions);
-        }
-    });
 }

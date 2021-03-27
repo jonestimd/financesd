@@ -1,9 +1,9 @@
-import * as agent from '../agent';
 import {PayeeModel, IPayee} from '../model/PayeeModel';
 import {addToMap, sortValuesByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
-import {computed, flow, makeObservable, ObservableMap} from 'mobx';
-import {LoadResult} from './interfaces';
+import {computed, makeObservable, ObservableMap} from 'mobx';
+import Loader from './Loader';
+import AlertStore from './AlertStore';
 
 export const query = `{
     payees {
@@ -11,18 +11,16 @@ export const query = `{
     }
 }`;
 
-type PayeesResponse = agent.IGraphqlResponse<{payees: IPayee[]}>;
-
-export const loadingPayees = 'Loading payees...';
+export const loadingPayees = 'Loading payees';
 
 export default class PayeeStore {
     private loading = false;
-    private payeesById = new ObservableMap<string, PayeeModel>();
-    private messageStore: IMessageStore;
+    private payeesById = new ObservableMap<number, PayeeModel>();
+    private loader: Loader;
 
-    constructor(messageStore: IMessageStore) {
+    constructor(messageStore: IMessageStore, alertStore: AlertStore) {
         makeObservable(this);
-        this.messageStore = messageStore;
+        this.loader = new Loader(messageStore, alertStore);
     }
 
     @computed
@@ -30,27 +28,17 @@ export default class PayeeStore {
         return sortValuesByName(this.payeesById);
     }
 
-    getPayee(id?: string | number): PayeeModel | undefined {
-        return this.payeesById.get('' + id);
+    getPayee(id?: number): PayeeModel | undefined {
+        return typeof id === 'number' ? this.payeesById.get(id) : undefined;
     }
 
-    loadPayees(): Promise<void> | undefined {
+    loadPayees(): Promise<boolean> | undefined {
         if (!this.loading && this.payeesById.size === 0) {
-            this.messageStore.addProgressMessage(loadingPayees);
-            return this._loadPayees();
+            this.loading = true;
+            return this.loader.load<{payees: IPayee[]}>(loadingPayees, {query,
+                updater: ({payees}) => addToMap(this.payeesById, payees.map((payee) => new PayeeModel(payee))),
+                completer: () => this.loading = false,
+            });
         }
     }
-
-    private _loadPayees = flow(function* (this: PayeeStore): LoadResult<PayeesResponse> {
-        this.loading = true;
-        try {
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
-            addToMap(this.payeesById, data.payees.map((payee) => new PayeeModel(payee)));
-        } catch (err) {
-            console.error('error gettting payees', err); // TODO show toast
-        } finally {
-            this.loading = false;
-            this.messageStore.removeProgressMessage(loadingPayees);
-        }
-    });
 }

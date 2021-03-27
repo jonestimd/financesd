@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -12,6 +14,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/gqlerrors"
 	"github.com/graphql-go/handler"
+	"github.com/jonestimd/financesd/internal/schema"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -85,6 +88,7 @@ func Test_main_connectsToDatabaseAndStartsServer(t *testing.T) {
 		assert.Equal(t, []interface{}{"localhost:8080"}, mocks.httpListenAndServe.GetCall(0).Arguments()[:1])
 		assert.Equal(t, []interface{}{errors.New("stopped server")}, mocks.exitMessage)
 	})
+	os.Args = os.Args[0:1]
 
 	main()
 
@@ -99,6 +103,7 @@ func Test_main_quitsIfDbConnectionFails(t *testing.T) {
 		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 		assert.Equal(t, []interface{}{expectedErr}, mocks.exitMessage)
 	})
+	os.Args = os.Args[0:1]
 
 	main()
 
@@ -113,6 +118,7 @@ func Test_main_quitsIfDbPingFails(t *testing.T) {
 		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 		assert.Equal(t, []interface{}{expectedErr}, mocks.exitMessage)
 	})
+	os.Args = os.Args[0:1]
 
 	main()
 
@@ -128,6 +134,7 @@ func Test_main_quitsOnSchemaError(t *testing.T) {
 		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 		assert.Equal(t, []interface{}{expectedErr}, mocks.exitMessage)
 	})
+	os.Args = os.Args[0:1]
 
 	main()
 
@@ -143,6 +150,7 @@ func Test_main_quitsIfCurrentDirUnavailable(t *testing.T) {
 		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 		assert.Equal(t, []interface{}{"can't get current directory"}, mocks.exitMessage)
 	})
+	os.Args = os.Args[0:1]
 
 	main()
 
@@ -165,35 +173,19 @@ func Test_resultCallback(t *testing.T) {
 		callback(ctx, nil, &graphql.Result{Errors: []gqlerrors.FormattedError{{}}}, nil)
 		assert.Equal(t, true, hasError)
 	})
+	os.Args = os.Args[0:1]
+
 	main()
 }
 
-type mockResponse struct {
-	header map[string][]string
-	status int
-}
-
-func (r *mockResponse) Header() http.Header {
-	if r.header == nil {
-		r.header = make(map[string][]string)
-	}
-	return r.header
-}
-
-func (r *mockResponse) Write([]byte) (int, error) {
-	return 0, nil
-}
-
-func (r *mockResponse) WriteHeader(statusCode int) {
-	r.status = statusCode
-}
-
 type mockGraphql struct {
+	user     interface{}
 	setError bool
 	panic    bool
 }
 
 func (h *mockGraphql) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.user = r.Context().Value(schema.UserKey)
 	if h.setError {
 		hasError := r.Context().Value(hasErrorKey).(*bool)
 		*hasError = true
@@ -202,71 +194,105 @@ func (h *mockGraphql) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Test_ServeHTTP_requiresUser(t *testing.T) {
+	tests := []struct {
+		name        string
+		requestUser string
+		defaultUser string
+		status      int
+	}{
+		{"no user", "", "", http.StatusBadRequest},
+		{"request user", "somebody", "nobody", http.StatusOK},
+		{"default user", "", "somebody", http.StatusOK},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mocks := makeMocks(t)
+			defer mocks.restore(t, "l", nil)
+			if test.status == http.StatusOK {
+				mocks.mockDB.ExpectBegin()
+				mocks.mockDB.ExpectCommit()
+			}
+			gqlHandler := &mockGraphql{}
+			handler := &graphqlHandler{db: mocks.db, defaultUser: test.defaultUser, handler: gqlHandler}
+			w := httptest.NewRecorder()
+
+			handler.ServeHTTP(w, &http.Request{Header: http.Header{"X-User": {test.requestUser}}})
+
+			assert.Equal(t, test.status, w.Result().StatusCode)
+			assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
+			if test.status == http.StatusOK {
+				assert.Equal(t, "somebody", gqlHandler.user)
+			}
+		})
+	}
+}
+
 func Test_ServeHTTP_returnsDatabaseError(t *testing.T) {
 	mocks := makeMocks(t)
 	defer mocks.restore(t, "l", nil)
-	handler := &graphqlHandler{db: mocks.db, handler: &mockGraphql{}}
+	handler := &graphqlHandler{db: mocks.db, defaultUser: "somebody", handler: &mockGraphql{}}
 	mocks.mockDB.ExpectBegin().WillReturnError(errors.New("connection error"))
-	res := &mockResponse{}
+	w := httptest.NewRecorder()
 
-	handler.ServeHTTP(res, nil)
+	handler.ServeHTTP(w, &http.Request{})
 
-	assert.Equal(t, http.StatusInternalServerError, res.status)
+	assert.Equal(t, http.StatusInternalServerError, w.Result().StatusCode)
 	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 }
 
 func Test_ServeHTTP_commitsOnSuccess(t *testing.T) {
 	mocks := makeMocks(t)
 	defer mocks.restore(t, "", nil)
-	handler := &graphqlHandler{db: mocks.db, handler: &mockGraphql{}}
+	handler := &graphqlHandler{db: mocks.db, defaultUser: "somebody", handler: &mockGraphql{}}
 	mocks.mockDB.ExpectBegin()
 	mocks.mockDB.ExpectCommit()
-	res := &mockResponse{}
+	w := httptest.NewRecorder()
 
-	handler.ServeHTTP(res, &http.Request{})
+	handler.ServeHTTP(w, &http.Request{})
 
-	assert.Equal(t, 0, res.status)
+	assert.Equal(t, http.StatusOK, w.Result().StatusCode)
 	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 }
 
 func Test_ServeHTTP_returnsErrorIfCommitFails(t *testing.T) {
 	mocks := makeMocks(t)
 	defer mocks.restore(t, "", nil)
-	handler := &graphqlHandler{db: mocks.db, handler: &mockGraphql{}}
+	handler := &graphqlHandler{db: mocks.db, defaultUser: "somebody", handler: &mockGraphql{}}
 	mocks.mockDB.ExpectBegin()
 	mocks.mockDB.ExpectCommit().WillReturnError(errors.New("commit error"))
-	res := &mockResponse{}
+	h := httptest.NewRecorder()
 
-	handler.ServeHTTP(res, &http.Request{})
+	handler.ServeHTTP(h, &http.Request{})
 
-	assert.Equal(t, http.StatusInternalServerError, res.status)
+	assert.Equal(t, http.StatusInternalServerError, h.Result().StatusCode)
 	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 }
 
 func Test_ServeHTTP_rollsbackOnError(t *testing.T) {
 	mocks := makeMocks(t)
 	defer mocks.restore(t, "", nil)
-	handler := &graphqlHandler{db: mocks.db, handler: &mockGraphql{setError: true}}
+	handler := &graphqlHandler{db: mocks.db, defaultUser: "somebody", handler: &mockGraphql{setError: true}}
 	mocks.mockDB.ExpectBegin()
 	mocks.mockDB.ExpectRollback()
-	res := &mockResponse{}
+	h := httptest.NewRecorder()
 
-	handler.ServeHTTP(res, &http.Request{})
+	handler.ServeHTTP(h, &http.Request{})
 
-	assert.Equal(t, 0, res.status, "doesn't change status")
+	assert.Equal(t, http.StatusOK, h.Result().StatusCode, "doesn't change status")
 	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 }
 
 func Test_ServeHTTP_rollsbackOnPanic(t *testing.T) {
 	mocks := makeMocks(t)
 	defer mocks.restore(t, "graphql error", nil)
-	handler := &graphqlHandler{db: mocks.db, handler: &mockGraphql{panic: true}}
+	handler := &graphqlHandler{db: mocks.db, defaultUser: "somebody", handler: &mockGraphql{panic: true}}
 	mocks.mockDB.ExpectBegin()
 	mocks.mockDB.ExpectRollback()
-	res := &mockResponse{}
+	h := httptest.NewRecorder()
 
-	handler.ServeHTTP(res, &http.Request{})
+	handler.ServeHTTP(h, &http.Request{})
 
-	assert.Equal(t, 0, res.status, "doesn't change status")
+	assert.Equal(t, http.StatusOK, h.Result().StatusCode, "doesn't change status")
 	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
 }

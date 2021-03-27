@@ -19,11 +19,15 @@ function ensureVisible(container: HTMLElement, row: number, rowSelector: string,
     const rowTop = row * rowHeight;
     if (rowTop < scrollTop) container.scrollTo({top: rowTop});
     else if (rowTop + rowHeight > scrollTop + clientHeight) container.scrollTo({top: rowTop + headerHeight - clientHeight + rowHeight});
-    return row;
 }
 
 function isTableCell(elem: EventTarget): elem is HTMLTableCellElement {
     return elem instanceof Element && elem.tagName.toLocaleLowerCase() === 'td';
+}
+
+export interface ICell {
+    row: number;
+    column: number;
 }
 
 export interface ISelectionOptions {
@@ -36,55 +40,89 @@ export interface ISelectionOptions {
     /** index of 1st row element in DOM */
     rowOffset?: number;
     /** CSS selector for row elements */
-    rowSelector: string;
+    rowSelector?: string;
     /** CSS selector for header */
     headerSelector?: string;
 }
 
-export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, rowSelector, headerSelector}: ISelectionOptions) {
-    const [row, setRow] = React.useState(initialRow);
-    const [column, setColumn] = React.useState(0);
+const defaultOptions = {
+    rowSelector: 'tbody tr.MuiTableRow-root',
+    headerSelector: 'thead',
+};
+
+function clamp(value: number, max: number) {
+    if (value < 0) return 0;
+    return (value >= max) ? max-1 : value;
+}
+
+function wrap(value: number, max: number) {
+    if (value < 0) return max - 1;
+    return (value >= max) ? 0 : value;
+}
+
+export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, ...selectors}: ISelectionOptions) {
+    const {rowSelector, headerSelector} = {...defaultOptions, ...selectors};
+    const [cell, setCell] = React.useState<ICell>({row: initialRow, column: 0});
+    const move = (target: HTMLElement, nRows: number, nCols: number) => setCell(({row: r, column: c}) => {
+        const cell = {row: clamp(r + nRows, rows), column: wrap(c + nCols, columns)};
+        ensureVisible(target, cell.row, rowSelector, headerSelector);
+        return cell;
+    });
     return {
-        row, column,
+        ...cell,
+        setCell(row: number, column: number) {
+            setCell({row, column});
+        },
         onKeyDown(event: React.KeyboardEvent<HTMLElement>) {
             const {currentTarget, key, ctrlKey} = event;
             const pageSize = getPageSize(currentTarget, rowSelector);
-            event.stopPropagation();
-            // TODO always make new selection visible
+            if (key !== 'Escape') event.stopPropagation();
             switch (key) {
-                case 'ArrowRight': setColumn((c) => c === columns - 1 ? 0 : c + 1); break;
-                case 'ArrowLeft': setColumn((c) => c === 0 ? columns - 1 : c - 1); break;
+                case 'ArrowRight': move(currentTarget, 0, 1); break;
+                case 'ArrowLeft': move(currentTarget, 0, -1); break;
+                case 'Tab':
+                    if (event.shiftKey) {
+                        if (cell.row > 0 || cell.column > 0) {
+                            event.preventDefault();
+                            move(currentTarget, cell.column === 0 ? -1 : 0, -1);
+                        }
+                    }
+                    else if (cell.row < rows-1 || cell.column < columns-1) {
+                        event.preventDefault();
+                        move(currentTarget, cell.column === columns - 1 ? 1 : 0, 1);
+                    }
+                    break;
                 case 'ArrowUp':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - 1), rowSelector, headerSelector));
+                    move(currentTarget, -1, 0);
                     break;
                 case 'ArrowDown':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.min(r + 1, rows - 1), rowSelector, headerSelector));
+                    move(currentTarget, 1, 0);
                     break;
                 case 'PageUp':
                     event.preventDefault();
-                    setRow((r) => ensureVisible(currentTarget, Math.max(0, r - pageSize), rowSelector, headerSelector));
+                    move(currentTarget, -pageSize, 0);
                     break;
                 case 'PageDown':
                     event.preventDefault();
-                    if (rows > 0) setRow((r) => ensureVisible(currentTarget, Math.min(r + pageSize, rows - 1), rowSelector, headerSelector));
+                    move(currentTarget, pageSize, 0);
                     break;
                 case 'Home':
                     event.preventDefault();
                     if (ctrlKey) {
                         currentTarget.scrollTo({top: 0});
-                        setRow(0);
+                        setCell({...cell, row: 0});
                     }
-                    else setColumn(0);
+                    else setCell({...cell, column: 0});
                     break;
                 case 'End':
                     event.preventDefault();
                     if (ctrlKey && rows > 0) {
                         ensureVisible(currentTarget, rows - 1, rowSelector, headerSelector);
-                        setRow(rows - 1);
+                        setCell({...cell, row: rows - 1});
                     }
-                    else setColumn(columns - 1);
+                    else setCell({...cell, column: columns - 1});
                     break;
             }
         },
@@ -94,13 +132,12 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
                 const cellIndex = Array.from(tr.querySelectorAll('td'))
                     .slice(0, event.target.cellIndex)
                     .reduce((count, cell) => count + (cell.colSpan || 1), 0);
-                setRow(tr.sectionRowIndex + rowOffset);
-                setColumn(cellIndex);
+                setCell({row: tr.sectionRowIndex + rowOffset, column: cellIndex});
             }
             else {
                 const container = event.currentTarget;
                 const index = Array.from(container.querySelectorAll(rowSelector)).findIndex((r) => r.getBoundingClientRect().bottom >= event.clientY);
-                if (index >= 0) setRow(index + rowOffset);
+                if (index >= 0) setCell({...cell, row: index + rowOffset});
             }
         },
     };

@@ -3,7 +3,9 @@ import {mount, shallow} from 'enzyme';
 import HeaderDetailTable from './HeaderDetailTable';
 import IMixedRowTableModel from 'src/lib/model/IMixedRowTableModel';
 import {sortedIndex} from 'lodash';
-import {HeaderRow, IColumn, Row} from './Table';
+import HeaderRow from './HeaderRow';
+import Row from './Row';
+import {IColumn} from './Column';
 import {mockHooks} from 'src/test/mockHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
 import TableHead from '@material-ui/core/TableHead';
@@ -12,10 +14,10 @@ import TableBody from '@material-ui/core/TableBody';
 let nextId = 1;
 
 class TestData {
-    readonly id: string;
+    readonly id: number;
 
     constructor(readonly c1: string, readonly c2: string | number, readonly c3: string) {
-        this.id = `${nextId++}`;
+        this.id = nextId++;
     }
 }
 

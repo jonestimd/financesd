@@ -32,7 +32,11 @@ var getwd = os.Getwd
 var newHandler = handler.New
 
 func main() {
-	config := configuration.LoadConfig(fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME")))
+	configPath := fmt.Sprintf("%s/.finances/connection.conf", os.Getenv("HOME"))
+	if len(os.Args) > 1 {
+		configPath = os.Args[1]
+	}
+	config := configuration.LoadConfig(configPath)
 	driver := strings.ToLower(config.GetString("connection.default.driver"))
 	user := config.GetString("connection.default.user")
 	password := config.GetString("connection.default.password")
@@ -63,7 +67,7 @@ func main() {
 	if cwd, err := getwd(); err != nil {
 		logAndQuit("can't get current directory")
 	} else {
-		httpHandle("/finances/api/v1/graphql", &graphqlHandler{db: db, handler: gqlHandler})
+		httpHandle("/finances/api/v1/graphql", &graphqlHandler{db: db, defaultUser: config.GetString("oauth.user"), handler: gqlHandler})
 		httpHandle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
 		httpHandle("/finances/", loadHTML(cwd, config))
 		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -79,8 +83,9 @@ func main() {
 }
 
 type graphqlHandler struct {
-	db      *sql.DB
-	handler http.Handler
+	db          *sql.DB
+	defaultUser string
+	handler     http.Handler
 }
 
 type reqContextKey string
@@ -93,31 +98,39 @@ func resultCallback(ctx context.Context, params *graphql.Params, result *graphql
 }
 
 func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var hasError bool
+	ctx := context.WithValue(r.Context(), hasErrorKey, &hasError)
+	if user := r.Header.Get("X-User"); user != "" {
+		ctx = context.WithValue(ctx, schema.UserKey, user)
+	} else if h.defaultUser != "" {
+		ctx = context.WithValue(ctx, schema.UserKey, h.defaultUser)
+	} else {
+		http.Error(w, "Unknown user", http.StatusBadRequest)
+		return
+	}
 	// start transaction
 	tx, err := h.db.Begin()
 	if err != nil {
 		http.Error(w, "Error starting transaction", http.StatusInternalServerError)
-	} else {
-		defer func() {
-			if r := recover(); r != nil {
-				tx.Rollback()
-				panic(r)
-			}
-		}()
-		var hasError bool
-		ctx := context.WithValue(r.Context(), schema.DbContextKey, tx)
-		ctx = context.WithValue(ctx, hasErrorKey, &hasError)
-		h.handler.ServeHTTP(w, r.WithContext(ctx))
-		// end transaction
-		if hasError {
-			log.Println("Rolling back")
-			if err := tx.Rollback(); err != nil {
-				log.Printf("Rollback failed: %v\n", err)
-			}
-		} else if err := tx.Commit(); err != nil {
-			log.Printf("Commit failed: %v\n", err)
-			http.Error(w, fmt.Sprintf("Commit failed: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
 		}
+	}()
+	ctx = context.WithValue(ctx, schema.DbContextKey, tx)
+	h.handler.ServeHTTP(w, r.WithContext(ctx))
+	// end transaction
+	if hasError {
+		log.Println("Rolling back")
+		if err := tx.Rollback(); err != nil {
+			log.Printf("Rollback failed: %v\n", err)
+		}
+	} else if err := tx.Commit(); err != nil {
+		log.Printf("Commit failed: %v\n", err)
+		http.Error(w, fmt.Sprintf("Commit failed: %v", err), http.StatusInternalServerError)
 	}
 }
 

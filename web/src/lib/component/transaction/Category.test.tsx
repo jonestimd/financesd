@@ -1,22 +1,19 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import Category from './Category';
-import MessageStore from 'src/lib/store/MessageStore';
-import CategoryStore from 'src/lib/store/CategoryStore';
 import {CategoryModel} from 'src/lib/model/CategoryModel';
-import AccountStore from 'src/lib/store/AccountStore';
-import {AccountModel} from 'src/lib/model/AccountModel';
+import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {newDetail} from 'src/test/detailFactory';
+import {RootStore} from 'src/lib/store/RootStore';
 
 const detail = newDetail();
 
 describe('Category', () => {
-    const messageStore = new MessageStore();
-    const accountStore = new AccountStore(messageStore);
-    const categoryStore = new CategoryStore(messageStore);
+    const rootStore = new RootStore();
+    const {accountStore, categoryStore} = rootStore;
 
     beforeEach(() => {
-        jest.spyOn(React, 'useContext').mockReturnValue({accountStore, categoryStore});
+        jest.spyOn(React, 'useContext').mockReturnValue(rootStore);
     });
     it('returns null if no category', () => {
         const component = shallow(<Category detail={detail} />);

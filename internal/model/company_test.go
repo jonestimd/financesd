@@ -2,7 +2,7 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"testing"
@@ -154,8 +154,7 @@ func Test_GetCompaniesByIDs(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			result, err := getCompaniesByIDs(tx, ids)
 
-			jsonIDs, _ := json.Marshal(ids)
-			assert.Equal(t, []interface{}{tx, companyType, "select * from company where json_contains(?, cast(id as json))", []interface{}{jsonIDs}},
+			assert.Equal(t, []interface{}{tx, companyType, "select * from company where json_contains(?, cast(id as json))", []interface{}{"[42,96]"}},
 				runQueryStub.GetFirstCall().Arguments())
 			assert.Nil(t, err)
 			assert.Equal(t, companies, result)
@@ -170,6 +169,134 @@ func Test_GetCompaniesByIDs(t *testing.T) {
 
 			assert.Same(t, expectedErr, err)
 			assert.Nil(t, result)
+		})
+	})
+}
+
+func Test_AddCompanies(t *testing.T) {
+	id := int64(42)
+	t.Run("returns companies with ids", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			runInsertStub := mocka.Function(t, &runInsert, id, nil)
+			runInsertStub.OnSecondCall().Return(id+1, nil)
+			defer runInsertStub.Restore()
+			validateNameStub := mocka.Function(t, &validateName, nil)
+			defer validateNameStub.Restore()
+
+			results, err := AddCompanies(tx, []string{"company1", "company2"}, "somebody")
+
+			assert.Nil(t, err)
+			assert.Equal(t, 2, validateNameStub.CallCount())
+			assert.Equal(t, []interface{}{"company1"}, validateNameStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{"company2"}, validateNameStub.GetCall(1).Arguments())
+			assert.Equal(t, id, results[0].ID)
+			assert.Equal(t, "company1", results[0].Name)
+			assert.Equal(t, "somebody", results[0].ChangeUser)
+			assert.Equal(t, 1, results[0].Version)
+			assert.NotNil(t, results[0].source)
+			assert.Equal(t, id+1, results[1].ID)
+			assert.Equal(t, "company2", results[1].Name)
+			assert.Equal(t, "somebody", results[1].ChangeUser)
+			assert.Equal(t, 1, results[1].Version)
+			assert.NotNil(t, results[1].source)
+			assert.Nil(t, mock.ExpectationsWereMet())
+		})
+	})
+	t.Run("returns error", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			expectedErr := errors.New("database error")
+			runInsertStub := mocka.Function(t, &runInsert, int64(42), nil)
+			runInsertStub.OnSecondCall().Return(int64(0), expectedErr)
+			defer runInsertStub.Restore()
+
+			result, err := AddCompanies(tx, []string{"company1", "company2"}, "somebody")
+
+			assert.Same(t, expectedErr, err)
+			assert.Nil(t, result)
+		})
+	})
+}
+
+func Test_DeleteCompanies(t *testing.T) {
+	ids := []int{42, 96}
+	t.Run("returns update error", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			expectedErr := errors.New("database error")
+			runUpdateStub := mocka.Function(t, &runUpdate, nil, expectedErr)
+			defer runUpdateStub.Restore()
+
+			_, err := DeleteCompanies(tx, ids, "somebody")
+
+			assert.Same(t, expectedErr, err)
+		})
+	})
+	t.Run("returns delete count", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+			count := int64(2)
+			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, count), nil)
+			defer runUpdateStub.Restore()
+
+			result, err := DeleteCompanies(tx, ids, "somebody")
+
+			assert.Equal(t,
+				[]interface{}{tx, "delete from company where json_contains(?, cast(id as json))", []interface{}{intsToJson(ids)}},
+				runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, count, result)
+			assert.Nil(t, err)
+		})
+	})
+}
+
+func Test_UpdateCompanies(t *testing.T) {
+	updates := []interface{}{
+		map[string]interface{}{"id": 42, "name": "rename 42", "version": 1},
+		map[string]interface{}{"id": 96, "name": "rename 96", "version": 1},
+	}
+	tests := []struct {
+		name        string
+		result      driver.Result
+		updateError error
+		getError    error
+		message     string
+	}{
+		{"returns update error", nil, errors.New("database error"), nil, "database error"},
+		{"returns count error", sqlmock.NewErrorResult(errors.New("database error")), nil, nil, "database error"},
+		{"returns not found error", sqlmock.NewResult(0, 0), nil, nil, "company not found (42) or incorrect version (1)"},
+		{"returns getCompanies error", sqlmock.NewResult(0, 1), nil, errors.New("database error"), "database error"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+				runUpdateStub := mocka.Function(t, &runUpdate, test.result, test.updateError)
+				defer runUpdateStub.Restore()
+				getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, nil, test.getError)
+				defer getCompaniesStub.Restore()
+
+				_, err := UpdateCompanies(tx, updates, "somebody")
+
+				assert.EqualError(t, err, test.message)
+			})
+		})
+	}
+	t.Run("returns companies", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			companies := []*Company{{ID: 42, Name: "new name"}}
+			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, 1), nil)
+			defer runUpdateStub.Restore()
+			getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, companies, nil)
+			defer getCompaniesStub.Restore()
+
+			result, err := UpdateCompanies(tx, updates, "somebody")
+
+			assert.Equal(t, companies, result)
+			assert.Nil(t, err)
+			assert.Equal(t, 2, runUpdateStub.CallCount())
+			assert.Equal(t, []interface{}{tx, updateCompanySQL, []interface{}{"rename 42", "somebody", int64(42), int64(1)}},
+				runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, updateCompanySQL, []interface{}{"rename 96", "somebody", int64(96), int64(1)}},
+				runUpdateStub.GetCall(1).Arguments())
+			assert.Equal(t, 1, getCompaniesStub.CallCount())
+			assert.Equal(t, []interface{}{tx, []int64{42, 96}}, getCompaniesStub.GetCall(0).Arguments())
 		})
 	})
 }

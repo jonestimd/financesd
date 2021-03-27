@@ -1,26 +1,24 @@
-import * as agent from '../agent';
 import {GroupModel, IGroup} from '../model/GroupModel';
 import {addToMap, sortValuesByName} from '../model/entityUtils';
 import {IMessageStore} from './MessageStore';
-import {computed, flow, makeObservable, ObservableMap} from 'mobx';
-import {LoadResult} from './interfaces';
+import {computed, makeObservable, ObservableMap} from 'mobx';
+import Loader from './Loader';
+import AlertStore from './AlertStore';
 
 export const query = `{
     groups {id name description version transactionCount}
 }`;
 
-type GroupsResponse = agent.IGraphqlResponse<{groups: IGroup[]}>;
-
-export const loadingGroups = 'Loading groups...';
+export const loadingGroups = 'Loading groups';
 
 export default class GroupStore {
     private loading = false;
-    private groupsById = new ObservableMap<string, GroupModel>();
-    private messageStore: IMessageStore;
+    private groupsById = new ObservableMap<number, GroupModel>();
+    private loader: Loader;
 
-    constructor(messageStore: IMessageStore) {
+    constructor(messageStore: IMessageStore, alertStore: AlertStore) {
         makeObservable(this);
-        this.messageStore = messageStore;
+        this.loader = new Loader(messageStore, alertStore);
     }
 
     @computed
@@ -28,27 +26,17 @@ export default class GroupStore {
         return sortValuesByName(this.groupsById);
     }
 
-    getGroup(id?: string | number): GroupModel | undefined {
-        return this.groupsById.get('' + id);
+    getGroup(id?: number): GroupModel | undefined {
+        return typeof id === 'number' ? this.groupsById.get(id) : undefined;
     }
 
-    loadGroups(): Promise<void> | undefined {
+    loadGroups(): Promise<boolean> | undefined {
         if (!this.loading && this.groupsById.size === 0) {
-            this.messageStore.addProgressMessage(loadingGroups);
-            return this._loadGroups();
+            this.loading = true;
+            return this.loader.load<{groups: IGroup[]}>(loadingGroups, {query,
+                updater: ({groups}) => addToMap(this.groupsById, groups.map((group) => new GroupModel(group))),
+                completer: () => this.loading = false,
+            });
         }
     }
-
-    private _loadGroups = flow(function* (this: GroupStore): LoadResult<GroupsResponse> {
-        this.loading = true;
-        try {
-            const {data} = yield agent.graphql('/finances/api/v1/graphql', query);
-            addToMap(this.groupsById, data.groups.map((group) => new GroupModel(group)));
-        } catch (err) {
-            console.error('error gettting groups', err); // TODO show toast
-        } finally {
-            this.loading = false;
-            this.messageStore.removeProgressMessage(loadingGroups);
-        }
-    });
 }

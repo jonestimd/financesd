@@ -1,12 +1,12 @@
-import {RootStore} from "./RootStore";
+import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
-import {newGroup, newGroupModel} from "src/test/groupFactory";
-import {GroupModel} from "../model/GroupModel";
-import {loadingGroups, query} from "./GroupStore";
+import {newGroup, newGroupModel} from 'src/test/groupFactory';
+import {GroupModel} from '../model/GroupModel';
+import {loadingGroups, query} from './GroupStore';
 
 describe('GroupStore', () => {
-    const {groupStore, messageStore} = new RootStore();
+    const {groupStore, messageStore, alertStore} = new RootStore();
 
     beforeEach(() => {
         groupStore['groupsById'].clear();
@@ -29,10 +29,9 @@ describe('GroupStore', () => {
             groupStore['groupsById'].set(group.id, group);
 
             expect(groupStore.getGroup(group.id)).toBe(group);
-            expect(groupStore.getGroup(parseInt(group.id))).toBe(group);
         });
         it('returns undefined for unknown ID', () => {
-            expect(groupStore.getGroup('-99')).toBeUndefined();
+            expect(groupStore.getGroup(-99)).toBeUndefined();
         });
     });
     describe('loadGroups', () => {
@@ -50,7 +49,7 @@ describe('GroupStore', () => {
             expect(groupStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingGroups);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingGroups);
-            expect(agent.graphql).toBeCalledWith('/finances/api/v1/graphql', query);
+            expect(agent.graphql).toBeCalledWith(query, undefined);
             expect(groupStore.groups).toStrictEqual([new GroupModel(group)]);
         });
         it('does nothing is already loading', async () => {
@@ -80,13 +79,15 @@ describe('GroupStore', () => {
             const error = new Error('API error');
             jest.spyOn(agent, 'graphql').mockRejectedValue(error);
             jest.spyOn(console, 'error').mockImplementation(() => { });
+            jest.spyOn(alertStore, 'addAlert').mockReturnValue();
 
             await groupStore.loadGroups();
 
             expect(groupStore['loading']).toBe(false);
             expect(messageStore.addProgressMessage).toBeCalledWith(loadingGroups);
             expect(messageStore.removeProgressMessage).toBeCalledWith(loadingGroups);
-            expect(console.error).toBeCalledWith('error gettting groups', error);
+            expect(console.error).toBeCalledWith('error from Loading groups', error);
+            expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading groups');
         });
     });
 });

@@ -4,9 +4,10 @@ import MessageStore from 'src/lib/store/MessageStore';
 import GroupStore from 'src/lib/store/GroupStore';
 import Group from './Group';
 import {GroupModel} from 'src/lib/model/GroupModel';
+import AlertStore from 'src/lib/store/AlertStore';
 
 describe('Group', () => {
-    const groupStore = new GroupStore(new MessageStore());
+    const groupStore = new GroupStore(new MessageStore(), new AlertStore());
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({groupStore});

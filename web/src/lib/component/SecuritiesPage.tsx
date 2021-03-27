@@ -2,10 +2,10 @@ import React from 'react';
 import {RootStoreContext} from '../store/RootStore';
 import {observer} from 'mobx-react-lite';
 import TopAppBar from './TopAppBar';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Column';
 import {SecurityModel} from '../model/SecurityModel';
 import {translate} from '../i18n/localize';
-import PageMenu from './PageMenu';
 import {HideZero, Shares} from '../formats';
 
 const columns: IColumn<SecurityModel>[] = [
@@ -22,12 +22,10 @@ const columns: IColumn<SecurityModel>[] = [
 const SecuritiesPage: React.FC = observer(() => {
     const {securityStore} = React.useContext(RootStoreContext);
     const securities = securityStore.securities;
-    return (
-        <div className='securities-list'>
-            <TopAppBar title={translate('menu.securities')} menuItems={<PageMenu currentPage='menu.securities' />} />
-            <Table columns={columns} data={securities} />
-        </div>
-    );
+    return <>
+        <TopAppBar title={translate('menu.securities')} currentPage='menu.securities' />
+        <Table columns={columns} data={securities} />
+    </>;
 });
 
 export default SecuritiesPage;

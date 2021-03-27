@@ -6,6 +6,7 @@ import PayeeStore from './PayeeStore';
 import TransactionStore from './TransactionStore';
 import SecurityStore from './SecurityStore';
 import GroupStore from './GroupStore';
+import AlertStore from './AlertStore';
 
 declare global {
     interface Window {
@@ -14,12 +15,13 @@ declare global {
 }
 
 export class RootStore {
+    alertStore = new AlertStore();
     messageStore = new MessageStore();
-    accountStore = new AccountStore(this.messageStore);
-    categoryStore = new CategoryStore(this.messageStore);
-    groupStore = new GroupStore(this.messageStore);
-    payeeStore = new PayeeStore(this.messageStore);
-    securityStore = new SecurityStore(this.messageStore);
+    accountStore = new AccountStore(this.messageStore, this.alertStore);
+    categoryStore = new CategoryStore(this.messageStore, this.alertStore);
+    groupStore = new GroupStore(this.messageStore, this.alertStore);
+    payeeStore = new PayeeStore(this.messageStore, this.alertStore);
+    securityStore = new SecurityStore(this.messageStore, this.alertStore);
     transactionStore = new TransactionStore(this);
 }
 

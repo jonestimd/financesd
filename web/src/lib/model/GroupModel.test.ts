@@ -1,5 +1,5 @@
-import {newGroup} from "src/test/groupFactory";
-import {GroupModel} from "./GroupModel";
+import {newGroup} from 'src/test/groupFactory';
+import {GroupModel} from './GroupModel';
 
 
 describe('GroupModel', () => {

@@ -1,8 +1,8 @@
-import {newCategoryModel} from "src/test/categoryFactory";
-import {newDetail} from "src/test/detailFactory";
-import {newTx, newTxModel} from "src/test/transactionFactory";
-import {RootStore} from "../store/RootStore";
-import TransactionModel from "./TransactionModel";
+import {newCategoryModel} from 'src/test/categoryFactory';
+import {newDetail} from 'src/test/detailFactory';
+import {newTx, newTxModel} from 'src/test/transactionFactory';
+import {RootStore} from '../store/RootStore';
+import TransactionModel from './TransactionModel';
 
 
 describe('TransactionModel', () => {

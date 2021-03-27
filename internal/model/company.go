@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
+	"fmt"
 	"reflect"
+	"time"
 )
 
 // Company contains information about a financial institution.
@@ -68,7 +69,57 @@ func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
 }
 
 // getCompaniesByIDs loads specified companies.
-func getCompaniesByIDs(tx *sql.Tx, ids []int64) ([]*Company, error) {
-	jsonIDs, _ := json.Marshal(ids) // can't be cyclic, so ignoring error
-	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", jsonIDs)
+var getCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
+	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", int64sToJson(ids))
+}
+
+// AddCompanies adds new companies.
+func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
+	changeDate := time.Now()
+	companies := make([]*Company, len(names))
+	for i, name := range names {
+		if err := validateName(name); err != nil {
+			return nil, err
+		}
+		id, err := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 1)", name, user, changeDate)
+		if err != nil {
+			return nil, err
+		}
+		companies[i] = &Company{ID: id, Name: name, Audited: Audited{user, &changeDate}, Version: 1}
+	}
+	return newCompanySource().setCompanies(companies), nil
+}
+
+// DeleteCompanies deletes companies.
+func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
+	rs, err := runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
+	if err != nil {
+		return 0, err
+	}
+	return rs.RowsAffected()
+}
+
+const updateCompanySQL = `update company set name = ?, change_date = current_timestamp, change_user = ?, version = version+1
+where id = ? and version = ?`
+
+// UpdateCompanies updates company names.
+func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, error) {
+	updates := args.([]interface{})
+	ids := make([]int64, len(updates))
+	for i, company := range updates {
+		values := company.(map[string]interface{})
+		ids[i] = int64(values["id"].(int))
+		name := values["name"].(string)
+		version := int64(values["version"].(int))
+		rs, err := runUpdate(tx, updateCompanySQL, name, user, ids[i], version)
+		if err != nil {
+			return nil, err
+		}
+		if count, err := rs.RowsAffected(); err != nil {
+			return nil, err
+		} else if count == 0 {
+			return nil, fmt.Errorf("company not found (%d) or incorrect version (%d)", ids[i], version)
+		}
+	}
+	return getCompaniesByIDs(tx, ids)
 }

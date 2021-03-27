@@ -1,6 +1,6 @@
-import {newCategory, newCategoryModel} from "src/test/categoryFactory";
-import {RootStore} from "../store/RootStore";
-import {CategoryModel} from "./CategoryModel";
+import {newCategory, newCategoryModel} from 'src/test/categoryFactory';
+import {RootStore} from '../store/RootStore';
+import {CategoryModel} from './CategoryModel';
 
 
 describe('CategoryModel', () => {

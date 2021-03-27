@@ -1,22 +1,25 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {RootStore} from '../store/RootStore';
-import {newAccountModel, newCompany} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 import AccountsPage from './AccountsPage';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
-import {AccountModel} from '../model/AccountModel';
+import {AccountModel} from '../model/account/AccountModel';
 import {Link} from 'react-router-dom';
 import accountType from '../i18n/accountType';
 import * as formats from '../formats';
+import {IconButton} from '@material-ui/core';
+import CompaniesDialog from './CompaniesDialog';
 
 describe('AccountsPage', () => {
     const rootStore = new RootStore();
-    const account = newAccountModel({description: 'my special account', accountNo: '123456-789'}, newCompany());
+    const account = newAccountModel({description: 'my special account', accountNo: '123456-789'}, newCompanyModel());
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue(rootStore);
-        jest.spyOn(rootStore.accountStore, 'loadAccounts').mockResolvedValue();
+        jest.spyOn(rootStore.accountStore, 'loadAccounts').mockResolvedValue(true);
     });
     it('displays app bar and table of accounts', () => {
         const accounts = [account];
@@ -48,6 +51,17 @@ describe('AccountsPage', () => {
 
                 expect(column?.render(account)).toEqual(value);
             });
+        });
+    });
+    describe('companies button', () => {
+        it('displays companies dialog', () => {
+            const component = shallow(<AccountsPage />);
+
+            component.find(IconButton).simulate('click');
+
+            expect(component.find(CompaniesDialog)).toExist();
+            component.find(CompaniesDialog).prop('onClose')();
+            expect(component.find(CompaniesDialog)).not.toExist();
         });
     });
 });

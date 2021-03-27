@@ -73,8 +73,9 @@ func newResolveInfo(queryName string, querySelection ...ast.Selection) graphql.R
 
 func newResolveParams(tx *sql.Tx, queryName string, querySelection ...ast.Selection) *resolveParamsBuilder {
 	info := newResolveInfo(queryName, querySelection...)
-	context := context.WithValue(context.TODO(), DbContextKey, tx)
-	return &resolveParamsBuilder{graphql.ResolveParams{Info: info, Context: context}}
+	ctx := context.WithValue(context.Background(), DbContextKey, tx)
+	ctx = context.WithValue(ctx, UserKey, "somebody")
+	return &resolveParamsBuilder{graphql.ResolveParams{Info: info, Context: ctx}}
 }
 
 func (b *resolveParamsBuilder) addArg(name string, value interface{}) *resolveParamsBuilder {

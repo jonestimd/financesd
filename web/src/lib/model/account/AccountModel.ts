@@ -1,13 +1,9 @@
-import {compareByName} from './entityUtils';
-
-export interface ICompany {
-    id: string;
-    name: string;
-    version: number;
-}
+import settingsStore from '../../store/settingsStore';
+import {CompanyModel} from './CompanyModel';
+import {compareByName} from '../entityUtils';
 
 export interface IAccount {
-    id: string;
+    id: number;
     companyId?: number;
     type: string;
     name: string;
@@ -24,7 +20,7 @@ export class AccountModel implements IAccount {
         return a1.compareTo(a2);
     }
 
-    id: string;
+    id: number;
     companyId?: number;
     type: string;
     name: string;
@@ -34,9 +30,9 @@ export class AccountModel implements IAccount {
     version: number;
     transactionCount: number;
     balance: number;
-    company?: ICompany;
+    company?: CompanyModel;
 
-    constructor(account: IAccount, company?: ICompany) {
+    constructor(account: IAccount, company?: CompanyModel) {
         this.id = account.id;
         this.companyId = account.companyId;
         this.type = account.type;
@@ -57,6 +53,10 @@ export class AccountModel implements IAccount {
     get displayName(): string {
         if (this.company) return `${this.company.name}: ${this.name}`;
         return this.name;
+    }
+
+    get hide() {
+        return this.closed && settingsStore.hideClosedAccounts;
     }
 
     compareTo(that: AccountModel): number {

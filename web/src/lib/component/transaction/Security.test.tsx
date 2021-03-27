@@ -1,17 +1,14 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import TransactionModel from 'src/lib/model/TransactionModel';
-import MessageStore from 'src/lib/store/MessageStore';
-import SecurityStore from 'src/lib/store/SecurityStore';
 import {SecurityModel} from 'src/lib/model/SecurityModel';
 import Security from './Security';
 import {newTx} from 'src/test/transactionFactory';
-import CategoryStore from 'src/lib/store/CategoryStore';
+import {RootStore} from 'src/lib/store/RootStore';
 
 describe('Security', () => {
-    const messageStore = new MessageStore();
-    const securityStore = new SecurityStore(messageStore);
-    const categoryStore = new CategoryStore(messageStore);
+    const rootStore = new RootStore();
+    const {securityStore, categoryStore} = rootStore;
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({securityStore});

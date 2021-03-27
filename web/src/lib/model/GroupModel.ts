@@ -1,5 +1,5 @@
 export interface IGroup {
-    id: string;
+    id: number;
     name: string;
     description?: string;
     version: number;
@@ -7,7 +7,7 @@ export interface IGroup {
 }
 
 export class GroupModel implements IGroup {
-    id: string;
+    id: number;
     name: string;
     description?: string;
     version: number;

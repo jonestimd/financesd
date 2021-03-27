@@ -1,9 +1,10 @@
-import {newAccount, newAccountModel, newCompany} from "src/test/accountFactory";
-import {AccountModel} from "./AccountModel";
+import {newAccount, newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import settingsStore from '../../store/settingsStore';
+import {AccountModel} from './AccountModel';
 
 describe('AccountModel', () => {
     const account = newAccount();
-    const company = newCompany();
+    const company = newCompanyModel();
 
     describe('constructor', () => {
         it('populates account properties', () => {
@@ -41,11 +42,24 @@ describe('AccountModel', () => {
             expect(model.displayName).toEqual(`${company.name}: ${account.name}`);
         });
     });
+    describe('hide', () => {
+        it('returns false if hide closed accounts is false', () => {
+            jest.spyOn(settingsStore, 'hideClosedAccounts', 'get').mockReturnValue(false);
+
+            expect(newAccountModel({closed: true}).hide).toEqual(false);
+        });
+        it('returns true if account is closed and hide closed accounts is true', () => {
+            jest.spyOn(settingsStore, 'hideClosedAccounts', 'get').mockReturnValue(true);
+
+            expect(newAccountModel().hide).toEqual(false);
+            expect(newAccountModel({closed: true}).hide).toEqual(true);
+        });
+    });
     describe('compare', () => {
         it('sorts by company name then account name', () => {
             const account1 = newAccountModel({}, company);
             const account2 = newAccountModel({}, company);
-            const company2 = newCompany();
+            const company2 = newCompanyModel();
             const account3 = newAccountModel({name: account1.name}, company2);
 
             expect(AccountModel.compare(account1, account3)).toBeLessThan(0);

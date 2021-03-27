@@ -18,18 +18,18 @@ export function compareByName(v1?: IName, v2?: IName): number {
     return v2 === undefined ? 1 : v1.name.toLocaleLowerCase().localeCompare(v2.name.toLocaleLowerCase());
 }
 
-export function sortValuesByName<T extends IName>(itemMap: Map<string, T>): T[] {
+export function sortValuesByName<T extends IName>(itemMap: Map<unknown, T>): T[] {
     return sortValues<T>(itemMap, compareByName);
 }
 
-export function sortValues<T>(itemMap: Map<string, T>, comparator: Comparator<T>): T[] {
+export function sortValues<T>(itemMap: Map<unknown, T>, comparator: Comparator<T>): T[] {
     return Array.from(itemMap.values()).sort(comparator);
 }
 
-export interface IStringId {
-    id: string;
+export interface INumberId {
+    id: number;
 }
 
-export function addToMap<T extends IStringId>(byId: Map<string, T>, items: T[]): void {
+export function addToMap<T extends INumberId>(byId: Map<number, T>, items: T[]): void {
     items.forEach((item) => byId.set(item.id, item));
 }

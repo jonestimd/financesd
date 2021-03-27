@@ -1,14 +1,18 @@
-import MessageStore from "./MessageStore";
+import MessageStore from './MessageStore';
+import * as localize from '../i18n/localize';
 
 describe('MessageStore', () => {
     describe('addProgressMessage', () => {
         it('appends message to list', () => {
             const messageStore = new MessageStore();
+            jest.spyOn(localize, 'translate');
 
             messageStore.addProgressMessage('message 1');
             messageStore.addProgressMessage('message 2');
 
             expect(messageStore['progressMessages']).toEqual(['message 1', 'message 2']);
+            expect(localize.translate).toBeCalledWith('message 1');
+            expect(localize.translate).toBeCalledWith('message 2');
         });
     });
     describe('removeMessage', () => {
@@ -17,10 +21,12 @@ describe('MessageStore', () => {
             messageStore.addProgressMessage('message 1');
             messageStore.addProgressMessage('message 2');
             messageStore.addProgressMessage('message 1');
+            jest.spyOn(localize, 'translate');
 
             messageStore.removeProgressMessage('message 1');
 
             expect(messageStore['progressMessages']).toEqual(['message 2', 'message 1']);
+            expect(localize.translate).toBeCalledWith('message 1');
         });
         it('does nothing if message not in list', () => {
             const messageStore = new MessageStore();

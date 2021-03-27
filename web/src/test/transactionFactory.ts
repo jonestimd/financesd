@@ -1,12 +1,12 @@
-import TransactionModel, {ITransaction} from "src/lib/model/TransactionModel";
-import CategoryStore from "src/lib/store/CategoryStore";
-import {defaultCategoryStore} from "./categoryFactory";
+import TransactionModel, {ITransaction} from 'src/lib/model/TransactionModel';
+import CategoryStore from 'src/lib/store/CategoryStore';
+import {defaultCategoryStore} from './categoryFactory';
 
 let nextId = 0;
 
 export function newTx(overrides: Partial<ITransaction> = {}): ITransaction {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         date: '2020-01-01',
         details: [],
         cleared: false,

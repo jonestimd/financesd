@@ -15,7 +15,7 @@
             "env": {
                 "SHOW_SQL": "yes"
             },
-            "args": []
+            "args": ["./financesd.conf"]
         },
         {
             "name": "jest",

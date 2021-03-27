@@ -5,6 +5,9 @@ import "github.com/jonestimd/financesd/internal/model"
 var getAllCompanies = model.GetAllCompanies
 var getCompanyByID = model.GetCompanyByID
 var getCompanyByName = model.GetCompanyByName
+var addCompanies = model.AddCompanies
+var updateCompanies = model.UpdateCompanies
+var deleteCompanies = model.DeleteCompanies
 
 var getAllAccounts = model.GetAllAccounts
 var getAccountByID = model.GetAccountByID

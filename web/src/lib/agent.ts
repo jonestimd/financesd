@@ -20,7 +20,7 @@ export interface IGraphqlResponse<T> {
     errors?: IGraphqlError[];
 }
 
-export async function graphql<T>(url: string, query: string, variables: Record<string, unknown> = {}): Promise<IGraphqlResponse<T>> {
+export async function graphql<T>(query: string, variables: unknown = {}): Promise<IGraphqlResponse<T>> {
     const body = JSON.stringify({query, variables});
-    return post(url, body);
+    return post('/finances/api/v1/graphql', body);
 }

@@ -39,20 +39,20 @@ describe('agent', () => {
             const query = 'the graphql query';
             mockFetch.mockResolvedValue(mockResponse({json: responseBody}));
 
-            const result = await agent.graphql(url, query);
+            const result = await agent.graphql(query);
 
             expect(result).toBe(responseBody);
-            expect(fetch).toBeCalledWith(url, {method: 'POST', body: JSON.stringify({query, variables: {}})});
+            expect(fetch).toBeCalledWith('/finances/api/v1/graphql', {method: 'POST', body: JSON.stringify({query, variables: {}})});
         });
         it('posts query and variables', async () => {
             const query = 'the graphql query';
             const variables = {a: 123, b: 'some value'};
             mockFetch.mockResolvedValue(mockResponse({json: responseBody}));
 
-            const result = await agent.graphql(url, query, variables);
+            const result = await agent.graphql(query, variables);
 
             expect(result).toBe(responseBody);
-            expect(fetch).toBeCalledWith(url, {method: 'POST', body: JSON.stringify({query, variables})});
+            expect(fetch).toBeCalledWith('/finances/api/v1/graphql', {method: 'POST', body: JSON.stringify({query, variables})});
         });
     });
 });

@@ -1,10 +1,10 @@
-import {ISecurity, SecurityModel} from "src/lib/model/SecurityModel";
+import {ISecurity, SecurityModel} from 'src/lib/model/SecurityModel';
 
 let nextId = 0;
 
 export function newSecurity(overrides: Partial<ISecurity> = {}): ISecurity {
     return {
-        id: `${++nextId}`,
+        id: ++nextId,
         name: `Security ${nextId}`,
         type: 'Stock',
         scale: 6,

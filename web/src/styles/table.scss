@@ -1,5 +1,5 @@
-$table-border: #c0c0c0 !default;
-$table-odd-background: #e0f0f5 !default;
+$table-changed-background: lightskyblue !default;
+$table-deleted-background: lightpink !default;
 
 table.table {
     position: relative;
@@ -9,6 +9,28 @@ table.table {
     td {
         &:not(:last-child) {
             border-right: 1px solid $table-border;
+        }
+        .material-icons {
+            font-size: 18px;
+            vertical-align: middle;
+            color: $mdc-theme-text-secondary;
+        }
+    }
+
+    td {
+        &.changed {
+            background-color: $table-changed-background;
+        }
+        &.editing {
+            padding: 1px;
+            .MuiInputBase-root {
+                font-size: inherit;
+                background-color: $mdc-theme-background;
+                padding: 4px 2px 2px;
+            }
+            .MuiInputBase-input {
+                padding: 0;
+            }
         }
     }
 
@@ -42,9 +64,16 @@ table.table {
                 background: $transaction-hover-background;
             }
         }
+        tr.deleted {
+            background: $table-deleted-background;
+            text-decoration: line-through;
+        }
         tr.selected {
             td.selected {
                 background: $selection-background;
+                &.changed {
+                    background: mix($selection-background, $table-changed-background);
+                }
             }
         }
     }

@@ -3,7 +3,6 @@ package schema
 import (
 	"database/sql"
 	"errors"
-	"strconv"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/model"
@@ -14,7 +13,7 @@ func getDetailSchema(name string, relatedField string, fieldType graphql.Output,
 		Name:        name,
 		Description: "a detail of a financial transaction",
 		Fields: addAudit(graphql.Fields{
-			"id":                    &graphql.Field{Type: graphql.ID},
+			"id":                    &graphql.Field{Type: graphql.Int},
 			"transactionCategoryId": &graphql.Field{Type: graphql.Int},
 			"transactionGroupId":    &graphql.Field{Type: graphql.Int},
 			"memo":                  &graphql.Field{Type: graphql.String},
@@ -31,7 +30,7 @@ func getTxSchemaConfig(name string) graphql.ObjectConfig {
 		Description: "a financial transaction",
 		Name:        name,
 		Fields: addAudit(graphql.Fields{
-			"id":              &graphql.Field{Type: graphql.ID},
+			"id":              &graphql.Field{Type: graphql.Int},
 			"date":            &graphql.Field{Type: dateType},
 			"memo":            &graphql.Field{Type: graphql.String},
 			"referenceNumber": &graphql.Field{Type: graphql.String},
@@ -54,16 +53,13 @@ func getTxSchema() *graphql.Object {
 
 var transactionQueryFields = &graphql.Field{
 	Type: graphql.NewList(getTxSchema()),
-	Args: map[string]*graphql.ArgumentConfig{
-		"accountId": {Type: graphql.NewNonNull(graphql.ID), Description: "account ID"},
+	Args: graphql.FieldConfigArgument{
+		"accountId": {Type: graphql.NewNonNull(graphql.Int), Description: "account ID"},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		accountID, err := strconv.ParseInt(p.Args["accountId"].(string), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		return getAccountTransactions(tx, accountID)
+		accountID := p.Args["accountId"].(int)
+		return getAccountTransactions(tx, int64(accountID))
 	},
 }
 

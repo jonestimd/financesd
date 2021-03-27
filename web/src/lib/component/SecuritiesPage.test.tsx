@@ -3,7 +3,8 @@ import {shallow} from 'enzyme';
 import {RootStore} from '../store/RootStore';
 import {newSecurityModel} from 'src/test/securityFactory';
 import SecuritiesPage from './SecuritiesPage';
-import Table, {IColumn} from './table/Table';
+import Table from './table/Table';
+import {IColumn} from './table/Column';
 import TopAppBar from './TopAppBar';
 import {SecurityModel} from '../model/SecurityModel';
 import {ObservableMap} from 'mobx';
@@ -56,14 +57,14 @@ describe('SecuritiesPage', () => {
         it('does not display zero shares', () => {
             const component = shallow(<SecuritiesPage />);
             const columns = component.find(Table).prop<IColumn<SecurityModel>[]>('columns');
-            const column = columns.find((column) => column.key === `security.shares`);
+            const column = columns.find((column) => column.key === 'security.shares');
 
             expect(column?.render(newSecurityModel())).toBeNull();
         });
         it('does not display cost basis for zero shares', () => {
             const component = shallow(<SecuritiesPage />);
             const columns = component.find(Table).prop<IColumn<SecurityModel>[]>('columns');
-            const column = columns.find((column) => column.key === `security.costBasis`);
+            const column = columns.find((column) => column.key === 'security.costBasis');
 
             expect(column?.render(newSecurityModel({costBasis: 0.000001}))).toBeNull();
         });

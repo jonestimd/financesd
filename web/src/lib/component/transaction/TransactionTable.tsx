@@ -1,14 +1,14 @@
 import React, {useCallback, useMemo} from 'react';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
-import {IColumn} from '../table/Table';
+import {IColumn} from '../table/Column';
 import HeaderDetailTable from '../table/HeaderDetailTable';
 import TransactionModel, {ITransactionDetail} from '../../model/TransactionModel';
 import * as formats from '../../formats';
 import classNames from 'classnames';
 
 interface IProps {
-    accountId?: string;
+    accountId?: number;
 }
 
 const securityAccountTypes = ['BROKERAGE', '_401K'];

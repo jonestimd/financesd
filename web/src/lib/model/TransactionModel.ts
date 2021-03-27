@@ -2,17 +2,17 @@ import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 
 export interface IRelatedTransaction {
-    id: string;
+    id: number;
     accountId: number;
 }
 
 export interface IRelatedDetail {
-    id: string;
+    id: number;
     transaction: IRelatedTransaction;
 }
 
 export interface ITransactionDetail {
-    id: string;
+    id: number;
     transactionCategoryId?: number;
     transactionGroupId?: number;
     memo?: string;
@@ -22,7 +22,7 @@ export interface ITransactionDetail {
 }
 
 export interface ITransaction {
-    id: string;
+    id: number;
     date: string;
     referenceNumber?: string;
     payeeId?: number;
@@ -40,7 +40,7 @@ export default class TransactionModel implements ITransaction {
         return t1.date < t2.date ? -1 : 1;
     }
 
-    id: string;
+    id: number;
     date: string;
     referenceNumber?: string;
     payeeId?: number;

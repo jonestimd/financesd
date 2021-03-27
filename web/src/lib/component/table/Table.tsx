@@ -1,104 +1,74 @@
-import React, {ReactNode} from 'react';
+import React from 'react';
 import classNames from 'classnames';
-import {translate} from '../../i18n/localize';
-import {useSelection} from '../scroll/selectionHooks';
 import MuiTable from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableCell from '@material-ui/core/TableCell';
+import HeaderRow from './HeaderRow';
+import Row, {IRowProps} from './Row';
+import {IColumn} from './Column';
+import {observer} from 'mobx-react-lite';
+import {ICell} from '../../model/SelectionModel';
 
-type ClassSupplier<T> = string | ((row?: T) => string);
-
-export interface IColumn<T> {
-    key: string;
-    className?: ClassSupplier<T>;
-    colspan?: number;
-    header?: (key: string) => ReactNode;
-    render: (row: T) => React.ReactNode;
-}
+type ContainerRef<T> = ((instance: T | null) => void) | React.MutableRefObject<T | null> | null;
 
 export interface ITableProps<T> {
     columns: IColumn<T>[];
     data: T[];
     className?: string;
-}
-
-export interface IRow {
-    id: string;
-}
-
-function evalSupplier<T>(supplier?: ClassSupplier<T>, row?: T): string {
-    return typeof supplier === 'function' ? supplier(row) : supplier ?? '';
-}
-
-function columnClasses<T>(columns: IColumn<T>[], selectedIndex = -1, row?: T): string[] {
-    return columns.reduce(({index, classes}, {className, colspan = 1}) => {
-        const selected = index <= selectedIndex && selectedIndex < index + colspan;
-        index += colspan;
-        return {index, classes: classes.concat(classNames(evalSupplier(className, row), {selected}))};
-    }, {index: 0, classes: [] as string[]}).classes;
-}
-
-interface IHeaderProps<T> {
-    className?: string;
-    columns: IColumn<T>[];
-}
-
-export const HeaderRow = <T extends unknown>({className, columns}: IHeaderProps<T>) => {
-    const classes = columnClasses(columns);
-    return (
-        <TableRow className={className}>
-            {columns.map(({key, colspan, header = translate}, index) =>
-                <TableCell key={key} className={classes[index]} colSpan={colspan}>{header(key)}</TableCell>
-            )}
-        </TableRow>
-    );
-};
-
-interface IRowProps<T> extends IHeaderProps<T> {
-    row: T;
     selection?: {
-        row?: number;
-        column?: number;
+        rowClass?: (index: number) => string;
+        cell: ICell;
+        editCell?: ICell;
+        setEditCell?: (cell?: ICell) => void;
+        stopEditing?: () => void;
+        isEditable?: (row: T, key: string) => boolean;
+        onMouseDown: React.MouseEventHandler;
+        onKeyDown: React.KeyboardEventHandler;
+        validate?: (row: T, key: string) => string[];
+        containerRef?: ContainerRef<HTMLDivElement>;
     };
 }
 
-export const Row = <T extends IRow>({row, className, columns, selection = {}}: IRowProps<T>) => {
-    const classes = columnClasses(columns, selection.column, row);
-    return (
-        <TableRow className={className}>
-            {columns.map(({key, render, colspan}, index) =>
-                <TableCell key={key} className={classes[index]} colSpan={colspan}>{render(row)}</TableCell>
-            )}
-        </TableRow>
-    );
+export interface IRow {
+    id: number;
+}
+
+const rowClass = (index: number) => ({odd: index % 2});
+
+const startEdit = (e: React.KeyboardEvent<HTMLElement>) => {
+    return !e.ctrlKey && !e.altKey && (e.key.length === 1 || e.key === 'F2') || e.key === 'Delete' || e.key === 'Backspace';
 };
 
-const rowClass = (index: number, selection: {row: number}) => classNames({
-    odd: index % 2,
-    selected: index === selection.row,
-});
-
-export const selectionOptions = {
-    rowSelector: 'tbody tr.MuiTableRow-root',
-    headerSelector: 'thead',
-};
-
-const Table = <T extends IRow>({columns, data, className}: ITableProps<T>) => {
-    const selection = useSelection({rows: data.length, columns: columns.length, ...selectionOptions});
+const Table = <T extends IRow>({columns, data, className, selection}: ITableProps<T>) => {
+    const editCell = selection?.editCell;
+    const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+        if (selection) {
+            if (selection.setEditCell && startEdit(e)) {
+                if (columns[selection.cell.column].editor) {
+                    selection.setEditCell(selection.cell);
+                }
+            }
+            else selection.onKeyDown(e);
+        }
+    };
+    const isEditable = selection?.isEditable && selection.isEditable.bind(selection);
+    const validate = selection?.validate && selection.validate.bind(selection);
+    const onCommit = selection?.stopEditing && selection.stopEditing.bind(selection);
+    const rowProps = (row: T, index: number): IRowProps<T> => ({
+        row, columns, isEditable, validate, onCommit,
+        className: classNames(selection?.rowClass?.(index), rowClass(index)),
+        selection: selection?.cell,
+        editCell: editCell?.row === index && editCell.column,
+        onClick: (column) => selection?.setEditCell?.({row: index, column}),
+    });
     return (
-        <div className='scroll-container' onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown} tabIndex={0}>
+        <div className='scroll-container' onKeyDown={onKeyDown} onMouseDown={selection?.onMouseDown} ref={selection?.containerRef}>
             <MuiTable className={classNames('table', className)}>
                 <TableHead><HeaderRow columns={columns} /></TableHead>
-                <TableBody>
-                    {data.map((row, index) =>
-                        <Row key={row.id} row={row} className={rowClass(index, selection)} columns={columns} selection={selection} />
-                    )}
-                </TableBody>
+                <TableBody>{data.map((row, index) => <Row key={row.id} {...rowProps(row, index)} />)}</TableBody>
             </MuiTable>
         </div>
     );
 };
 
-export default Table;
+export default observer(Table);

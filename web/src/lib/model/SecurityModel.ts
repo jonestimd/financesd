@@ -1,5 +1,5 @@
 export interface IAsset {
-    id: string;
+    id: number;
     name: string;
     type: string;
     scale: number;
@@ -17,7 +17,7 @@ export interface ISecurity extends IAsset {
 }
 
 export class SecurityModel implements ISecurity {
-    id: string;
+    id: number;
     name: string;
     type: string;
     scale: number;

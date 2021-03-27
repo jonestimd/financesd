@@ -2,7 +2,7 @@ import React, {ChangeEvent} from 'react';
 import {shallow} from 'enzyme';
 import {History} from 'history';
 import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel, newCompany} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
 import TransactionsPage from './TransactionsPage';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
@@ -11,7 +11,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import TopAppBar from '../TopAppBar';
 import {mockUseEffect} from 'src/test/mockHooks';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {AccountModel} from 'src/lib/model/AccountModel';
+import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {TextField} from '@material-ui/core';
 
 const accountId = '123';
@@ -25,22 +25,22 @@ jest.mock('react-router', () => ({
 
 describe('TransactionsPage', () => {
     const {accountStore, transactionStore} = new RootStore();
-    const account = newAccountModel({}, newCompany());
+    const account = newAccountModel({}, newCompanyModel());
     const props = {
         match: {params: {accountId}},
     };
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({accountStore, transactionStore});
-        jest.spyOn(transactionStore, 'loadTransactions').mockResolvedValue();
+        jest.spyOn(transactionStore, 'loadTransactions').mockResolvedValue(true);
         jest.spyOn(accountStore, 'getAccount').mockReturnValue(account);
         mockUseEffect();
     });
     it('loads account transactions', () => {
         shallow(<TransactionsPage {...props} />);
 
-        expect(transactionStore.loadTransactions).toBeCalledWith(accountId);
-        expect(accountStore.getAccount).toBeCalledWith(accountId);
+        expect(transactionStore.loadTransactions).toBeCalledWith(parseInt(accountId));
+        expect(accountStore.getAccount).toBeCalledWith(parseInt(accountId));
     });
     describe('account input', () => {
         it('displays account name', () => {
@@ -100,7 +100,7 @@ describe('TransactionsPage', () => {
         it('defaults to list', () => {
             const component = shallow(<TransactionsPage {...props} />);
 
-            expect(component.find(TransactionList)).toHaveProp('accountId', accountId);
+            expect(component.find(TransactionList)).toHaveProp('accountId', parseInt(accountId));
             expect(component.find(TransactionTable)).not.toExist();
         });
         it('shows table when table button clicked', () => {
@@ -110,7 +110,7 @@ describe('TransactionsPage', () => {
             component.rerender({...props, x: 'force rerender'});
 
             expect(component.find(TransactionList)).not.toExist();
-            expect(component.find(TransactionTable)).toHaveProp('accountId', accountId);
+            expect(component.find(TransactionTable)).toHaveProp('accountId', parseInt(accountId));
         });
     });
 });

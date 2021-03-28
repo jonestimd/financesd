@@ -19,7 +19,7 @@ describe('TopAppBar', () => {
     it('renders AppBar with title, menu and children', () => {
         const component = shallow(<TopAppBar currentPage='transactions' title={title}><div id='children' /></TopAppBar>);
 
-        expect(component.find(AppBar)).toHaveProp('position', 'fixed');
+        expect(component.find(AppBar)).toHaveProp('position', 'relative');
         expect(component.find(Toolbar).find(Typography)).toHaveText(title);
         expect(component.find(Toolbar).find('#children')).toExist();
         expect(component.find(Drawer)).toHaveProps({open: false});
@@ -27,7 +27,7 @@ describe('TopAppBar', () => {
     it('renders AppBar without title', () => {
         const component = shallow(<TopAppBar currentPage='transactions'><div id='children' /></TopAppBar>);
 
-        expect(component.find(AppBar)).toHaveProp('position', 'fixed');
+        expect(component.find(AppBar)).toHaveProp('position', 'relative');
         expect(component.find(Toolbar).find(Typography)).not.toExist();
         expect(component.find(Toolbar).find('#children')).toExist();
         expect(component.find(Drawer)).toHaveProps({open: false});

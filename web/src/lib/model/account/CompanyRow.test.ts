@@ -5,7 +5,7 @@ import {testAction} from 'src/test/mobxUtils';
 describe('CompanyRow', () => {
     describe('get id', () => {
         it('returns data.id', () => {
-            expect(new CompanyRow({id: -1}).id).toEqual('-1');
+            expect(new CompanyRow({id: -1}).id).toEqual(-1);
         });
     });
     describe('get version', () => {

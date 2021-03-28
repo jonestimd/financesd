@@ -24,7 +24,7 @@ const renderShares = (detail: ITransactionDetail) => {
 };
 const dummyRender = () => '';
 
-// TODO make header sticky
+// TODO fixed column widths (manually adjustable
 // TODO fix keyboard scrolling
 // - slowness
 // - always display selected row

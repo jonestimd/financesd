@@ -13,6 +13,7 @@ import {mockUseEffect} from 'src/test/mockHooks';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
 import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {TextField} from '@material-ui/core';
+import settingsStore from 'src/lib/store/settingsStore';
 
 const accountId = '123';
 const history = {push: jest.fn()} as unknown as History;
@@ -97,13 +98,16 @@ describe('TransactionsPage', () => {
             expect(buttons).toHaveLength(2);
             expect(buttons.map((b) => b.prop<string>('value'))).toEqual(['list', 'table']);
         });
-        it('defaults to list', () => {
+        it('uses settings', () => {
+            settingsStore.transactionsView = 'list';
+
             const component = shallow(<TransactionsPage {...props} />);
 
             expect(component.find(TransactionList)).toHaveProp('accountId', parseInt(accountId));
             expect(component.find(TransactionTable)).not.toExist();
         });
         it('shows table when table button clicked', () => {
+            settingsStore.transactionsView = 'list';
             const component = shallow(<TransactionsPage {...props} />);
 
             component.find(ToggleButtonGroup).simulate('change', {}, 'table');
@@ -111,6 +115,7 @@ describe('TransactionsPage', () => {
 
             expect(component.find(TransactionList)).not.toExist();
             expect(component.find(TransactionTable)).toHaveProp('accountId', parseInt(accountId));
+            expect(settingsStore.transactionsView).toEqual('table');
         });
     });
 });

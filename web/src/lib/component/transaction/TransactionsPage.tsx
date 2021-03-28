@@ -9,12 +9,11 @@ import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
+import settingsStore, {ViewMode} from '../../store/settingsStore';
 
 interface IProps {
     match: {params: {[name: string]: string}};
 }
-
-type ViewMode = 'list' | 'table';
 
 const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId: accountParam}}}) => {
     const history = useHistory();
@@ -22,7 +21,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     const {accountStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => void transactionStore.loadTransactions(accountId), [transactionStore, accountId]);
     const account = accountStore.getAccount(accountId);
-    const [mode, setMode] = React.useState<ViewMode>('list');
+    const mode = settingsStore.transactionsView;
     return <>
         <TopAppBar currentPage='transactions'>
             <Autocomplete options={accountStore.accounts} loading={accountStore.accounts.length === 0}
@@ -38,7 +37,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
             {/* TODO filter input */}
             {/* TODO cleared balance */}
             <ToggleButtonGroup value={mode} exclusive size='small'
-                onChange={(_event: React.MouseEvent, value: ViewMode) => setMode(value ?? mode)}>
+                onChange={(_event: React.MouseEvent, value: ViewMode) => settingsStore.transactionsView = value}>
                 <ToggleButton value='list'><Icon>list</Icon></ToggleButton>
                 <ToggleButton value='table'><Icon>apps</Icon></ToggleButton>
             </ToggleButtonGroup>

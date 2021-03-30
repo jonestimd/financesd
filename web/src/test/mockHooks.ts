@@ -4,12 +4,12 @@ import * as selectionHooks from '../lib/component/scroll/selectionHooks';
 
 type ScrollHook = Pick<ReturnType<typeof scrollHooks['useScroll']>, 'startRow' | 'rowHeight' | 'headerHeight'>;
 
-export function mockScrollHook(overrides: Partial<ScrollHook> = {}) {
+export function mockScrollHook<T extends HTMLElement>(overrides: Partial<ScrollHook> = {}) {
     const scroll = {
         startRow: 0,
         rowHeight: 0,
         headerHeight: 0,
-        listRef: {current: null} as unknown as React.MutableRefObject<HTMLElement>,
+        listRef: {current: null} as unknown as React.MutableRefObject<T>,
         endRow: jest.fn<number, [number]>(),
         onScroll: jest.fn<void, [React.UIEvent<HTMLElement>]>(),
         ...overrides,
@@ -18,22 +18,17 @@ export function mockScrollHook(overrides: Partial<ScrollHook> = {}) {
     return scroll;
 }
 
-export function mockSelectionHook(row = 0, column = 0) {
+export function mockSelectionHook<T extends HTMLElement>(row = 0, column = 0, overrides: Partial<ScrollHook> = {}) {
     const selection = {
         row,
         column,
         setCell: jest.fn(),
         onKeyDown: jest.fn(),
         onMouseDown: jest.fn(),
+        scroll: mockScrollHook<T>(overrides),
     };
     jest.spyOn(selectionHooks, 'useSelection').mockReturnValue(selection);
     return selection;
-}
-
-export function mockHooks(scrollOverrides: Partial<ScrollHook> = {}) {
-    const scroll = mockScrollHook(scrollOverrides);
-    const selection = mockSelectionHook();
-    return {scroll, selection};
 }
 
 const effects: string[] = [];

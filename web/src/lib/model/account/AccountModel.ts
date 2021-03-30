@@ -15,6 +15,8 @@ export interface IAccount {
     balance: number;
 }
 
+const securityTypes = ['BROKERAGE', '401K'];
+
 export class AccountModel implements IAccount {
     static compare(a1: AccountModel, a2: AccountModel): number {
         return a1.compareTo(a2);
@@ -57,6 +59,10 @@ export class AccountModel implements IAccount {
 
     get hide() {
         return this.closed && settingsStore.hideClosedAccounts;
+    }
+
+    get isSecurity() {
+        return securityTypes.includes(this.type);
     }
 
     compareTo(that: AccountModel): number {

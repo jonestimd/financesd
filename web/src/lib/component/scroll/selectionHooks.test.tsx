@@ -2,6 +2,7 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import {useSelection, ISelectionOptions} from './selectionHooks';
 import {createDiv} from 'src/test/htmlUtils';
+import {mockScrollHook} from 'src/test/mockHooks';
 
 const hook: Partial<ReturnType<typeof useSelection>> = {};
 
@@ -29,8 +30,10 @@ describe('selectionHooks', () => {
 
             expect(hook).toEqual(expect.objectContaining({row: 0, column: 0}));
         });
-        it('defaults to initial row', () => {
-            setup({...options, initialRow: 9});
+        it('defaults to scroll startRow', () => {
+            mockScrollHook({startRow: 9});
+
+            setup({...options});
 
             expect(hook).toEqual(expect.objectContaining({row: 9, column: 0}));
         });
@@ -72,24 +75,26 @@ describe('selectionHooks', () => {
                 expect(row.getBoundingClientRect).toBeCalled();
             });
             it('scrolls up to selected row', () => {
-                const initialRow = pageSize * 2;
-                jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((initialRow - pageSize / 2) * rowHeight);
-                setup({...options, headerSelector, initialRow});
+                const startRow = pageSize * 2;
+                mockScrollHook({startRow});
+                jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((startRow - pageSize / 2) * rowHeight);
+                setup({...options, headerSelector});
                 const event = mockKeyEvent('PageUp', false);
 
                 hook.onKeyDown!(event);
 
-                expect(container.scrollTo).toBeCalledWith({top: (initialRow - pageSize) * rowHeight});
+                expect(container.scrollTo).toBeCalledWith({top: (startRow - pageSize) * rowHeight});
             });
             it('scrolls down to selected row', () => {
-                const initialRow = pageSize * 2;
-                jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((initialRow - pageSize / 2) * rowHeight);
-                setup({...options, headerSelector, initialRow});
+                const startRow = pageSize * 2;
+                mockScrollHook({startRow});
+                jest.spyOn(container, 'scrollTop', 'get').mockReturnValue((startRow - pageSize / 2) * rowHeight);
+                setup({...options, headerSelector});
                 const event = mockKeyEvent('PageDown', false);
 
                 hook.onKeyDown!(event);
 
-                const finalRow = initialRow + pageSize;
+                const finalRow = startRow + pageSize;
                 expect(container.scrollTo).toBeCalledWith({top: finalRow * rowHeight + headerHeight - containerHeight + rowHeight});
             });
             const rowTests = [
@@ -108,7 +113,8 @@ describe('selectionHooks', () => {
             ];
             rowTests.forEach(({name, initialRow, key, ctrl, expectedRow}) =>
                 it(name, () => {
-                    setup({...options, initialRow});
+                    mockScrollHook({startRow: initialRow});
+                    setup({...options});
                     const event = mockKeyEvent(key, ctrl);
 
                     hook.onKeyDown!(event);
@@ -150,7 +156,8 @@ describe('selectionHooks', () => {
             ];
             columnTests.forEach(({name, initial, key, ctrl, shift, expected}) =>
                 it(name, () => {
-                    setup({...options, initialRow: initial.row});
+                    mockScrollHook({startRow: initial.row});
+                    setup({...options});
                     for (let index = 0; index < initial.column; index++) hook.onKeyDown!(mockKeyEvent('ArrowRight', false));
                     const event = mockKeyEvent(key, ctrl, shift);
 
@@ -220,12 +227,13 @@ describe('selectionHooks', () => {
                     expect(hook.row).toEqual(4);
                 });
                 it('ignores click past end row', () => {
-                    const initialRow = 5;
-                    setup({...options, initialRow});
+                    const startRow = 5;
+                    mockScrollHook({startRow});
+                    setup({...options});
 
                     hook.onMouseDown!(mockMouseEvent(null, rowHeight * (rows.length + 1)));
 
-                    expect(hook.row).toEqual(initialRow);
+                    expect(hook.row).toEqual(startRow);
                 });
             });
         });

@@ -7,7 +7,6 @@ import Row from './Row';
 import {IColumn} from './Column';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
-import {useScroll} from '../scroll/scrollHooks';
 import {useSelection} from '../scroll/selectionHooks';
 import {Table, TableRow, TableCell, TableHead, TableBody} from '@material-ui/core';
 
@@ -31,20 +30,18 @@ const scrollOptions = {
 
 const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(props: IHeaderDetailTableProps<T, S>) => {
     const {columns, subColumns, model, subrows, className} = props;
-    const scroll = useScroll<HTMLTableElement>(scrollOptions);
     // React.useEffect(() => {
     //     if (tableRef.current && model.groups.length > 0) gotoBottom();
     // }, [model, tableRef.current, rowHeight]);
-    const startGroup = model.getGroupIndex(scroll.startRow);
-    const leadingHeight = model.precedingRows[startGroup] * scroll.rowHeight;
-    const height = model.rowCount * scroll.rowHeight + scroll.headerHeight;
-    const rowOffset = Math.max(0, model.precedingRows[startGroup] - 1);
-    const selection = useSelection({initialRow: scroll.startRow, rows: model.rowCount, columns: columns.length, rowOffset});
+    const selection = useSelection<HTMLTableElement>({...scrollOptions, rows: model.rowCount, columns: columns.length});
+    const startGroup = model.getGroupIndex(selection.scroll.startRow);
+    const leadingHeight = model.precedingRows[startGroup] * selection.scroll.rowHeight;
+    const height = model.rowCount * selection.scroll.rowHeight + selection.scroll.headerHeight;
     return (
-        <ScrollViewport onScroll={scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
+        <ScrollViewport onScroll={selection.scroll.onScroll} onKeyDown={selection.onKeyDown} onMouseDown={selection.onMouseDown}>
             {({scrollHeight}: IScrollableProps) => {
-                const endGroup = model.getGroupIndex(scroll.endRow(scrollHeight));
-                const trailingHeight = model.getRowsAfter(endGroup) * scroll.rowHeight;
+                const endGroup = model.getGroupIndex(selection.scroll.endRow(scrollHeight));
+                const trailingHeight = model.getRowsAfter(endGroup) * selection.scroll.rowHeight;
                 const rowClassNames = (index: number, subIndex = 0, classes?: string) => {
                     return classNames(classes, {
                         odd: (startGroup + index) % 2,
@@ -52,7 +49,7 @@ const HeaderDetailTable: TableType = observer(<T extends IRow, S extends IRow>(p
                     });
                 };
                 return (
-                    <Table ref={scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
+                    <Table ref={selection.scroll.listRef} className={classNames('table header-detail', className)} style={{height}}>
                         <TableHead>
                             <HeaderRow columns={columns} />
                             <HeaderRow className='detail' columns={subColumns} />

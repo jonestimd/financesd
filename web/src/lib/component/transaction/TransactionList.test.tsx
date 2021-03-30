@@ -12,6 +12,7 @@ import Security from './Security';
 import TxDetail from './TxDetail';
 import {newDetail} from 'src/test/detailFactory';
 import TransactionModel from 'src/lib/model/TransactionModel';
+import {mockSelectionHook} from 'src/test/mockHooks';
 
 type RenderItem = IProps<TransactionModel>['renderItem'];
 
@@ -26,12 +27,12 @@ describe('TransactionList', () => {
         jest.spyOn(transactionStore, 'getTransactionsModel').mockReturnValue(transactionsModel);
     });
     it('displays list in ListViewPort', () => {
+        const selection = mockSelectionHook();
+
         const component = shallow(<TransactionList />);
 
         expect(component.find(ListViewport).props()).toEqual(expect.objectContaining({
-            items: transactionsModel.transactions,
-            rowSelector: 'div.transaction',
-            prototypeSelector: '.prototype',
+            items: transactionsModel.transactions, selection,
         }));
     });
     it('displays prototype transaction', () => {

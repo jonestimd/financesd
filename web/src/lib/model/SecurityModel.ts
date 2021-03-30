@@ -42,4 +42,8 @@ export class SecurityModel implements ISecurity {
         this.version = security.version;
         this.transactionCount = security.transactionCount;
     }
+
+    get displayName() {
+        return this.name + (this.symbol ? ` (${this.symbol})` : '');
+    }
 }

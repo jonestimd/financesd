@@ -10,6 +10,8 @@ import Memo from './Memo';
 import TransactionModel from 'src/lib/model/TransactionModel';
 import {Checkbox, Typography} from '@material-ui/core';
 import ListViewport from '../scroll/ListViewport';
+import {useSelection} from '../scroll/selectionHooks';
+import TransactionPane from './TransactionPane';
 
 interface IProps {
     accountId?: number;
@@ -47,15 +49,21 @@ const Transaction: React.FC<{tx: TransactionModel, selected: boolean}> = observe
     </Typography>
 ));
 
+const rowSelector = 'div.transaction';
+const prototypeSelector = '.prototype';
+
 const TransactionList: React.FC<IProps> = observer(({accountId}) => {
-    const {transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, transactionStore} = React.useContext(RootStoreContext);
     const tableModel = transactionStore.getTransactionsModel(accountId);
-    return (
-        <ListViewport items={tableModel.transactions} rowSelector='div.transaction' prototypeSelector='.prototype'
+    const showSecurity = accountStore.getAccount(accountId)?.isSecurity;
+    const selection = useSelection<HTMLDivElement>({rows: tableModel.transactions.length, rowSelector, prototypeSelector});
+    return <>
+        <ListViewport items={tableModel.transactions} selection={selection}
             renderItem={(tx, _index, selected) => <Transaction tx={tx} selected={selected} />} >
             <TransactionPrototype />
         </ListViewport>
-    );
+        <TransactionPane showSecurity={showSecurity} transaction={tableModel.transactions[selection.row]} />
+    </>;
 });
 
 export default TransactionList;

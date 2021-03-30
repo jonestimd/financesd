@@ -1,4 +1,5 @@
 import React from 'react';
+import {IScrollOptions, useScroll} from './scrollHooks';
 
 const defaultRowHeight = 24;
 
@@ -30,15 +31,11 @@ export interface ICell {
     column: number;
 }
 
-export interface ISelectionOptions {
-    /** initial selection */
-    initialRow?: number;
+export interface ISelectionOptions extends IScrollOptions {
     /** total number of rows */
     rows: number;
     /** total number of columns */
     columns?: number;
-    /** index of 1st row element in DOM */
-    rowOffset?: number;
     /** CSS selector for row elements */
     rowSelector?: string;
     /** CSS selector for header */
@@ -60,9 +57,10 @@ function wrap(value: number, max: number) {
     return (value >= max) ? 0 : value;
 }
 
-export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, ...selectors}: ISelectionOptions) {
-    const {rowSelector, headerSelector} = {...defaultOptions, ...selectors};
-    const [cell, setCell] = React.useState<ICell>({row: initialRow, column: 0});
+export function useSelection<T extends HTMLElement>({rows, columns = 1, ...options}: ISelectionOptions) {
+    const scroll = useScroll<T>({defaultRowHeight, ...options});
+    const {rowSelector, headerSelector} = {...defaultOptions, ...options};
+    const [cell, setCell] = React.useState<ICell>({row: scroll.startRow, column: 0});
     const move = (target: HTMLElement, nRows: number, nCols: number) => setCell(({row: r, column: c}) => {
         const cell = {row: clamp(r + nRows, rows), column: wrap(c + nCols, columns)};
         ensureVisible(target, cell.row, rowSelector, headerSelector);
@@ -70,6 +68,7 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
     });
     return {
         ...cell,
+        scroll,
         setCell(row: number, column: number) {
             setCell({row, column});
         },
@@ -132,12 +131,12 @@ export function useSelection({initialRow = 0, rows, columns = 1, rowOffset = 0, 
                 const cellIndex = Array.from(tr.querySelectorAll('td'))
                     .slice(0, event.target.cellIndex)
                     .reduce((count, cell) => count + (cell.colSpan || 1), 0);
-                setCell({row: tr.sectionRowIndex + rowOffset, column: cellIndex});
+                setCell({row: tr.sectionRowIndex + scroll.startRow, column: cellIndex});
             }
             else {
                 const container = event.currentTarget;
                 const index = Array.from(container.querySelectorAll(rowSelector)).findIndex((r) => r.getBoundingClientRect().bottom >= event.clientY);
-                if (index >= 0) setCell({...cell, row: index + rowOffset});
+                if (index >= 0) setCell({...cell, row: index + scroll.startRow});
             }
         },
     };

@@ -1,33 +1,35 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import {mockHooks} from 'src/test/mockHooks';
-import ListViewport from './ListViewport';
+import ListViewport, {IProps} from './ListViewport';
 import ScrollViewport from './ScrollViewport';
+import {mockSelectionHook} from 'src/test/mockHooks';
 
 describe('ListViewport', () => {
     const rowHeight = 10;
-    const props = {
-        className: 'container',
-        rowSelector: '.row',
-        renderItem: (row: {id: number}) => <div className='row'>{row.id}</div>,
-        items: new Array(10).fill(null).map((_, index) => ({id: index + 1})),
+    const getProps = (startRow = 0, lastRow = 0, row = startRow): IProps<{id: number}> => {
+        const selection = mockSelectionHook<HTMLDivElement>(row, 0, {startRow, rowHeight});
+        selection.scroll.endRow.mockReturnValue(lastRow);
+        return {
+            className: 'container',
+            renderItem: (row: {id: number}) => <div className='row'>{row.id}</div>,
+            items: new Array(10).fill(null).map((_, index) => ({id: index + 1})),
+            selection,
+        };
     };
 
     it('returns null for 0 height', () => {
-        const {scroll, selection} = mockHooks({rowHeight: 10});
+        const props = getProps();
 
         const viewport = shallow(<ListViewport {...props} />).find(ScrollViewport);
 
-        expect(viewport).toHaveProp('onScroll', scroll.onScroll);
-        expect(viewport).toHaveProp('onKeyDown', selection.onKeyDown);
-        expect(viewport).toHaveProp('onMouseDown', selection.onMouseDown);
+        expect(viewport).toHaveProp('onScroll', props.selection.scroll.onScroll);
+        expect(viewport).toHaveProp('onKeyDown', props.selection.onKeyDown);
+        expect(viewport).toHaveProp('onMouseDown', props.selection.onMouseDown);
         expect(viewport.prop('children')({scrollHeight: 0})).toBeNull();
     });
     it('does not display leading filler if startRow is 0', () => {
-        const {scroll} = mockHooks({rowHeight});
         const endRow = 6;
-        scroll.endRow.mockReturnValue(endRow);
-        const component = shallow(<ListViewport {...props} />);
+        const component = shallow(<ListViewport {...getProps(0, endRow)} />);
 
         const result = shallow(component.find(ScrollViewport).prop('children')({scrollHeight: 100}) as React.ReactElement);
 
@@ -39,8 +41,7 @@ describe('ListViewport', () => {
     it('displays items from scroll.startRow to scroll.endRow', () => {
         const startRow = 2;
         const endRow = 6;
-        const {scroll} = mockHooks({rowHeight, startRow});
-        scroll.endRow.mockReturnValue(endRow);
+        const props = getProps(startRow, endRow);
         const component = shallow(<ListViewport {...props} />);
 
         const result = shallow(component.find(ScrollViewport).prop('children')({scrollHeight: 100}) as React.ReactElement);
@@ -53,9 +54,7 @@ describe('ListViewport', () => {
     it('displays children after rows', () => {
         const startRow = 2;
         const endRow = 6;
-        const {scroll} = mockHooks({rowHeight, startRow});
-        scroll.endRow.mockReturnValue(endRow);
-        const component = shallow(<ListViewport {...props}><div className='prototype'>a sample row</div></ListViewport>);
+        const component = shallow(<ListViewport {...getProps(startRow, endRow)}><div className='prototype'>a sample row</div></ListViewport>);
 
         const result = shallow(component.find(ScrollViewport).prop('children')({scrollHeight: 100}) as React.ReactElement);
 

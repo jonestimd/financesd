@@ -6,7 +6,7 @@ import {sortedIndex} from 'lodash';
 import HeaderRow from './HeaderRow';
 import Row from './Row';
 import {IColumn} from './Column';
-import {mockHooks} from 'src/test/mockHooks';
+import {mockSelectionHook} from 'src/test/mockHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
 import {TableHead, TableBody} from '@material-ui/core';
 
@@ -76,17 +76,17 @@ describe('HeaderDetailTable', () => {
     const rowHeight = 24;
 
     it('uses ScrollViewport', () => {
-        const {scroll, selection} = mockHooks();
+        const selection = mockSelectionHook();
 
         const component = shallow(<HeaderDetailTable {...props} />);
 
         const viewport = component.find(ScrollViewport);
-        expect(viewport).toHaveProp('onScroll', scroll.onScroll);
+        expect(viewport).toHaveProp('onScroll', selection.scroll.onScroll);
         expect(viewport).toHaveProp('onKeyDown', selection.onKeyDown);
         expect(viewport).toHaveProp('onMouseDown', selection.onMouseDown);
     });
     it('displays a table with headers', () => {
-        const {scroll} = mockHooks();
+        const {scroll} = mockSelectionHook();
         const component = shallow(<HeaderDetailTable {...props} />);
 
         const table = mount(component.find(ScrollViewport).prop('children')({scrollHeight}) as React.ReactElement);
@@ -99,7 +99,7 @@ describe('HeaderDetailTable', () => {
         expect(headerRows.at(1)).toHaveClassName('detail');
     });
     it('displays header and detail rows', () => {
-        mockHooks();
+        mockSelectionHook();
         const component = shallow(<HeaderDetailTable {...props} />);
 
         const table = shallow(component.find(ScrollViewport).prop('children')({scrollHeight}) as React.ReactElement);
@@ -123,7 +123,7 @@ describe('HeaderDetailTable', () => {
     it('displays leading filler', () => {
         const model = new TestModel(new Array(100).fill(null).map(() => new TestRow('b1', 20, 'b3', [new TestData('z1', 'z2', 'z3')])));
         const startRow = 75;
-        mockHooks({startRow, rowHeight: 24});
+        mockSelectionHook(startRow, 0, {startRow, rowHeight: 24});
         const component = shallow(<HeaderDetailTable {...props} model={model} />);
 
         const table = shallow(component.find(ScrollViewport).prop('children')({scrollHeight}) as React.ReactElement);
@@ -133,7 +133,7 @@ describe('HeaderDetailTable', () => {
     it('displays trailing filler', () => {
         const model = new TestModel(new Array(100).fill(null).map(() => new TestRow('b1', 20, 'b3', [new TestData('z1', 'z2', 'z3')])));
         const endRow = 15;
-        const {scroll} = mockHooks({rowHeight});
+        const {scroll} = mockSelectionHook(0, 0, {rowHeight});
         scroll.endRow.mockReturnValue(endRow);
         const component = shallow(<HeaderDetailTable {...props} model={model} />);
 

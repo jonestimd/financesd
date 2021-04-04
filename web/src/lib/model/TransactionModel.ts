@@ -47,10 +47,8 @@ export default class TransactionModel implements ITransaction {
     securityId?: number;
     memo?: string;
     cleared: boolean;
-    @observable
-    details: ITransactionDetail[];
-    @observable
-    balance = 0;
+    @observable details: ITransactionDetail[];
+    @observable balance = 0;
     categoryStore: CategoryStore;
 
     constructor(transaction: ITransaction, categoryStore: CategoryStore) {

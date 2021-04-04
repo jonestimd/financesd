@@ -57,6 +57,15 @@ function wrap(value: number, max: number) {
     return (value >= max) ? 0 : value;
 }
 
+function isContained(element: HTMLElement, parentSelector: string) {
+    let parent: HTMLElement | null = element;
+    while (parent) {
+        if (parent.matches(parentSelector)) return true;
+        parent = parent.parentElement;
+    }
+    return false;
+}
+
 export function useSelection<T extends HTMLElement>({rows, columns = 1, ...options}: ISelectionOptions) {
     const scroll = useScroll<T>({defaultRowHeight, ...options});
     const {rowSelector, headerSelector} = {...defaultOptions, ...options};
@@ -126,17 +135,19 @@ export function useSelection<T extends HTMLElement>({rows, columns = 1, ...optio
             }
         },
         onMouseDown(event: React.MouseEvent<HTMLElement>) {
-            if (isTableCell(event.target)) {
-                const tr = event.target.parentElement as HTMLTableRowElement;
-                const cellIndex = Array.from(tr.querySelectorAll('td'))
-                    .slice(0, event.target.cellIndex)
-                    .reduce((count, cell) => count + (cell.colSpan || 1), 0);
-                setCell({row: tr.sectionRowIndex + scroll.startRow, column: cellIndex});
-            }
-            else {
-                const container = event.currentTarget;
-                const index = Array.from(container.querySelectorAll(rowSelector)).findIndex((r) => r.getBoundingClientRect().bottom >= event.clientY);
-                if (index >= 0) setCell({...cell, row: index + scroll.startRow});
+            if (event.button === 0 && isContained(event.target as HTMLElement, rowSelector)) {
+                if (isTableCell(event.target)) {
+                    const tr = event.target.parentElement as HTMLTableRowElement;
+                    const cellIndex = Array.from(tr.querySelectorAll('td'))
+                        .slice(0, event.target.cellIndex)
+                        .reduce((count, cell) => count + (cell.colSpan || 1), 0);
+                    setCell({row: tr.sectionRowIndex + scroll.startRow, column: cellIndex});
+                }
+                else {
+                    const container = event.currentTarget;
+                    const index = Array.from(container.querySelectorAll(rowSelector)).findIndex((r) => r.getBoundingClientRect().bottom >= event.clientY);
+                    if (index >= 0) setCell({...cell, row: index + scroll.startRow});
+                }
             }
         },
     };

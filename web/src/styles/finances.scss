@@ -17,6 +17,18 @@ $selection-background: #dfd0e0 !default;
 
 $transaction-hover-background: #dddddd !default;
 
+/* Chrome, Safari, Edge, Opera: disable spinner on number input */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox: disable spinner on number input */
+input[type='number'] {
+    -moz-appearance: textfield;
+}
+
 .hidden {
     display: none;
 }
@@ -110,6 +122,10 @@ table.transactions {
     }
 }
 
+.MuiTextField-root.date input {
+    max-width: 10ex;
+}
+
 table.transactions,
 table.security-transactions {
     td.category {
@@ -167,6 +183,12 @@ table.security-transactions {
         &:hover {
             background-color: darken($color: $selection-background, $amount: 10%);
         }
+        .details {
+            flex-wrap: wrap;
+        }
+    }
+    .MuiInputBase-root {
+        background-color: change-color($mdc-theme-background, $alpha: 0.9);
     }
     &:hover {
         background-color: $transaction-hover-background;
@@ -186,6 +208,7 @@ table.security-transactions {
         flex-direction: row;
         // flex-basis: 8em;
         white-space: nowrap;
+        align-items: center;
     }
     .ref-number {
         font-weight: bold;
@@ -223,6 +246,12 @@ table.security-transactions {
         flex-grow: 1;
         // TODO (for single line list item)
         overflow: hidden;
+        align-items: center;
+        .MuiAutocomplete-root {
+            input.MuiInputBase-input {
+                width: initial;
+            }
+        }
         .number {
             flex-basis: 8em;
             text-align: right;
@@ -250,6 +279,14 @@ table.security-transactions {
             white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
+            padding-bottom: 0;
+            &.editing {
+                display: flex;
+                align-items: center;
+                .MuiFormControl-root {
+                    margin: 0;
+                }
+            }
         }
     }
     .trailing {

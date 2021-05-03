@@ -3,31 +3,30 @@ import {shallow} from 'enzyme';
 import TransactionList from './TransactionList';
 import {RootStore} from 'src/lib/store/RootStore';
 import TransactionTableModel from 'src/lib/model/TransactionTableModel';
-import ListViewport, {IProps} from '../scroll/ListViewport';
+import ListViewport from '../scroll/ListViewport';
 import {newTxModel} from 'src/test/transactionFactory';
 import Memo from './Memo';
 import {Checkbox} from '@material-ui/core';
-import Payee from './Payee';
-import Security from './Security';
-import TxDetail from './TxDetail';
 import {newDetail} from 'src/test/detailFactory';
 import TransactionModel from 'src/lib/model/TransactionModel';
-import {mockSelectionHook} from 'src/test/mockHooks';
+import * as selectionHooks from '../scroll/listSelectionHooks';
+import {mockListSelectionHook} from 'src/test/mockHooks';
+import Transaction from './Transaction';
 
-type RenderItem = IProps<TransactionModel>['renderItem'];
+const Wrapper: React.FC<{children: React.ReactElement}> = ({children}) => <>{children}</>;
 
 describe('TransactionList', () => {
-    const {categoryStore, transactionStore} = new RootStore();
+    const {categoryStore, transactionStore, accountStore} = new RootStore();
     const detail = newDetail({amount: 123.45});
     const txModel = newTxModel({categoryStore, memo: 'transaction memo', details: [detail], balance: 567.89});
     const transactionsModel = new TransactionTableModel([txModel], categoryStore);
 
     beforeEach(() => {
-        jest.spyOn(React, 'useContext').mockReturnValue({transactionStore});
+        jest.spyOn(React, 'useContext').mockReturnValue({transactionStore, accountStore});
         jest.spyOn(transactionStore, 'getTransactionsModel').mockReturnValue(transactionsModel);
     });
     it('displays list in ListViewPort', () => {
-        const selection = mockSelectionHook();
+        const selection = mockListSelectionHook();
 
         const component = shallow(<TransactionList />);
 
@@ -44,42 +43,46 @@ describe('TransactionList', () => {
         expect(prototype.find('.trailing').find(Checkbox)).toExist();
         expect(prototype.find('.trailing .number').at(0)).toHaveText('0.00');
     });
-    describe('renderItem', () => {
-        let renderItem: RenderItem;
+    describe('selection', () => {
+        it('resets field when row changes', () => {
+            const useSelection = jest.spyOn(selectionHooks, 'useSelection');
+            shallow(<TransactionList />);
 
-        beforeEach(() => {
-            renderItem = shallow(<TransactionList />).find(ListViewport).prop('renderItem');
+            const getColumn = useSelection.mock.calls[0][0].getColumn!;
+
+            expect(getColumn({row: Math.random(), column: Math.random()})).toEqual(0);
         });
-        it('displays transaction date, payee, memo, security, details and cleared', () => {
-            const tx = shallow(renderItem(txModel, -1, false) as React.ReactElement);
+    });
+    describe('renderItem', () => {
+        const renderTx = (tx: TransactionModel, selected: boolean) => {
+            const renderItem = shallow(<TransactionList />).find(ListViewport).prop('renderItem');
+            return shallow(<Wrapper>{renderItem(tx, -1, selected) as React.ReactElement}</Wrapper>);
+        };
 
-            expect(tx.find('.leading .date')).toHaveText(txModel.date);
-            expect(tx.find(Payee)).toHaveProp('transaction', txModel);
-            expect(tx.find(Security)).toHaveProp('transaction', txModel);
-            expect(tx.find(Memo)).toHaveProp('text', txModel.memo);
-            expect(tx.find('.details').find(TxDetail)).toHaveProp('detail', detail);
-            expect(tx.find('.trailing').find(Checkbox)).toHaveProp('checked', false);
-            expect(tx.find('.trailing .number').map((c) => c.text()))
-                .toEqual([`$${txModel.subtotal}`, `$${txModel.balance}`]);
-            expect(tx).not.toHaveClassName('selected');
-            expect(tx.find('.ref-number')).not.toExist();
+        it('displays transaction', () => {
+            const tx = renderTx(txModel, false);
+
+            expect(tx.find(Transaction)).toHaveProp({tx: txModel, selected: false, fieldIndex: 0});
         });
         it('highlights selected transaction', () => {
-            const tx = shallow(renderItem(newTxModel({categoryStore}), -1, true) as React.ReactElement);
+            const tx = renderTx(newTxModel({categoryStore}), true);
 
-            expect(tx).toHaveClassName('selected');
+            expect(tx.find(Transaction)).toHaveProp('selected', true);
         });
-        it('displays checked checkbox for cleared transaction', () => {
-            const tx = shallow(renderItem(newTxModel({categoryStore, cleared: true}), -1, true) as React.ReactElement);
+        it('displays input for selected field', () => {
+            mockListSelectionHook(0, 3);
 
-            expect(tx.find('.trailing').find(Checkbox)).toHaveProp('checked', true);
+            const tx = renderTx(newTxModel({categoryStore, cleared: true}), true);
+
+            expect(tx.find(Transaction)).toHaveProp('fieldIndex', 3);
         });
-        it('displays reference number', () => {
-            const referenceNumber = '555';
+        it('updates column when field changes', () => {
+            const selection = mockListSelectionHook(0, 3);
+            const tx = renderTx(newTxModel({categoryStore, cleared: true}), true);
 
-            const tx = shallow(renderItem(newTxModel({referenceNumber, categoryStore}), -1, true) as React.ReactElement);
+            tx.find(Transaction).prop<(f: number) => void>('setField')(4);
 
-            expect(tx.find('.ref-number')).toHaveText(referenceNumber);
+            expect(selection.setCell).toBeCalledWith(0, 4);
         });
     });
 });

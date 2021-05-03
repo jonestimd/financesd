@@ -4,7 +4,7 @@ import {AccountModel} from './AccountModel';
 
 describe('AccountModel', () => {
     const account = newAccount();
-    const company = newCompanyModel();
+    const company = newCompanyModel({name: 'C1'});
 
     describe('constructor', () => {
         it('populates account properties', () => {
@@ -55,11 +55,22 @@ describe('AccountModel', () => {
             expect(newAccountModel({closed: true}).hide).toEqual(true);
         });
     });
+    describe('get isSecurity', () => {
+        it('returns false for Bank type', () => {
+            expect(newAccountModel().isSecurity).toBe(false);
+        });
+        it('returns true for Brokerage type', () => {
+            expect(newAccountModel({type: 'BROKERAGE'}).isSecurity).toBe(true);
+        });
+        it('returns true for 401K type', () => {
+            expect(newAccountModel({type: '401K'}).isSecurity).toBe(true);
+        });
+    });
     describe('compare', () => {
         it('sorts by company name then account name', () => {
-            const account1 = newAccountModel({}, company);
-            const account2 = newAccountModel({}, company);
-            const company2 = newCompanyModel();
+            const account1 = newAccountModel({name: 'A1'}, company);
+            const account2 = newAccountModel({name: 'A2'}, company);
+            const company2 = newCompanyModel({name: 'C2'});
             const account3 = newAccountModel({name: account1.name}, company2);
 
             expect(AccountModel.compare(account1, account3)).toBeLessThan(0);

@@ -27,6 +27,7 @@ input::-webkit-inner-spin-button {
 /* Firefox: disable spinner on number input */
 input[type='number'] {
     -moz-appearance: textfield;
+    max-width: 10ex;
 }
 
 .hidden {
@@ -159,7 +160,7 @@ table.security-transactions {
     display: inline-block;
     margin: 3px;
     padding: 2px 6px;
-    i.material-icons {
+    .material-icons {
         vertical-align: text-top;
     }
 }
@@ -167,6 +168,9 @@ table.security-transactions {
 .transaction {
     display: flex;
     align-items: center;
+    .material-icons {
+        font-size: 18px;
+    }
     @media (max-width: 835px) {
         display: block;
     }
@@ -210,7 +214,7 @@ table.security-transactions {
         white-space: nowrap;
         align-items: center;
     }
-    .ref-number {
+    span[data-type='ref'] {
         font-weight: bold;
         color: white;
         background: #333333;
@@ -239,6 +243,16 @@ table.security-transactions {
         .group {
             color: darkcyan;
         }
+        &.prefix {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            margin-right: 0;
+        }
+        &.suffix {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            margin-left: 0;
+        }
     }
     .details {
         display: flex;
@@ -262,13 +276,13 @@ table.security-transactions {
                 text-shadow: 0 0 2px #008a00;
             }
         }
-        span.payee {
+        span[data-type='payee'] {
             background: lightyellow;
         }
-        span.security {
+        span[data-type='security'] {
             background: #dbfadb;
         }
-        span.memo.chip {
+        span.chip[data-type='description'] {
             background: white;
         }
         span.memo:not(.chip) {
@@ -280,13 +294,6 @@ table.security-transactions {
             text-overflow: ellipsis;
             overflow: hidden;
             padding-bottom: 0;
-            &.editing {
-                display: flex;
-                align-items: center;
-                .MuiFormControl-root {
-                    margin: 0;
-                }
-            }
         }
     }
     .trailing {

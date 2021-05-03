@@ -4,7 +4,7 @@ import {RootStoreContext} from '../../store/RootStore';
 import Memo from './Memo';
 import {Checkbox, Typography} from '@material-ui/core';
 import ListViewport from '../scroll/ListViewport';
-import {useSelection} from '../scroll/selectionHooks';
+import {useSelection} from '../scroll/listSelectionHooks';
 import Transaction from './Transaction';
 
 interface IProps {
@@ -25,15 +25,17 @@ const TransactionPrototype: React.FC = () => (
 
 const rowSelector = 'div.transaction';
 const prototypeSelector = '.prototype';
+const getColumn = () => 0;
 
 const TransactionList: React.FC<IProps> = observer(({accountId}) => {
     const {accountStore, transactionStore} = React.useContext(RootStoreContext);
     const tableModel = transactionStore.getTransactionsModel(accountId);
     const showSecurity = accountStore.getAccount(accountId)?.isSecurity;
-    const selection = useSelection<HTMLDivElement>({rows: tableModel.transactions.length, rowSelector, prototypeSelector});
+    const selection = useSelection<HTMLDivElement>({rows: tableModel.transactions.length, rowSelector, prototypeSelector, getColumn});
+    const setField = (field: number) => selection.setCell(selection.row, field);
     return (
-        <ListViewport items={tableModel.transactions} selection={selection}
-            renderItem={(tx, _index, selected) => <Transaction tx={tx} selected={selected} showSecurity={showSecurity} />} >
+        <ListViewport items={tableModel.transactions} selection={selection} renderItem={(tx, _index, selected) =>
+            <Transaction tx={tx} selected={selected} setField={setField} fieldIndex={selection.column} showSecurity={showSecurity} />} >
             <TransactionPrototype />
         </ListViewport>
     );

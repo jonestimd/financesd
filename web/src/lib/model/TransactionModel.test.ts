@@ -8,18 +8,15 @@ import TransactionModel from './TransactionModel';
 describe('TransactionModel', () => {
     const {categoryStore} = new RootStore();
     const transaction = newTx({details: [newDetail(), newDetail()]});
+    const model = new TransactionModel(transaction, categoryStore);
 
     describe('constructor', () => {
         it('populates transaction properties', () => {
-            const model = new TransactionModel(transaction, categoryStore);
-
             expect(model).toEqual(expect.objectContaining(transaction));
         });
     });
     describe('subtotal', () => {
         it('returns total of detail amounts', () => {
-            const model = new TransactionModel(transaction, categoryStore);
-
             expect(model.subtotal).toEqual(model.details[0].amount + model.details[1].amount);
         });
         it('ignores asset quantities', () => {
@@ -29,6 +26,62 @@ describe('TransactionModel', () => {
             const model = newTxModel({details, categoryStore});
 
             expect(model.subtotal).toEqual(details[0].amount);
+        });
+    });
+    describe('getField', () => {
+        const securityTests = [
+            {transactionField: 'date', detailField: 'amount', itemIndex: -1},
+            {transactionField: 'ref', detailField: 'category', itemIndex: -1},
+            {transactionField: 'payee', detailField: 'group', itemIndex: -1},
+            {transactionField: 'security', detailField: 'shares', itemIndex: -1},
+            {transactionField: 'description', detailField: 'memo', itemIndex: -1},
+            {transactionField: false, detailField: 'amount', itemIndex: 0},
+            {transactionField: false, detailField: 'category', itemIndex: 0},
+            {transactionField: false, detailField: 'group', itemIndex: 0},
+            {transactionField: false, detailField: 'shares', itemIndex: 0},
+            {transactionField: false, detailField: 'memo', itemIndex: 0},
+        ];
+        securityTests.forEach(({transactionField, detailField, itemIndex}, index) =>
+            it(`returns ${transactionField} and ${detailField} for showSecurity and ${index}`, () => {
+                expect(model.getField(index, true)).toEqual({transactionField, detailField, itemIndex});
+            }));
+        const notSecurityTests = [
+            {transactionField: 'date', detailField: 'amount', itemIndex: -1},
+            {transactionField: 'ref', detailField: 'category', itemIndex: -1},
+            {transactionField: 'payee', detailField: 'group', itemIndex: -1},
+            {transactionField: 'description', detailField: 'memo', itemIndex: -1},
+            {transactionField: false, detailField: 'amount', itemIndex: 0},
+            {transactionField: false, detailField: 'category', itemIndex: 0},
+            {transactionField: false, detailField: 'group', itemIndex: 0},
+            {transactionField: false, detailField: 'memo', itemIndex: 0},
+        ];
+        notSecurityTests.forEach(({transactionField, detailField, itemIndex}, index) =>
+            it(`returns ${transactionField} and ${detailField} for !showSecurity and ${index}`, () => {
+                expect(model.getField(index, false)).toEqual({transactionField, detailField, itemIndex});
+            }));
+    });
+    describe('fieldCount', () => {
+        it('returns 4 * (details + 1) for !showSecurity', () => {
+            expect(model.fieldCount(false)).toEqual(4 * (model.details.length + 1));
+        });
+        it('returns 5 * (details + 1) for showSecurity', () => {
+            expect(model.fieldCount(true)).toEqual(5 * (model.details.length + 1));
+        });
+    });
+    describe('nextField', () => {
+        const lastField = model.fieldCount(false)-1;
+
+        it('returns 0 for 0', () => {
+            expect(model.nextField(0, false)).toEqual(0);
+        });
+        it('returns last field for last field', () => {
+            expect(model.nextField(lastField, false)).toEqual(lastField);
+        });
+        it('returns 0 for > last field', () => {
+            expect(model.nextField(lastField+1, false)).toEqual(0);
+        });
+        it('returns last field for < 0', () => {
+            expect(model.nextField(-1, false)).toEqual(lastField);
         });
     });
     describe('compare', () => {

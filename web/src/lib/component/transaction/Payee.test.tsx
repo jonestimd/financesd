@@ -5,6 +5,7 @@ import {PayeeModel} from 'src/lib/model/PayeeModel';
 import Payee from './Payee';
 import {newTx} from 'src/test/transactionFactory';
 import {RootStore} from 'src/lib/store/RootStore';
+import {Icon} from '@material-ui/core';
 
 const txData = newTx();
 
@@ -29,9 +30,9 @@ describe('Payee', () => {
 
         const component = shallow(<Payee transaction={tx} />);
 
-        expect(component).toHaveClassName('payee');
+        expect(component).toHaveProp('data-type', 'payee');
         expect(component).toHaveClassName('chip');
-        expect(component.find('i.material-icons.md-18')).toHaveText('person');
+        expect(component.find(Icon)).toHaveText('person');
         expect(component.childAt(1)).toHaveText(name);
     });
 });

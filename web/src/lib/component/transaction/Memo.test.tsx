@@ -1,6 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import Memo from './Memo';
+import {Icon} from '@material-ui/core';
 
 describe('Memo', () => {
     it('returns null if no memo', () => {
@@ -11,7 +12,8 @@ describe('Memo', () => {
 
         const component = shallow(<Memo text={memo} />);
 
-        expect(component.find('i.material-icons.md-18')).toHaveText('notes');
-        expect(component.find('.memo.chip').childAt(1)).toHaveText(memo);
+        expect(component).toHaveProp('data-type', 'description');
+        expect(component.find(Icon)).toHaveText('notes');
+        expect(component.childAt(1)).toHaveText(memo);
     });
 });

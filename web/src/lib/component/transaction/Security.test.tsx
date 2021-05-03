@@ -5,6 +5,7 @@ import {SecurityModel} from 'src/lib/model/SecurityModel';
 import Security from './Security';
 import {newTx} from 'src/test/transactionFactory';
 import {RootStore} from 'src/lib/store/RootStore';
+import {Icon} from '@material-ui/core';
 
 describe('Security', () => {
     const rootStore = new RootStore();
@@ -20,17 +21,17 @@ describe('Security', () => {
 
         expect(component).toBeEmptyRender();
     });
-    it('shows payee', () => {
+    it('shows security', () => {
         const securityId = 123;
         const name = 'the security';
-        jest.spyOn(securityStore, 'getSecurity').mockReturnValue({name} as SecurityModel);
+        jest.spyOn(securityStore, 'getSecurity').mockReturnValue({displayName: name} as SecurityModel);
         const tx = new TransactionModel(newTx({securityId}), categoryStore);
 
         const component = shallow(<Security transaction={tx} />);
 
-        expect(component).toHaveClassName('security');
+        expect(component).toHaveProp('data-type', 'security');
         expect(component).toHaveClassName('chip');
-        expect(component.find('i.material-icons.md-18')).toHaveText('request_page');
+        expect(component.find(Icon)).toHaveText('request_page');
         expect(component.childAt(1)).toHaveText(name);
         expect(securityStore.getSecurity).toBeCalledWith(securityId);
     });

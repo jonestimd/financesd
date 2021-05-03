@@ -1,6 +1,6 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import {useSelection, ISelectionOptions} from './selectionHooks';
+import {useSelection, ISelectionOptions} from './tableSelectionHooks';
 import {createDiv} from 'src/test/htmlUtils';
 import {mockScrollHook} from 'src/test/mockHooks';
 
@@ -16,7 +16,7 @@ function setup(options: ISelectionOptions) {
 }
 const document = new Document();
 
-describe('selectionHooks', () => {
+describe('tableSelectionHooks', () => {
     const rows = 1245;
     const columns = 4;
     const headerSelector = '.header';
@@ -36,6 +36,17 @@ describe('selectionHooks', () => {
             setup({...options});
 
             expect(hook).toEqual(expect.objectContaining({row: 9, column: 0}));
+        });
+        describe('setCell', () => {
+            it('sets row and column', () => {
+                mockScrollHook({startRow: 9});
+                setup({...options});
+
+                hook.setCell!(3, 4);
+
+                expect(hook.row).toEqual(3);
+                expect(hook.column).toEqual(4);
+            });
         });
         describe('onKeyDown', () => {
             const container = createDiv();
@@ -171,11 +182,14 @@ describe('selectionHooks', () => {
         describe('onMouseDown', () => {
             const container = document.createElement('div');
             const rows = new Array(50).fill(null).map(() => container.appendChild(document.createElement('div')));
+            const target = document.createElement('span');
+            rows[0].appendChild(target);
 
-            const mockMouseEvent = (target: HTMLElement | null, clientY = -1) => ({
+            const mockMouseEvent = (target: HTMLElement | null, clientY = -1, button = 0) => ({
                 target,
                 currentTarget: container,
                 clientY,
+                button,
                 stopPropagation: jest.fn(),
                 preventDefault: jest.fn(),
             } as unknown as React.MouseEvent<HTMLElement>);
@@ -183,6 +197,8 @@ describe('selectionHooks', () => {
             describe('table', () => {
                 const cells = new Array(columns).fill(null).map(() => document.createElement('td'));
                 const tr = document.createElement('tr');
+                tr.setAttribute('class', 'row');
+                cells.forEach((cell) => tr.appendChild(cell));
                 const rowIndex = Math.floor(Math.random() * 100);
 
                 beforeAll(() => {
@@ -222,7 +238,7 @@ describe('selectionHooks', () => {
                 it('selects row at click', () => {
                     setup(options);
 
-                    hook.onMouseDown!(mockMouseEvent(null, rowHeight * 4.1));
+                    hook.onMouseDown!(mockMouseEvent(target, rowHeight * 4.1));
 
                     expect(hook.row).toEqual(4);
                 });

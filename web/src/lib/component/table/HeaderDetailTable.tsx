@@ -7,7 +7,7 @@ import Row from './Row';
 import {IColumn} from './Column';
 import IMixedRowTableModel from '../../model/IMixedRowTableModel';
 import ScrollViewport, {IScrollableProps} from '../scroll/ScrollViewport';
-import {useSelection} from '../scroll/selectionHooks';
+import {useSelection} from '../scroll/tableSelectionHooks';
 import {Table, TableRow, TableCell, TableHead, TableBody} from '@material-ui/core';
 
 export interface IHeaderDetailTableProps<T, S> {

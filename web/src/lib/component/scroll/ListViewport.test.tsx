@@ -2,12 +2,12 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import ListViewport, {IProps} from './ListViewport';
 import ScrollViewport from './ScrollViewport';
-import {mockSelectionHook} from 'src/test/mockHooks';
+import {mockTableSelectionHook} from 'src/test/mockHooks';
 
 describe('ListViewport', () => {
     const rowHeight = 10;
     const getProps = (startRow = 0, lastRow = 0, row = startRow): IProps<{id: number}> => {
-        const selection = mockSelectionHook<HTMLDivElement>(row, 0, {startRow, rowHeight});
+        const selection = mockTableSelectionHook<HTMLDivElement>(row, 0, {startRow, rowHeight});
         selection.scroll.endRow.mockReturnValue(lastRow);
         return {
             className: 'container',

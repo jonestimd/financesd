@@ -1,6 +1,6 @@
 import React from 'react';
 import * as scrollHooks from '../lib/component/scroll/scrollHooks';
-import * as selectionHooks from '../lib/component/scroll/selectionHooks';
+import * as tableSelectionHooks from '../lib/component/scroll/tableSelectionHooks';
 
 type ScrollHook = Pick<ReturnType<typeof scrollHooks['useScroll']>, 'startRow' | 'rowHeight' | 'headerHeight'>;
 
@@ -18,7 +18,7 @@ export function mockScrollHook<T extends HTMLElement>(overrides: Partial<ScrollH
     return scroll;
 }
 
-export function mockSelectionHook<T extends HTMLElement>(row = 0, column = 0, overrides: Partial<ScrollHook> = {}) {
+export function mockTableSelectionHook<T extends HTMLElement>(row = 0, column = 0, overrides: Partial<ScrollHook> = {}) {
     const selection = {
         row,
         column,
@@ -27,7 +27,7 @@ export function mockSelectionHook<T extends HTMLElement>(row = 0, column = 0, ov
         onMouseDown: jest.fn(),
         scroll: mockScrollHook<T>(overrides),
     };
-    jest.spyOn(selectionHooks, 'useSelection').mockReturnValue(selection);
+    jest.spyOn(tableSelectionHooks, 'useSelection').mockReturnValue(selection);
     return selection;
 }
 

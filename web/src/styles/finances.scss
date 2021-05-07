@@ -53,14 +53,28 @@ body {
 
 .MuiAppBar-root {
     .MuiToolBar-root {
+        .filler,
         h6.MuiTypography-root {
             flex-grow: 1;
         }
-        .MuiInputBase-root,
+        .MuiOutlined-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: lighten($color: $mdc-theme-primary, $amount: 30%);
+        }
+        .MuiOutlinedInput-notchedOutline {
+            border-color: rgba(255, 255, 255, 0.23);
+        }
+        .MuiInputBase-root {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: inherit;
+        }
         .MuiButtonBase-root {
             color: inherit;
         }
+        .MuiButtonBase-root:disabled {
+            color: #c0c0c0;
+        }
         .MuiAutocomplete-root {
+            max-width: 300px;
             flex-grow: 1;
         }
         .MuiButtonBase-root {

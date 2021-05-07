@@ -70,9 +70,9 @@ table.table {
         }
         tr.selected {
             td.selected {
-                background: $selection-background;
+                background: $selected-background;
                 &.changed {
-                    background: mix($selection-background, $table-changed-background);
+                    background: mix($selected-background, $table-changed-background);
                 }
             }
         }

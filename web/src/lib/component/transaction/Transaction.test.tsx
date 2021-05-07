@@ -102,13 +102,20 @@ describe('Transaction', () => {
 
             expect(component.find(DateInput)).toHaveProp({
                 ...inputProps,
-                value: props.tx.date,
+                initialValue: props.tx.date,
             });
+        });
+        it('updates transaction on change', () => {
+            const component = shallow(<Transaction {...props} selected={true} />);
+
+            component.find(DateInput).simulate('dateChange', new Date('2020-12-25'), '2020-12-25');
+
+            expect(props.tx.date).toEqual('2020-12-25');
         });
         it('shows blank for new transaction', () => {
             const component = shallow(<Transaction {...props} selected={true} tx={newTxModel({date: undefined})} />);
 
-            expect(component.find(DateInput)).toHaveProp('value', '');
+            expect(component.find(DateInput)).toHaveProp('initialValue', '');
         });
     });
     describe('ref input', () => {
@@ -120,6 +127,13 @@ describe('Transaction', () => {
                 icon: 'tag',
                 value: props.tx.referenceNumber,
             });
+        });
+        it('updates transaction on change', () => {
+            const component = shallow(<Transaction {...props} selected={true} fieldIndex={1} />);
+
+            component.find(IconInput).simulate('change', {currentTarget: {value: 'xyz'}});
+
+            expect(props.tx.referenceNumber).toEqual('xyz');
         });
         it('shows blank for new transaction', () => {
             const component = shallow(<Transaction {...props} selected={true} fieldIndex={1} tx={newTxModel()} />);
@@ -157,10 +171,26 @@ describe('Transaction', () => {
                 value: props.tx.memo,
             });
         });
+        it('updates transaction on change', () => {
+            const component = shallow(<Transaction {...props} selected={true} fieldIndex={4} />);
+
+            component.find(IconInput).simulate('change', {currentTarget: {value: 'xyz'}});
+
+            expect(props.tx.memo).toEqual('xyz');
+        });
         it('shows blank for no memo', () => {
             const component = shallow(<Transaction {...props} selected={true} fieldIndex={4} tx={newTxModel()} />);
 
             expect(component.find(IconInput)).toHaveProp('value', '');
+        });
+    });
+    describe('cleared checkbox', () => {
+        it('updates transaction on change', () => {
+            const component = shallow(<Transaction {...props} selected={true} fieldIndex={4} />);
+
+            component.find(Checkbox).simulate('change', {}, true);
+
+            expect(props.tx.cleared).toBe(true);
         });
     });
     describe('detail inputs', () => {

@@ -16,6 +16,7 @@ const PayeeInput = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({
     return (
         <Autocomplete ref={ref} {...autocompleteProps} options={payeeStore.payees} getOptionLabel={(p) => p.name}
             value={payeeStore.getPayee(transaction.payeeId) ?? null}
+            onChange={(_event, value) => transaction.payeeId = value?.id ?? undefined}
             filterOptions={(options, state) => options.filter((p) => p.name.toLocaleLowerCase().includes(state.inputValue.toLowerCase()))}
             renderInput={(params) => <IconInput {...params} {...inputProps} icon='person' />} />
     );

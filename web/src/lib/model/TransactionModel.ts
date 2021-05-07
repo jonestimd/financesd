@@ -1,5 +1,6 @@
 import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
+import ChangeModel from './ChangeModel';
 
 export const securityTxFields = ['date', 'ref', 'payee', 'security', 'description'] as const;
 export const txFields = [...securityTxFields].filter((name) => name !== 'security');
@@ -51,27 +52,79 @@ export default class TransactionModel implements ITransaction {
     }
 
     id: number;
-    date: string;
-    referenceNumber?: string;
-    payeeId?: number;
-    securityId?: number;
-    memo?: string;
-    cleared: boolean;
     @observable details: ITransactionDetail[];
     @observable balance = 0;
+    private _changes: ChangeModel<ITransaction>;
     categoryStore: CategoryStore;
 
     constructor(transaction: ITransaction, categoryStore: CategoryStore) {
         makeObservable(this);
         this.id = transaction.id;
-        this.date = transaction.date;
-        this.referenceNumber = transaction.referenceNumber;
-        this.payeeId = transaction.payeeId;
-        this.securityId = transaction.securityId;
-        this.memo = transaction.memo;
-        this.cleared = transaction.cleared;
         this.details = transaction.details;
+        this._changes = new ChangeModel(transaction);
         this.categoryStore = categoryStore;
+    }
+
+    @computed
+    get date() {
+        return this._changes.get('date');
+    }
+
+    set date(date: string) {
+        this._changes.set('date', date);
+    }
+
+    @computed
+    get referenceNumber() {
+        return this._changes.get('referenceNumber');
+    }
+
+    set referenceNumber(ref: string | undefined) {
+        this._changes.set('referenceNumber', ref ? ref : undefined);
+    }
+
+    @computed
+    get payeeId() {
+        return this._changes.get('payeeId');
+    }
+
+    set payeeId(payeeId: number | undefined) {
+        this._changes.set('payeeId', payeeId);
+    }
+
+    @computed
+    get securityId() {
+        return this._changes.get('securityId');
+    }
+
+    set securityId(securityId: number | undefined) {
+        this._changes.set('securityId', securityId);
+    }
+
+    @computed
+    get memo() {
+        return this._changes.get('memo');
+    }
+
+    set memo(memo: string | undefined) {
+        this._changes.set('memo', memo ? memo : undefined);
+    }
+
+    @computed
+    get cleared() {
+        return this._changes.get('cleared');
+    }
+
+    set cleared(cleared: boolean) {
+        this._changes.set('cleared', cleared);
+    }
+
+    get isChanged() {
+        return this._changes.isChanged;
+    }
+
+    reset() {
+        this._changes.revert();
     }
 
     @computed

@@ -57,4 +57,20 @@ describe('SecurityInput', () => {
             startAdornment: <Icon>request_page</Icon>,
         }));
     });
+    it('updates transaction when selection changes', () => {
+        const transaction = newTxModel({securityId: securities[1].id});
+        const component = shallow(<SecurityInput transaction={transaction} />);
+
+        component.find(Autocomplete).simulate('change', {}, securities[0]);
+
+        expect(transaction.securityId).toEqual(securities[0].id);
+    });
+    it('updates transaction when selection is cleared', () => {
+        const transaction = newTxModel({securityId: securities[1].id});
+        const component = shallow(<SecurityInput transaction={transaction} />);
+
+        component.find(Autocomplete).simulate('change', {}, null);
+
+        expect(transaction.securityId).toBeUndefined();
+    });
 });

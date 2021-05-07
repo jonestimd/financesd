@@ -16,6 +16,7 @@ const SecurityInput = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>
     return (
         <Autocomplete ref={ref} {...autocompleteProps} options={securityStore.securities} getOptionLabel={(s) => s.displayName}
             value={securityStore.getSecurity(transaction.securityId) ?? null}
+            onChange={(_event, value) => transaction.securityId = value?.id ?? undefined}
             filterOptions={(options, state) => options.filter((s) => s.displayName.toLocaleLowerCase().includes(state.inputValue.toLowerCase()))}
             renderInput={(params) => <IconInput {...params} {...inputProps} icon='request_page' />} />
     );

@@ -10,9 +10,52 @@ describe('TransactionModel', () => {
     const transaction = newTx({details: [newDetail(), newDetail()]});
     const model = new TransactionModel(transaction, categoryStore);
 
+    beforeEach(() => model.reset());
     describe('constructor', () => {
         it('populates transaction properties', () => {
             expect(model).toEqual(expect.objectContaining(transaction));
+        });
+    });
+    describe('set date', () => {
+        it('updates isChanged', () => {
+            model.date = '0001-01-01';
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('set referenceNumber', () => {
+        it('updates isChanged', () => {
+            model.referenceNumber = '#123';
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('set payeeId', () => {
+        it('updates isChanged', () => {
+            model.payeeId = 123;
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('set securityId', () => {
+        it('updates isChanged', () => {
+            model.securityId = 123;
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('set memo', () => {
+        it('updates isChanged', () => {
+            model.memo = 'notes';
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('set cleared', () => {
+        it('updates isChanged', () => {
+            model.cleared = true;
+
+            expect(model.isChanged).toBe(true);
         });
     });
     describe('subtotal', () => {

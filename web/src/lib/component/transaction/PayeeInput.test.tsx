@@ -57,4 +57,20 @@ describe('PayeeInput', () => {
             startAdornment: <Icon>person</Icon>,
         }));
     });
+    it('updates transaction when selection changes', () => {
+        const transaction = newTxModel({payeeId: payees[1].id});
+        const component = shallow(<PayeeInput transaction={transaction} />);
+
+        component.find(Autocomplete).simulate('change', {}, payees[0]);
+
+        expect(transaction.payeeId).toEqual(payees[0].id);
+    });
+    it('updates transaction when selection is cleared', () => {
+        const transaction = newTxModel({payeeId: payees[1].id});
+        const component = shallow(<PayeeInput transaction={transaction} />);
+
+        component.find(Autocomplete).simulate('change', {}, null);
+
+        expect(transaction.payeeId).toBeUndefined();
+    });
 });

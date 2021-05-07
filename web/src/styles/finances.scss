@@ -13,7 +13,10 @@ $app-bar-height: 48px !default;
 $side-bar-width: 300px !default;
 $modal-zindex: 1300 !default;
 
-$selection-background: #dfd0e0 !default;
+$error-background: red !default;
+$selected-background: #dfd0e0 !default;
+$changed-background: rgb(150, 231, 255);
+$changed-selected-background: mix($changed-background, $selected-background, $weight: 50%);
 
 $transaction-hover-background: #dddddd !default;
 
@@ -182,10 +185,22 @@ table.security-transactions {
     &:nth-child(odd) {
         background-color: #f0ffff;
     }
-    &.selected {
-        background: $selection-background;
+    &.changed {
+        background-color: $changed-background;
         &:hover {
-            background-color: darken($color: $selection-background, $amount: 10%);
+            background-color: darken($color: $changed-background, $amount: 10%);
+        }
+        &.selected {
+            background-color: $changed-selected-background;
+            &:hover {
+                background-color: darken($color: $changed-selected-background, $amount: 10%);
+            }
+        }
+    }
+    &.selected {
+        background: $selected-background;
+        &:hover {
+            background-color: darken($color: $selected-background, $amount: 10%);
         }
         .details {
             flex-wrap: wrap;
@@ -308,6 +323,9 @@ table.security-transactions {
             text-align: right;
             flex-basis: 50%;
         }
+    }
+    .MuiTextField-root.error {
+        background-color: $error-background;
     }
 }
 

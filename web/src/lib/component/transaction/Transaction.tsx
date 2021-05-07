@@ -25,7 +25,7 @@ const unselectedField = {transactionField: false as const, detailField: false as
 
 const Transaction: React.FC<IProps> = observer(({tx, selected, showSecurity, fieldIndex, setField}) => {
     const {transactionField, detailField, itemIndex} = selected ? tx.getField(fieldIndex, showSecurity) : unselectedField;
-    const inputProps: Partial<TextFieldProps> = {
+    const inputProps: Pick<TextFieldProps, 'variant' | 'color' | 'size' | 'onKeyDown'> = {
         variant: 'outlined',
         color: 'primary',
         size: 'small',
@@ -39,26 +39,26 @@ const Transaction: React.FC<IProps> = observer(({tx, selected, showSecurity, fie
         },
     };
     return (
-        <Typography className={classNames('transaction', {selected})}>
+        <Typography className={classNames('transaction', {selected, changed: tx.isChanged})}>
             <div className='leading'>
                 {transactionField === 'date'
-                    ? <DateInput value={tx.date ?? ''} {...inputProps} />
+                    ? <DateInput initialValue={tx.date ?? ''} {...inputProps} onDateChange={(_date, value) => tx.date = value} />
                     : <span className='date'>{tx.date}</span>}
                 {transactionField === 'ref'
-                    ? <IconInput value={tx.referenceNumber ?? ''} {...inputProps} icon='tag' />
+                    ? <IconInput value={tx.referenceNumber ?? ''} {...inputProps} icon='tag' onChange={(event) => tx.referenceNumber = event.currentTarget.value} />
                     : tx.referenceNumber ? <span data-type='ref'>{tx.referenceNumber}</span> : null}
             </div>
             <div className='details'>
                 {transactionField === 'payee' ? <PayeeInput transaction={tx} {...inputProps} /> : <Payee transaction={tx} />}
                 {transactionField === 'security' ? <SecurityInput transaction={tx} {...inputProps} /> : <Security transaction={tx} />}
                 {transactionField === 'description'
-                    ? <IconInput value={tx.memo ?? ''} {...inputProps} icon='notes' />
+                    ? <IconInput value={tx.memo ?? ''} {...inputProps} icon='notes' onChange={(event) => tx.memo = event.currentTarget.value} />
                     : <Memo text={tx.memo} />}
                 {tx.details.map((detail, index) =>
                     <TxDetail key={detail.id} detail={detail} editField={index === itemIndex && detailField} showSecurity={showSecurity} {...inputProps} />)}
             </div>
             <div className='trailing'>
-                <Checkbox disabled checked={tx.cleared} />
+                <Checkbox checked={tx.cleared} onChange={(_event, checked) => tx.cleared = checked} />
                 <span className={formats.numberClass(tx.subtotal)}>{formats.currency.format(tx.subtotal)}</span>
                 <span className={formats.numberClass(tx.balance)}>{formats.currency.format(tx.balance)}</span>
             </div>

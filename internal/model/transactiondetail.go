@@ -19,7 +19,7 @@ type TransactionDetail struct {
 	RelatedDetailID       *int64
 	RelatedDetail         *TransactionDetail
 	Version               int
-	accountTransactions   *AccountTransactions
+	txSource              *transactionSource
 	Audited
 }
 
@@ -56,22 +56,16 @@ func (d *TransactionDetail) GetRelatedDetail(tx *sql.Tx) (*TransactionDetail, er
 	if d.RelatedDetailID == nil {
 		return nil, nil
 	}
-	if d.accountTransactions.err != nil {
-		return nil, d.accountTransactions.err
+	if d.txSource.loadRelatedDetails(tx) != nil {
+		return nil, d.txSource.err
 	}
-	if d.accountTransactions.relatedDetailsByID == nil && d.accountTransactions.getRelatedDetails(tx) != nil {
-		return nil, d.accountTransactions.err
-	}
-	return d.accountTransactions.relatedDetailsByID[*d.RelatedDetailID], nil
+	return d.txSource.relatedDetailsByID[*d.RelatedDetailID], nil
 }
 
 // GetRelatedTransaction returns the transaction for a related detail.
 func (d *TransactionDetail) GetRelatedTransaction(tx *sql.Tx) (*Transaction, error) {
-	if d.accountTransactions.err != nil {
-		return nil, d.accountTransactions.err
+	if d.txSource.loadRelatedTransactions(tx) != nil {
+		return nil, d.txSource.err
 	}
-	if d.accountTransactions.relatedTxByID == nil && d.accountTransactions.getRelatedTransactions(tx) != nil {
-		return nil, d.accountTransactions.err
-	}
-	return d.accountTransactions.relatedTxByID[d.TransactionID], nil
+	return d.txSource.relatedTxByID[d.TransactionID], nil
 }

@@ -31,6 +31,7 @@ func asInts(arg interface{}) []int {
 
 var nonNullInt = graphql.NewNonNull(graphql.Int)
 var nonNullString = graphql.NewNonNull(graphql.String)
+var nonNullDate = graphql.NewNonNull(dateType)
 
 var intList = graphql.NewList(nonNullInt)
 var stringList = graphql.NewList(nonNullString)

@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"testing"
 
@@ -16,6 +17,37 @@ func Test_intsToJson(t *testing.T) {
 	result := intsToJson(values)
 
 	assert.Equal(t, result, "[1,3,5,2,4,6]")
+}
+
+func Test_stringOrNull(t *testing.T) {
+	tests := []struct {
+		name  string
+		value interface{}
+	}{
+		{"returns string value", "the value"},
+		{"returns null value", nil},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.value, stringOrNull(test.value))
+		})
+	}
+}
+
+func Test_int64OrNull(t *testing.T) {
+	tests := []struct {
+		name           string
+		value          interface{}
+		expectedResult interface{}
+	}{
+		{"returns int64 value", 42, int64(42)},
+		{"returns null value", nil, nil},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.expectedResult, int64OrNull(test.value))
+		})
+	}
 }
 
 func Test_runQuery_populatesModel(t *testing.T) {
@@ -43,6 +75,53 @@ func Test_runQuery_returnsQueryError(t *testing.T) {
 
 		assert.Same(t, expectedErr, err)
 		assert.Nil(t, result)
+	})
+}
+
+func Test_runUpdate_closesStatement(t *testing.T) {
+	query := "update company set name = ? where id = ?"
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		expectedArgs := []driver.Value{"new name", 42}
+		rs := sqlmock.NewResult(-1, 1)
+		mockDB.ExpectPrepare(query).WillBeClosed().ExpectExec().WithArgs(expectedArgs...).WillReturnResult(rs)
+
+		result, err := runUpdate(tx, query, "new name", 42)
+
+		assert.Nil(t, err)
+		rowCount, _ := result.RowsAffected()
+		assert.Equal(t, int64(1), rowCount)
+		lastID, _ := result.LastInsertId()
+		assert.Equal(t, int64(-1), lastID)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
+	})
+}
+
+func Test_runUpdate_returnsPrepareError(t *testing.T) {
+	query := "update company set name = ? where id = ?"
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		expectedErr := errors.New("query error")
+		mockDB.ExpectPrepare(query).WillReturnError(expectedErr)
+
+		result, err := runUpdate(tx, query, "new name", 42)
+
+		assert.Same(t, expectedErr, err)
+		assert.Nil(t, result)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
+	})
+}
+
+func Test_runUpdate_returnsQueryError(t *testing.T) {
+	query := "update company set name = ? where id = ?"
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		expectedArgs := []driver.Value{"new name", 42}
+		expectedErr := errors.New("query error")
+		mockDB.ExpectPrepare(query).WillBeClosed().ExpectExec().WithArgs(expectedArgs...).WillReturnError(expectedErr)
+
+		result, err := runUpdate(tx, query, "new name", 42)
+
+		assert.Same(t, expectedErr, err)
+		assert.Nil(t, result)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
 	})
 }
 

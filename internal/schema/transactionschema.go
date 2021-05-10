@@ -25,20 +25,24 @@ func getDetailSchema(name string, relatedField string, fieldType graphql.Output,
 	})
 }
 
+func getTxFields() graphql.Fields {
+	return graphql.Fields{
+		"id":              &graphql.Field{Type: nonNullInt},
+		"date":            &graphql.Field{Type: nonNullDate},
+		"memo":            &graphql.Field{Type: graphql.String},
+		"referenceNumber": &graphql.Field{Type: graphql.String},
+		"cleared":         &graphql.Field{Type: yesNoType},
+		"accountId":       &graphql.Field{Type: nonNullInt},
+		"payeeId":         &graphql.Field{Type: graphql.Int},
+		"securityId":      &graphql.Field{Type: graphql.Int},
+	}
+}
+
 func getTxSchemaConfig(name string) graphql.ObjectConfig {
 	return graphql.ObjectConfig{
 		Description: "a financial transaction",
 		Name:        name,
-		Fields: addAudit(graphql.Fields{
-			"id":              &graphql.Field{Type: graphql.Int},
-			"date":            &graphql.Field{Type: dateType},
-			"memo":            &graphql.Field{Type: graphql.String},
-			"referenceNumber": &graphql.Field{Type: graphql.String},
-			"cleared":         &graphql.Field{Type: yesNoType},
-			"accountId":       &graphql.Field{Type: graphql.Int},
-			"payeeId":         &graphql.Field{Type: graphql.Int},
-			"securityId":      &graphql.Field{Type: graphql.Int},
-		}),
+		Fields:      addAudit(getTxFields()),
 	}
 }
 
@@ -51,8 +55,10 @@ func getTxSchema() *graphql.Object {
 	return txSchema
 }
 
+var txList = newList(getTxSchema())
+
 var transactionQueryFields = &graphql.Field{
-	Type: graphql.NewList(getTxSchema()),
+	Type: txList,
 	Args: graphql.FieldConfigArgument{
 		"accountId": {Type: graphql.NewNonNull(graphql.Int), Description: "account ID"},
 	},
@@ -94,4 +100,57 @@ func resolveRelatedTransaction(p graphql.ResolveParams) (interface{}, error) {
 		return detail.GetRelatedTransaction(tx)
 	}
 	return nil, errors.New("invalid source")
+}
+
+func getTxInput(action string) *graphql.InputObject {
+	fields := graphql.InputObjectConfigFieldMap{}
+	for name, field := range getTxFields() {
+		if (action != "add" || name != "id") && name != "accountId" {
+			fields[name] = &graphql.InputObjectFieldConfig{Type: field.Type}
+		}
+	}
+	if action != "add" {
+		fields["date"].Type = dateType
+		fields["accountId"] = &graphql.InputObjectFieldConfig{Type: graphql.Int}
+		fields["version"] = &graphql.InputObjectFieldConfig{Type: nonNullInt, Description: "The current version of the transaction."}
+	}
+	return graphql.NewInputObject(graphql.InputObjectConfig{
+		Name:   action + "TransactionInput",
+		Fields: fields,
+	})
+}
+
+var updateTxFields = &graphql.Field{
+	Type:        txList,
+	Description: "Add, update and/or delete transactions.",
+	Args: graphql.FieldConfigArgument{
+		"accountId": {Type: nonNullInt, Description: "ID of account for transactions."},
+		"add":       {Type: newList(getTxInput("add")), Description: "Transactions to add."},
+		"update":    {Type: newList(getTxInput("update")), Description: "Changes to be made to existing transactions."},
+		"delete":    {Type: intList, Description: "IDs of transactions to delete."}, // TODO include versions?
+	},
+	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		var err error
+		transactions := []*model.Transaction{}
+		tx := p.Context.Value(DbContextKey).(*sql.Tx)
+		user := p.Context.Value(UserKey).(string)
+		// if ids, ok := p.Args["delete"]; ok {
+		// 	log.Printf("deleting transactions: %v", ids)
+		// }
+		if updates, ok := p.Args["update"]; ok {
+			var ids []int64
+			if ids, err = updateTransactions(tx, updates, user); err != nil {
+				return nil, err
+			}
+			transactions, err = getTransactionsByIDs(tx, ids)
+		}
+		// if names, ok := p.Args["add"]; ok {
+		// 	if added, err := addCompanies(tx, asStrings(names), user); err != nil {
+		// 		return nil, err
+		// 	} else {
+		// 		companies = append(companies, added...)
+		// 	}
+		// }
+		return transactions, err
+	},
 }

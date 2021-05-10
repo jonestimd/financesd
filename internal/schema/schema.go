@@ -8,11 +8,13 @@ const accountQuery = "accounts"
 const companyQuery = "companies"
 const updateCompaniesMutation = "updateCompanies"
 const payeeQuery = "payees"
-const assetsQuery = "assets"
+
+// const assetsQuery = "assets"
 const securityQuery = "securities"
 const categoryQuery = "categories"
 const groupQuery = "groups"
 const transactionQuery = "transactions"
+const updateTxMutation = "updateTransactions"
 
 var queries = graphql.Fields{
 	accountQuery:     accountQueryFields,
@@ -26,6 +28,7 @@ var queries = graphql.Fields{
 
 var mutations = graphql.Fields{
 	updateCompaniesMutation: updateCompaniesFields,
+	updateTxMutation:        updateTxFields,
 }
 
 // New creates the GraphQL schema.

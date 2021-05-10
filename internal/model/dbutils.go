@@ -15,6 +15,20 @@ func int64sToJson(values []int64) string {
 	return strings.Replace(fmt.Sprint(values), " ", ",", -1)
 }
 
+func stringOrNull(value interface{}) interface{} {
+	if s, ok := value.(string); ok {
+		return s
+	}
+	return nil
+}
+
+func int64OrNull(value interface{}) interface{} {
+	if i, ok := value.(int); ok {
+		return int64(i)
+	}
+	return nil
+}
+
 type model interface {
 	ptrTo(column string) interface{}
 }

@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"database/sql/driver"
 	"errors"
 	"fmt"
 	"testing"
@@ -222,7 +221,7 @@ func Test_DeleteCompanies(t *testing.T) {
 	t.Run("returns update error", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			expectedErr := errors.New("database error")
-			runUpdateStub := mocka.Function(t, &runUpdate, nil, expectedErr)
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(0), expectedErr)
 			defer runUpdateStub.Restore()
 
 			_, err := DeleteCompanies(tx, ids, "somebody")
@@ -233,7 +232,7 @@ func Test_DeleteCompanies(t *testing.T) {
 	t.Run("returns delete count", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 			count := int64(2)
-			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, count), nil)
+			runUpdateStub := mocka.Function(t, &runUpdate, count, nil)
 			defer runUpdateStub.Restore()
 
 			result, err := DeleteCompanies(tx, ids, "somebody")
@@ -254,20 +253,19 @@ func Test_UpdateCompanies(t *testing.T) {
 	}
 	tests := []struct {
 		name        string
-		result      driver.Result
+		count       int64
 		updateError error
 		getError    error
 		message     string
 	}{
-		{"returns update error", nil, errors.New("database error"), nil, "database error"},
-		{"returns count error", sqlmock.NewErrorResult(errors.New("database error")), nil, nil, "database error"},
-		{"returns not found error", sqlmock.NewResult(0, 0), nil, nil, "company not found (42) or incorrect version (1)"},
-		{"returns getCompanies error", sqlmock.NewResult(0, 1), nil, errors.New("database error"), "database error"},
+		{"returns update error", 0, errors.New("database error"), nil, "database error"},
+		{"returns not found error", 0, nil, nil, "company not found (42) or incorrect version (1)"},
+		{"returns getCompanies error", 1, nil, errors.New("database error"), "database error"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-				runUpdateStub := mocka.Function(t, &runUpdate, test.result, test.updateError)
+				runUpdateStub := mocka.Function(t, &runUpdate, test.count, test.updateError)
 				defer runUpdateStub.Restore()
 				getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, nil, test.getError)
 				defer getCompaniesStub.Restore()
@@ -281,7 +279,7 @@ func Test_UpdateCompanies(t *testing.T) {
 	t.Run("returns companies", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			companies := []*Company{{ID: 42, Name: "new name"}}
-			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(0, 1), nil)
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(1), nil)
 			defer runUpdateStub.Restore()
 			getCompaniesStub := mocka.Function(t, &getCompaniesByIDs, companies, nil)
 			defer getCompaniesStub.Restore()

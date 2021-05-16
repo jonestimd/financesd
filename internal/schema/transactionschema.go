@@ -8,20 +8,25 @@ import (
 	"github.com/jonestimd/financesd/internal/model"
 )
 
+func getDetailFields() graphql.Fields {
+	return graphql.Fields{
+		"id":                    &graphql.Field{Type: nonNullInt},
+		"transactionCategoryId": &graphql.Field{Type: graphql.Int},
+		"transactionGroupId":    &graphql.Field{Type: graphql.Int},
+		"memo":                  &graphql.Field{Type: graphql.String},
+		"amount":                &graphql.Field{Type: nonNullFloat},
+		"assetQuantity":         &graphql.Field{Type: graphql.Float},
+		"exchangeAssetId":       &graphql.Field{Type: graphql.Int},
+	}
+}
+
 func getDetailSchema(name string, relatedField string, fieldType graphql.Output, resolve graphql.FieldResolveFn) *graphql.Object {
+	detailFields := getDetailFields()
+	detailFields[relatedField] = &graphql.Field{Type: fieldType, Resolve: resolve}
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name:        name,
 		Description: "a detail of a financial transaction",
-		Fields: addAudit(graphql.Fields{
-			"id":                    &graphql.Field{Type: graphql.Int},
-			"transactionCategoryId": &graphql.Field{Type: graphql.Int},
-			"transactionGroupId":    &graphql.Field{Type: graphql.Int},
-			"memo":                  &graphql.Field{Type: graphql.String},
-			"amount":                &graphql.Field{Type: graphql.Float},
-			"assetQuantity":         &graphql.Field{Type: graphql.Float},
-			"exchangeAssetId":       &graphql.Field{Type: graphql.Int},
-			relatedField:            &graphql.Field{Type: fieldType, Resolve: resolve},
-		}),
+		Fields:      addAudit(detailFields),
 	})
 }
 
@@ -102,14 +107,38 @@ func resolveRelatedTransaction(p graphql.ResolveParams) (interface{}, error) {
 	return nil, errors.New("invalid source")
 }
 
+func getDetailInput(action string) *graphql.InputObjectFieldConfig {
+	fields := graphql.InputObjectConfigFieldMap{
+		"transferAccountId": &graphql.InputObjectFieldConfig{Type: graphql.Int},
+		"version":           &graphql.InputObjectFieldConfig{Type: graphql.Int},
+	}
+	for name, field := range getDetailFields() {
+		fieldType := field.Type
+		if action == "update" && (name == "id" || name == "amount") {
+			fieldType = field.Type.(*graphql.NonNull).OfType
+		}
+		fields[name] = &graphql.InputObjectFieldConfig{Type: fieldType}
+	}
+	return &graphql.InputObjectFieldConfig{
+		Description: "Update data for transaction details.",
+		Type: graphql.NewList(graphql.NewNonNull(graphql.NewInputObject(graphql.InputObjectConfig{
+			Name: action + "TransactionDetailInput",
+			Description: "To update, provide **id**, **version** and fields to modify." +
+				" To add, provide at least **amount** (without **id** or **version**)." +
+				" To delete, provide just **id** and **version**.",
+			Fields: fields,
+		}))),
+	}
+}
+
 func getTxInput(action string) *graphql.InputObject {
-	fields := graphql.InputObjectConfigFieldMap{}
+	fields := graphql.InputObjectConfigFieldMap{"details": getDetailInput(action)}
 	for name, field := range getTxFields() {
 		if (action != "add" || name != "id") && name != "accountId" {
 			fields[name] = &graphql.InputObjectFieldConfig{Type: field.Type}
 		}
 	}
-	if action != "add" {
+	if action == "update" {
 		fields["date"].Type = dateType
 		fields["accountId"] = &graphql.InputObjectFieldConfig{Type: graphql.Int}
 		fields["version"] = &graphql.InputObjectFieldConfig{Type: nonNullInt, Description: "The current version of the transaction."}
@@ -139,7 +168,7 @@ var updateTxFields = &graphql.Field{
 		// }
 		if updates, ok := p.Args["update"]; ok {
 			var ids []int64
-			if ids, err = updateTransactions(tx, updates, user); err != nil {
+			if ids, err = updateTransactions(tx, updates.([]map[string]interface{}), user); err != nil {
 				return nil, err
 			}
 			transactions, err = getTransactionsByIDs(tx, ids)

@@ -19,37 +19,6 @@ func Test_intsToJson(t *testing.T) {
 	assert.Equal(t, result, "[1,3,5,2,4,6]")
 }
 
-func Test_stringOrNull(t *testing.T) {
-	tests := []struct {
-		name  string
-		value interface{}
-	}{
-		{"returns string value", "the value"},
-		{"returns null value", nil},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.value, stringOrNull(test.value))
-		})
-	}
-}
-
-func Test_int64OrNull(t *testing.T) {
-	tests := []struct {
-		name           string
-		value          interface{}
-		expectedResult interface{}
-	}{
-		{"returns int64 value", 42, int64(42)},
-		{"returns null value", nil, nil},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.expectedResult, int64OrNull(test.value))
-		})
-	}
-}
-
 func Test_runQuery_populatesModel(t *testing.T) {
 	name := "the company"
 	query := "select * from company where name = ?"
@@ -85,13 +54,10 @@ func Test_runUpdate_closesStatement(t *testing.T) {
 		rs := sqlmock.NewResult(-1, 1)
 		mockDB.ExpectPrepare(query).WillBeClosed().ExpectExec().WithArgs(expectedArgs...).WillReturnResult(rs)
 
-		result, err := runUpdate(tx, query, "new name", 42)
+		rowCount, err := runUpdate(tx, query, "new name", 42)
 
 		assert.Nil(t, err)
-		rowCount, _ := result.RowsAffected()
 		assert.Equal(t, int64(1), rowCount)
-		lastID, _ := result.LastInsertId()
-		assert.Equal(t, int64(-1), lastID)
 		assert.Nil(t, mockDB.ExpectationsWereMet())
 	})
 }
@@ -102,10 +68,10 @@ func Test_runUpdate_returnsPrepareError(t *testing.T) {
 		expectedErr := errors.New("query error")
 		mockDB.ExpectPrepare(query).WillReturnError(expectedErr)
 
-		result, err := runUpdate(tx, query, "new name", 42)
+		count, err := runUpdate(tx, query, "new name", 42)
 
 		assert.Same(t, expectedErr, err)
-		assert.Nil(t, result)
+		assert.Equal(t, int64(0), count)
 		assert.Nil(t, mockDB.ExpectationsWereMet())
 	})
 }
@@ -117,10 +83,10 @@ func Test_runUpdate_returnsQueryError(t *testing.T) {
 		expectedErr := errors.New("query error")
 		mockDB.ExpectPrepare(query).WillBeClosed().ExpectExec().WithArgs(expectedArgs...).WillReturnError(expectedErr)
 
-		result, err := runUpdate(tx, query, "new name", 42)
+		count, err := runUpdate(tx, query, "new name", 42)
 
 		assert.Same(t, expectedErr, err)
-		assert.Nil(t, result)
+		assert.Equal(t, int64(0), count)
 		assert.Nil(t, mockDB.ExpectationsWereMet())
 	})
 }

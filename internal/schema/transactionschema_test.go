@@ -127,7 +127,7 @@ func Test_resolveRelatedTransaction(t *testing.T) {
 func Test_updateTransactions_Resolve_update(t *testing.T) {
 	id := 42
 	name := "new name"
-	args := []interface{}{map[string]interface{}{"id": id, "name": name}}
+	args := []map[string]interface{}{{"id": id, "name": name}}
 	tests := []struct {
 		name         string
 		updateIDs    []int64

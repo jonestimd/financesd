@@ -15,22 +15,13 @@ func int64sToJson(values []int64) string {
 	return strings.Replace(fmt.Sprint(values), " ", ",", -1)
 }
 
-func stringOrNull(value interface{}) interface{} {
-	if s, ok := value.(string); ok {
-		return s
-	}
-	return nil
-}
-
-func int64OrNull(value interface{}) interface{} {
-	if i, ok := value.(int); ok {
-		return int64(i)
-	}
-	return nil
-}
-
 type model interface {
 	ptrTo(column string) interface{}
+}
+
+type versionID struct {
+	ID      int64
+	Version int64
 }
 
 // returns a slice of model pointers
@@ -58,7 +49,7 @@ var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...inte
 	return models.Interface(), nil
 }
 
-var runUpdate = func(tx *sql.Tx, sql string, args ...interface{}) (sql.Result, error) {
+func execUpdate(tx *sql.Tx, sql string, args ...interface{}) (sql.Result, error) {
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
 		return nil, err
@@ -67,8 +58,16 @@ var runUpdate = func(tx *sql.Tx, sql string, args ...interface{}) (sql.Result, e
 	return stmt.Exec(args...)
 }
 
+var runUpdate = func(tx *sql.Tx, sql string, args ...interface{}) (int64, error) {
+	rs, err := execUpdate(tx, sql, args...)
+	if err != nil {
+		return 0, err
+	}
+	return rs.RowsAffected()
+}
+
 var runInsert = func(tx *sql.Tx, sql string, args ...interface{}) (int64, error) {
-	rs, err := runUpdate(tx, sql, args...)
+	rs, err := execUpdate(tx, sql, args...)
 	if err != nil {
 		return 0, err
 	}

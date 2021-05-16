@@ -115,7 +115,7 @@ func Test_UpdateTransactions(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			update := map[string]interface{}{
+			update := inputObject{
 				"id":      id,
 				"version": version,
 			}
@@ -125,16 +125,16 @@ func Test_UpdateTransactions(t *testing.T) {
 					tx, updateTxSQL,
 					[]interface{}{update["date"],
 						test.field == "referenceNumber", update["referenceNumber"],
-						test.field == "payeeId", int64OrNull(update["payeeId"]),
-						test.field == "securityId", int64OrNull(update["securityId"]),
+						test.field == "payeeId", update.intOrNull("payeeId"),
+						test.field == "securityId", update.intOrNull("securityId"),
 						test.field == "memo", update["memo"],
 						update["cleared"],
-						test.field == "accountId", int64OrNull(update["accountId"]),
+						test.field == "accountId", update.intOrNull("accountId"),
 						user, int64(id), int64(version)}}
-				runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(-1, 1), nil)
+				runUpdateStub := mocka.Function(t, &runUpdate, int64(1), nil)
 				defer runUpdateStub.Restore()
 
-				ids, err := UpdateTransactions(tx, []interface{}{update}, user)
+				ids, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
 
 				assert.Nil(t, err)
 				assert.Equal(t, []int64{42}, ids)
@@ -144,32 +144,43 @@ func Test_UpdateTransactions(t *testing.T) {
 		})
 	}
 	expectedErr := errors.New("test error")
+	t.Run("updates details", func(t *testing.T) {
+		update := map[string]interface{}{
+			"id":      id,
+			"version": version,
+			"details": []map[string]interface{}{},
+		}
+		tests := []struct {
+			name string
+			err  error
+		}{
+			{"updates details", nil},
+			{"returns update detail error", expectedErr},
+		}
+		for _, test := range tests {
+			sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+				runUpdateStub := mocka.Function(t, &runUpdate, int64(1), nil)
+				updateTxDetailsStub := mocka.Function(t, &updateTxDetails, test.err)
+				defer runUpdateStub.Restore()
+				defer updateTxDetailsStub.Restore()
+
+				_, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
+
+				assert.Equal(t, test.err, err)
+				assert.Equal(t, []interface{}{tx, int64(id), update["details"], user}, updateTxDetailsStub.GetCall(0).Arguments())
+			})
+		}
+	})
 	t.Run("returns query error", func(t *testing.T) {
 		update := map[string]interface{}{
 			"id":      id,
 			"version": version,
 		}
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			runUpdateStub := mocka.Function(t, &runUpdate, nil, expectedErr)
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(0), expectedErr)
 			defer runUpdateStub.Restore()
 
-			ids, err := UpdateTransactions(tx, []interface{}{update}, user)
-
-			assert.Same(t, expectedErr, err)
-			assert.Nil(t, ids)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
-		})
-	})
-	t.Run("returns result count error", func(t *testing.T) {
-		update := map[string]interface{}{
-			"id":      id,
-			"version": version,
-		}
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewErrorResult(expectedErr), nil)
-			defer runUpdateStub.Restore()
-
-			ids, err := UpdateTransactions(tx, []interface{}{update}, user)
+			ids, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
 
 			assert.Same(t, expectedErr, err)
 			assert.Nil(t, ids)
@@ -182,12 +193,12 @@ func Test_UpdateTransactions(t *testing.T) {
 			"version": version,
 		}
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			runUpdateStub := mocka.Function(t, &runUpdate, sqlmock.NewResult(-1, 0), nil)
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(0), nil)
 			defer runUpdateStub.Restore()
 
-			ids, err := UpdateTransactions(tx, []interface{}{update}, user)
+			ids, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
 
-			assert.Equal(t, "transaction not found (42) or incorrect version (1)", err.Error())
+			assert.Equal(t, "transaction not found (42 @ 1)", err.Error())
 			assert.Nil(t, ids)
 			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})

@@ -87,34 +87,36 @@ set date = coalesce(?, date)
 where id = ? and version = ?`
 
 // UpdateTransactions updates transactions.
-func UpdateTransactions(tx *sql.Tx, args interface{}, user string) ([]int64, error) {
-	updates := args.([]interface{})
+func UpdateTransactions(tx *sql.Tx, updates []map[string]interface{}, user string) ([]int64, error) {
 	ids := make([]int64, len(updates))
 	for i, transaction := range updates {
-		values := transaction.(map[string]interface{})
-		ids[i] = int64(values["id"].(int))
-		ref, setRef := values["referenceNumber"]
-		payeeId, setPayee := values["payeeId"]
-		securityId, setSecurity := values["securityId"]
-		memo, setMemo := values["memo"]
-		accountId, setAccount := values["accountId"]
+		values := inputObject(transaction)
+		ids[i] = values.requireInt("id")
+		ref, setRef := values.getString("referenceNumber")
+		payeeId, setPayee := values.getInt("payeeId")
+		securityId, setSecurity := values.getInt("securityId")
+		memo, setMemo := values.getString("memo")
+		accountId, setAccount := values.getInt("accountId")
 		version := int64(values["version"].(int))
-		rs, err := runUpdate(tx, updateTxSQL,
-			stringOrNull(values["date"]),
-			setRef, stringOrNull(ref),
-			setPayee, int64OrNull(payeeId),
-			setSecurity, int64OrNull(securityId),
-			setMemo, stringOrNull(memo),
-			stringOrNull(values["cleared"]),
-			setAccount, int64OrNull(accountId),
+		count, err := runUpdate(tx, updateTxSQL,
+			values.stringOrNull("date"),
+			setRef, ref,
+			setPayee, payeeId,
+			setSecurity, securityId,
+			setMemo, memo,
+			values.stringOrNull("cleared"),
+			setAccount, accountId,
 			user, ids[i], version)
 		if err != nil {
 			return nil, err
-		}
-		if count, err := rs.RowsAffected(); err != nil {
-			return nil, err
 		} else if count == 0 {
-			return nil, fmt.Errorf("transaction not found (%d) or incorrect version (%d)", ids[i], version)
+			return nil, fmt.Errorf("transaction not found (%d @ %d)", ids[i], version)
+		}
+		if details, ok := values["details"]; ok {
+			detailUpdates := details.([]map[string]interface{})
+			if err := updateTxDetails(tx, ids[i], detailUpdates, user); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return ids, nil

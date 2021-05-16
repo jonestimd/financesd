@@ -92,11 +92,7 @@ func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
 
 // DeleteCompanies deletes companies.
 func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
-	rs, err := runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
-	if err != nil {
-		return 0, err
-	}
-	return rs.RowsAffected()
+	return runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
 }
 
 const updateCompanySQL = `update company set name = ?, change_date = current_timestamp, change_user = ?, version = version+1
@@ -111,11 +107,7 @@ func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, err
 		ids[i] = int64(values["id"].(int))
 		name := values["name"].(string)
 		version := int64(values["version"].(int))
-		rs, err := runUpdate(tx, updateCompanySQL, name, user, ids[i], version)
-		if err != nil {
-			return nil, err
-		}
-		if count, err := rs.RowsAffected(); err != nil {
+		if count, err := runUpdate(tx, updateCompanySQL, name, user, ids[i], version); err != nil {
 			return nil, err
 		} else if count == 0 {
 			return nil, fmt.Errorf("company not found (%d) or incorrect version (%d)", ids[i], version)

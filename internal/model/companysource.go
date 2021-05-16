@@ -1,6 +1,10 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/jonestimd/financesd/internal/database"
+)
 
 // companySource provides companies and accounts for a GraphQL request.
 type companySource struct {
@@ -14,35 +18,37 @@ func newCompanySource() *companySource {
 	return &companySource{}
 }
 
-func (cs *companySource) setAccounts(accounts []*Account, cacheAccounts bool) []*Account {
-	if cacheAccounts {
-		cs.accounts = accounts
-	}
+func (cs *companySource) setAccounts(accounts []*database.Account, cacheAccounts bool) []*Account {
 	companyIDs := newIDSet()
-	for _, account := range accounts {
-		account.source = cs
+	accts := make([]*Account, len(accounts))
+	for i, account := range accounts {
+		accts[i] = &Account{source: cs, Account: account}
 		if account.CompanyID != nil {
 			companyIDs.Add(*account.CompanyID)
 		}
 	}
 	cs.companyIDs = companyIDs.Values()
-	return accounts
+	if cacheAccounts {
+		cs.accounts = accts
+	}
+	return accts
 }
 
-func (cs *companySource) setCompanies(companies []*Company) []*Company {
-	cs.companiesByID = make(map[int64]*Company, len(companies))
-	cs.companyIDs = make([]int64, len(companies))
-	for i, company := range companies {
-		company.source = cs
+func (cs *companySource) setCompanies(dbCompanies []*database.Company) []*Company {
+	cs.companiesByID = make(map[int64]*Company, len(dbCompanies))
+	cs.companyIDs = make([]int64, len(dbCompanies))
+	companies := make([]*Company, len(dbCompanies))
+	for i, company := range dbCompanies {
+		companies[i] = &Company{source: cs, Company: company}
 		cs.companyIDs[i] = company.ID
-		cs.companiesByID[company.ID] = company
+		cs.companiesByID[company.ID] = companies[i]
 	}
 	return companies
 }
 
 func (cs *companySource) loadCompanies(tx *sql.Tx) error {
 	if cs.err == nil && cs.companiesByID == nil {
-		if companies, err := getCompaniesByIDs(tx, cs.companyIDs); err != nil {
+		if companies, err := GetCompaniesByIDs(tx, cs.companyIDs); err != nil {
 			cs.err = err
 		} else {
 			cs.companiesByID = make(map[int64]*Company, len(companies))
@@ -57,7 +63,7 @@ func (cs *companySource) loadCompanies(tx *sql.Tx) error {
 
 func (cs *companySource) loadAccounts(tx *sql.Tx) error {
 	if cs.err == nil && cs.accounts == nil {
-		if accounts, err := getAccountsByCompanyIDs(tx, cs.companyIDs); err != nil {
+		if accounts, err := GetAccountsByCompanyIDs(tx, cs.companyIDs); err != nil {
 			cs.err = err
 		} else {
 			cs.accounts = accounts

@@ -9,7 +9,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
 	"github.com/graphql-go/graphql"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/database"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,21 +19,21 @@ func Test_securitySchema_Fields(t *testing.T) {
 	now := time.Now()
 	cost := float64(12.34)
 	dividends := float64(23.45)
-	security := &model.Security{
+	security := &database.Security{
 		Type:             "Stock",
 		Shares:           96,
 		FirstAcquired:    &now,
 		CostBasis:        &cost,
 		Dividends:        &dividends,
 		TransactionCount: 69,
-		Asset: model.Asset{
+		Asset: database.Asset{
 			ID:      1,
 			Name:    "the asset",
 			Type:    "Security",
 			Scale:   6,
 			Symbol:  &symbol,
 			Version: 42,
-			Audited: model.Audited{ChangeUser: "me", ChangeDate: &now},
+			Audited: database.Audited{ChangeUser: "me", ChangeDate: &now},
 		},
 	}
 	params := graphql.ResolveParams{Source: security}
@@ -62,7 +62,7 @@ func Test_securitySchema_Fields(t *testing.T) {
 
 func Test_securityQueryFields_Resolve_all(t *testing.T) {
 	symbol := "S1"
-	securities := []*model.Security{{AssetID: 42}}
+	securities := []*database.Security{{AssetID: 42}}
 	getAll := mocka.Function(t, &getAllSecurities, securities, nil)
 	getByID := mocka.Function(t, &getSecurityByID, securities, nil)
 	getBySymbol := mocka.Function(t, &getSecurityBySymbol, securities, nil)

@@ -15,7 +15,7 @@ import (
 func Test_accountQueryFields_Resolve(t *testing.T) {
 	companyID := int64(99)
 	accountID := int64(1)
-	accounts := []*model.Account{{ID: accountID, CompanyID: &companyID}}
+	accounts := []*model.Account{model.NewAccount(accountID, &companyID)}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		getAll := mocka.Function(t, &getAllAccounts, accounts, nil)
 		byID := mocka.Function(t, &getAccountByID, accounts, nil)
@@ -70,8 +70,8 @@ func (a *mockAccountModel) GetCompany(tx *sql.Tx) (*model.Company, error) {
 
 func Test_resolveCompany(t *testing.T) {
 	companyID := int64(99)
-	company := model.Company{ID: companyID}
-	mockAccount := &mockAccountModel{company: &company, err: errors.New("test error")}
+	company := model.NewCompany(companyID, "")
+	mockAccount := &mockAccountModel{company: company, err: errors.New("test error")}
 	sqltest.TestInTx(t, func(_ sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, "", newField("", "id"), newField("", "name")).setSource(mockAccount)
 

@@ -2,31 +2,23 @@ package model
 
 import (
 	"database/sql"
-	"fmt"
-	"reflect"
-	"time"
+
+	"github.com/graphql-go/graphql"
+	"github.com/jonestimd/financesd/internal/database"
 )
 
 // Company contains information about a financial institution.
 type Company struct {
-	ID      int64
-	Name    string
-	Version int
-	source  *companySource
-	Audited
+	source *companySource
+	*database.Company
 }
 
-// PtrTo returns a pointer to the field for the database column.
-func (c *Company) ptrTo(column string) interface{} {
-	switch column {
-	case "id":
-		return &c.ID
-	case "name":
-		return &c.Name
-	case "version":
-		return &c.Version
-	}
-	return c.Audited.ptrToAudit(column)
+func NewCompany(id int64, name string) *Company {
+	return &Company{Company: &database.Company{ID: id, Name: name}}
+}
+
+func (c *Company) Resolve(p graphql.ResolveParams) (interface{}, error) {
+	return graphql.DefaultResolveFn(replaceSource(p, c.Company))
 }
 
 // GetAccounts returns the accounts for the company.
@@ -43,60 +35,47 @@ func (c *Company) GetAccounts(tx *sql.Tx) ([]*Account, error) {
 	return accounts, nil
 }
 
-var companyType = reflect.TypeOf(Company{})
-
-func runCompanyQuery(tx *sql.Tx, query string, args ...interface{}) ([]*Company, error) {
-	companies, err := runQuery(tx, companyType, query, args...)
+func companiesOrError(companies []*database.Company, err error) ([]*Company, error) {
 	if err != nil {
 		return nil, err
-	}
-	return newCompanySource().setCompanies(companies.([]*Company)), nil
-}
-
-// GetAllCompanies loads all companies.
-func GetAllCompanies(tx *sql.Tx) ([]*Company, error) {
-	return runCompanyQuery(tx, "select * from company")
-}
-
-// GetCompanyByID returns the company with the ID.
-func GetCompanyByID(tx *sql.Tx, id int64) ([]*Company, error) {
-	return runCompanyQuery(tx, "select * from company where id = ?", id)
-}
-
-// GetCompanyByName returns the company with the name.
-func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
-	return runCompanyQuery(tx, "select * from company where name = ?", name)
-}
-
-// getCompaniesByIDs loads specified companies.
-var getCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
-	return runCompanyQuery(tx, "select * from company where json_contains(?, cast(id as json))", int64sToJson(ids))
-}
-
-// AddCompanies adds new companies.
-func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
-	changeDate := time.Now()
-	companies := make([]*Company, len(names))
-	for i, name := range names {
-		if err := validateName(name); err != nil {
-			return nil, err
-		}
-		id, err := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 1)", name, user, changeDate)
-		if err != nil {
-			return nil, err
-		}
-		companies[i] = &Company{ID: id, Name: name, Audited: Audited{user, &changeDate}, Version: 1}
 	}
 	return newCompanySource().setCompanies(companies), nil
 }
 
-// DeleteCompanies deletes companies.
-func DeleteCompanies(tx *sql.Tx, ids []int, user string) (int64, error) {
-	return runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
+// GetAllCompanies loads all companies.
+func GetAllCompanies(tx *sql.Tx) ([]*Company, error) {
+	return companiesOrError(getAllCompanies(tx))
 }
 
-const updateCompanySQL = `update company set name = ?, change_date = current_timestamp, change_user = ?, version = version+1
-where id = ? and version = ?`
+// GetCompanyByID returns the company with the ID.
+func GetCompanyByID(tx *sql.Tx, id int64) ([]*Company, error) {
+	return companiesOrError(getCompanyByID(tx, id))
+}
+
+// GetCompanyByName returns the company with the name.
+func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
+	return companiesOrError(getCompanyByName(tx, name))
+}
+
+// GetCompaniesByIDs loads specified companies.
+var GetCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
+	return companiesOrError(getCompaniesByIDs(tx, ids))
+}
+
+// AddCompanies adds new companies.
+func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
+	companies := make([]*database.Company, len(names))
+	var err error
+	for i, name := range names {
+		if err = validateName(name); err != nil {
+			return nil, err
+		}
+		if companies[i], err = addCompany(tx, name, user); err != nil {
+			return nil, err
+		}
+	}
+	return newCompanySource().setCompanies(companies), nil
+}
 
 // UpdateCompanies updates company names.
 func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, error) {
@@ -107,11 +86,9 @@ func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, err
 		ids[i] = int64(values["id"].(int))
 		name := values["name"].(string)
 		version := int64(values["version"].(int))
-		if count, err := runUpdate(tx, updateCompanySQL, name, user, ids[i], version); err != nil {
+		if err := updateCompany(tx, ids[i], version, name, user); err != nil {
 			return nil, err
-		} else if count == 0 {
-			return nil, fmt.Errorf("company not found (%d) or incorrect version (%d)", ids[i], version)
 		}
 	}
-	return getCompaniesByIDs(tx, ids)
+	return GetCompaniesByIDs(tx, ids)
 }

@@ -75,7 +75,7 @@ var updateCompaniesFields = &graphql.Field{
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
 		if ids, ok := p.Args["delete"]; ok {
-			if _, err = deleteCompanies(tx, asInts(ids), user); err != nil {
+			if _, err = deleteCompanies(tx, asInts(ids)); err != nil {
 				return nil, err
 			}
 		}

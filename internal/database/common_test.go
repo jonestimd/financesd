@@ -1,4 +1,4 @@
-package model
+package database
 
 import (
 	"database/sql"
@@ -19,33 +19,33 @@ func Test_intsToJson(t *testing.T) {
 	assert.Equal(t, result, "[1,3,5,2,4,6]")
 }
 
-// func Test_runQuery_populatesModel(t *testing.T) {
-// 	name := "the company"
-// 	query := "select * from company where name = ?"
-// 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-// 		rows := sqltest.MockRows("id", "name").AddRow(42, name)
-// 		mock.ExpectQuery(query).WithArgs(name).WillReturnRows(rows)
+func Test_runQuery_populatesModel(t *testing.T) {
+	name := "the company"
+	query := "select * from company where name = ?"
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		rows := sqltest.MockRows("id", "name").AddRow(42, name)
+		mock.ExpectQuery(query).WithArgs(name).WillReturnRows(rows)
 
-// 		result, err := runQuery(tx, companyType, query, name)
+		result, err := runQuery(tx, companyType, query, name)
 
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, result, []*Company{{ID: 42, Name: name}})
-// 	})
-// }
+		assert.Nil(t, err)
+		assert.Equal(t, result, []*Company{{ID: 42, Name: name}})
+	})
+}
 
-// func Test_runQuery_returnsQueryError(t *testing.T) {
-// 	name := "the company"
-// 	query := "select * from company where name = ?"
-// 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-// 		expectedErr := errors.New("query error")
-// 		mock.ExpectQuery(query).WithArgs(name).WillReturnError(expectedErr)
+func Test_runQuery_returnsQueryError(t *testing.T) {
+	name := "the company"
+	query := "select * from company where name = ?"
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		expectedErr := errors.New("query error")
+		mock.ExpectQuery(query).WithArgs(name).WillReturnError(expectedErr)
 
-// 		result, err := runQuery(tx, companyType, query, name)
+		result, err := runQuery(tx, companyType, query, name)
 
-// 		assert.Same(t, expectedErr, err)
-// 		assert.Nil(t, result)
-// 	})
-// }
+		assert.Same(t, expectedErr, err)
+		assert.Nil(t, result)
+	})
+}
 
 func Test_runUpdate_closesStatement(t *testing.T) {
 	query := "update company set name = ? where id = ?"

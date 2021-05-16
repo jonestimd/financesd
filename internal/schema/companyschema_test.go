@@ -13,7 +13,7 @@ import (
 )
 
 func Test_companyQueryFields_Resolve(t *testing.T) {
-	companies := []*model.Company{{ID: 1}}
+	companies := []*model.Company{model.NewCompany(1, "")}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		getAll := mocka.Function(t, &getAllCompanies, companies, nil)
 		byID := mocka.Function(t, &getCompanyByID, companies, nil)
@@ -68,9 +68,7 @@ func (c *mockCompanyModel) GetAccounts(tx *sql.Tx) ([]*model.Account, error) {
 
 func Test_resolveAccounts(t *testing.T) {
 	companyID := int64(42)
-	accounts := []*model.Account{
-		{ID: 123, CompanyID: &companyID},
-	}
+	accounts := []*model.Account{model.NewAccount(123, &companyID)}
 	mockCompany := &mockCompanyModel{accounts: accounts, err: errors.New("test error")}
 	sqltest.TestInTx(t, func(_ sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).setSource(mockCompany)
@@ -90,7 +88,7 @@ func Test_updateCompany_Resolve_add(t *testing.T) {
 		companies interface{}
 		err       error
 	}{
-		{"returns new companies", []*model.Company{{ID: 42, Name: names[0].(string)}}, nil},
+		{"returns new companies", []*model.Company{model.NewCompany(42, names[0].(string))}, nil},
 		{"returns error", nil, errors.New("test error")},
 	}
 	for _, test := range tests {
@@ -132,7 +130,7 @@ func Test_updateCompany_Resolve_delete(t *testing.T) {
 
 				assert.Equal(t, test.err, err)
 				assert.Equal(t, test.companies, result)
-				assert.Equal(t, []interface{}{tx, asInts(ids), "somebody"}, mockDeleteCompanies.GetFirstCall().Arguments())
+				assert.Equal(t, []interface{}{tx, asInts(ids)}, mockDeleteCompanies.GetFirstCall().Arguments())
 			})
 		})
 	}

@@ -1,4 +1,4 @@
-package model
+package database
 
 // Asset represents a type of financial asset.
 type Asset struct {

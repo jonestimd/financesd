@@ -2,11 +2,12 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +24,7 @@ func Test_companySource(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			accounts := []*Account{
+			dbAccounts := []*database.Account{
 				{ID: 1, CompanyID: &companyID1},
 				{ID: 2, CompanyID: &companyID1},
 				{ID: 3},
@@ -31,11 +32,14 @@ func Test_companySource(t *testing.T) {
 			}
 			cs := newCompanySource()
 
-			assert.Equal(t, accounts, cs.setAccounts(accounts, test.cacheAccounts))
+			accounts := cs.setAccounts(dbAccounts, test.cacheAccounts)
 
 			assert.ElementsMatch(t, []int64{companyID1, companyID2}, cs.companyIDs)
 			if test.cacheAccounts {
 				assert.Equal(t, accounts, cs.accounts)
+				for i, account := range accounts {
+					assert.Same(t, dbAccounts[i], account.Account)
+				}
 			} else {
 				assert.Nil(t, cs.accounts)
 			}
@@ -49,21 +53,19 @@ func Test_companySource(t *testing.T) {
 func Test_companySource_setCompanies(t *testing.T) {
 	companyID1 := int64(10)
 	companyID2 := int64(20)
-	companies := []*Company{
+	dbCompanies := []*database.Company{
 		{ID: companyID1},
 		{ID: companyID2},
 	}
 	cs := newCompanySource()
 
-	assert.Equal(t, companies, cs.setCompanies(companies))
+	companies := cs.setCompanies(dbCompanies)
 
-	assert.Equal(t, map[int64]*Company{
-		companyID1: companies[0],
-		companyID2: companies[1],
-	}, cs.companiesByID)
 	assert.ElementsMatch(t, []int64{companyID1, companyID2}, cs.companyIDs)
-	for _, company := range companies {
+	for i, company := range companies {
+		assert.Same(t, dbCompanies[i], company.Company)
 		assert.Same(t, cs, company.source)
+		assert.Same(t, company, cs.companiesByID[company.ID])
 	}
 }
 
@@ -113,30 +115,30 @@ func Test_companySource_loadAccounts(t *testing.T) {
 	t.Run("returns database error", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			expectedErr := errors.New("test error")
+			getAccountsStub := mocka.Function(t, &getAccountsByCompanyIDs, nil, expectedErr)
+			defer getAccountsStub.Restore()
 			cs := newCompanySource()
-			mockDB.ExpectQuery(accountSQL + " where json_contains(?, cast(company_id as json))").
-				WillReturnError(expectedErr)
 
 			assert.Same(t, expectedErr, cs.loadAccounts(tx))
 
 			assert.Same(t, expectedErr, cs.err)
+			assert.Equal(t, []interface{}{tx, cs.companyIDs}, getAccountsStub.GetCall(0).Arguments())
 		})
 	})
-	t.Run("loads companies", func(t *testing.T) {
+	t.Run("loads accounts", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			accountIDs := []int64{1, 2}
+			dbAccounts := []*database.Account{{ID: 1}, {ID: 2}}
+			getAccountsStub := mocka.Function(t, &getAccountsByCompanyIDs, dbAccounts, nil)
+			defer getAccountsStub.Restore()
 			cs := &companySource{companyIDs: []int64{10, 20}}
-			jsonIDs, _ := json.Marshal(cs.companyIDs)
-			mockDB.ExpectQuery(accountSQL + " where json_contains(?, cast(company_id as json))").
-				WithArgs(jsonIDs).
-				WillReturnRows(sqltest.MockRows("id").AddRow(accountIDs[0]).AddRow(accountIDs[1]))
 
 			assert.Nil(t, cs.loadAccounts(tx))
 
 			assert.Equal(t, 2, len(cs.accounts))
-			assert.Nil(t, mockDB.ExpectationsWereMet())
 			for i, account := range cs.accounts {
 				assert.Equal(t, accountIDs[i], account.ID)
+				assert.Same(t, dbAccounts[i], account.Account)
 				assert.Same(t, cs, account.source)
 			}
 		})

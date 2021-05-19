@@ -6,11 +6,13 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_transactionSource_GetDetails(t *testing.T) {
+func Test_transactionSource_loadTransactionDetails(t *testing.T) {
 	accountID := int64(42)
 	txID := int64(96)
 	detailID := int64(69)
@@ -24,11 +26,12 @@ func Test_transactionSource_GetDetails(t *testing.T) {
 			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
-	t.Run("returns query error", func(t *testing.T) {
+	t.Run("returns DAO error", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			expectedErr := errors.New("test error")
 			txSource := &transactionSource{accountID: accountID}
-			mockDB.ExpectQuery(accountTxDetailsSQL).WithArgs(accountID).WillReturnError(expectedErr)
+			getDetailsStub := mocka.Function(t, &getDetailsByAccountID, nil, expectedErr)
+			defer getDetailsStub.Restore()
 
 			assert.Same(t, expectedErr, txSource.loadTransactionDetails(tx))
 
@@ -38,41 +41,40 @@ func Test_transactionSource_GetDetails(t *testing.T) {
 	t.Run("loads transaction details by account ID", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txSource := &transactionSource{accountID: accountID}
-			expectedDetail := &TransactionDetail{
+			detail := &database.TransactionDetail{
 				ID:            detailID,
 				TransactionID: txID,
-				txSource:      txSource,
 			}
-			mockDB.ExpectQuery(accountTxDetailsSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id", "transaction_id").AddRow(detailID, txID))
+			getDetailsStub := mocka.Function(t, &getDetailsByAccountID, []*database.TransactionDetail{detail}, nil)
+			defer getDetailsStub.Restore()
 
 			err := txSource.loadTransactionDetails(tx)
 
 			assert.Nil(t, err)
-			assert.Equal(t, map[int64][]*TransactionDetail{txID: {expectedDetail}}, txSource.detailsByTxID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			assert.Equal(t, detail, txSource.detailsByTxID[txID][0].TransactionDetail)
+			assert.Equal(t, txSource, txSource.detailsByTxID[txID][0].txSource)
 		})
 	})
 	t.Run("loads transaction details by tx IDs", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txSource := &transactionSource{txIDs: []int64{txID}}
-			expectedDetail := &TransactionDetail{
+			detail := &database.TransactionDetail{
 				ID:            detailID,
 				TransactionID: txID,
-				txSource:      txSource,
 			}
-			mockDB.ExpectQuery(txDetailsSQL).WithArgs(int64sToJson(txSource.txIDs)).
-				WillReturnRows(sqltest.MockRows("id", "transaction_id").AddRow(detailID, txID))
+			getDetailsStub := mocka.Function(t, &getDetailsByTxIDs, []*database.TransactionDetail{detail}, nil)
+			defer getDetailsStub.Restore()
 
 			err := txSource.loadTransactionDetails(tx)
 
 			assert.Nil(t, err)
-			assert.Equal(t, map[int64][]*TransactionDetail{txID: {expectedDetail}}, txSource.detailsByTxID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			assert.Equal(t, detail, txSource.detailsByTxID[txID][0].TransactionDetail)
+			assert.Equal(t, txSource, txSource.detailsByTxID[txID][0].txSource)
 		})
 	})
 }
 
-func Test_transactionSource_getRelatedDetails(t *testing.T) {
+func Test_transactionSource_loadRelatedDetails(t *testing.T) {
 	id := int64(42)
 	txID := int64(96)
 	t.Run("returns existing error", func(t *testing.T) {
@@ -84,50 +86,55 @@ func Test_transactionSource_getRelatedDetails(t *testing.T) {
 	})
 	t.Run("returns nil for existing details", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			relatedDetail := &TransactionDetail{ID: id}
+			relatedDetail := NewTransactionDetail(id, -1)
 			txSource := &transactionSource{accountID: 69, relatedDetailsByID: map[int64]*TransactionDetail{id: relatedDetail}}
 
 			err := txSource.loadRelatedDetails(tx)
 
 			assert.Nil(t, err)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
 	t.Run("loads related details by account ID", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txSource := &transactionSource{accountID: 69}
-			mockDB.ExpectQuery(accountRelatedDetailsSQL).WithArgs(txSource.accountID).WillReturnRows(sqltest.MockRows("id").AddRow(id))
+			relatedDetail := &database.TransactionDetail{ID: id}
+			getRelatedDetailsStub := mocka.Function(t, &getRelatedDetailsByAccountID, []*database.TransactionDetail{relatedDetail}, nil)
+			defer getRelatedDetailsStub.Restore()
 
 			err := txSource.loadRelatedDetails(tx)
 
 			assert.Nil(t, err)
-			assert.Equal(t, map[int64]*TransactionDetail{id: {ID: id, txSource: txSource}}, txSource.relatedDetailsByID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			assert.Equal(t, []interface{}{tx, txSource.accountID}, getRelatedDetailsStub.GetCall(0).Arguments())
+			assert.Equal(t, relatedDetail, txSource.relatedDetailsByID[id].TransactionDetail)
+			assert.Equal(t, txSource, txSource.relatedDetailsByID[id].txSource)
 		})
 	})
 	t.Run("loads related details by transaction IDs", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txSource := &transactionSource{txIDs: []int64{txID}}
-			mockDB.ExpectQuery(relatedDetailsSQL).WithArgs(int64sToJson(txSource.txIDs)).WillReturnRows(sqltest.MockRows("id").AddRow(id))
+			relatedDetail := &database.TransactionDetail{ID: id}
+			getRelatedDetailsStub := mocka.Function(t, &getRelatedDetailsByTxIDs, []*database.TransactionDetail{relatedDetail}, nil)
+			defer getRelatedDetailsStub.Restore()
 
 			err := txSource.loadRelatedDetails(tx)
 
 			assert.Nil(t, err)
-			assert.Equal(t, map[int64]*TransactionDetail{id: {ID: id, txSource: txSource}}, txSource.relatedDetailsByID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			assert.Equal(t, []interface{}{tx, txSource.txIDs}, getRelatedDetailsStub.GetCall(0).Arguments())
+			assert.Equal(t, relatedDetail, txSource.relatedDetailsByID[id].TransactionDetail)
+			assert.Equal(t, txSource, txSource.relatedDetailsByID[id].txSource)
 		})
 	})
 	t.Run("returns query error", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			expectedErr := errors.New("test error")
 			txSource := &transactionSource{accountID: 69}
-			mockDB.ExpectQuery(accountRelatedDetailsSQL).WithArgs(txSource.accountID).WillReturnError(expectedErr)
+			getRelatedDetailsStub := mocka.Function(t, &getRelatedDetailsByAccountID, nil, expectedErr)
+			defer getRelatedDetailsStub.Restore()
 
 			err := txSource.loadRelatedDetails(tx)
 
 			assert.Same(t, expectedErr, err)
 			assert.Same(t, expectedErr, txSource.err)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
 }
@@ -141,40 +148,55 @@ func Test_transactionSource_loadRelatedTransactions(t *testing.T) {
 
 		assert.Same(t, txSource.err, err)
 	})
-	t.Run("loads related transactions", func(t *testing.T) {
+	t.Run("loads related transactions by account id", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txSource := &transactionSource{accountID: 69}
-			mockDB.ExpectQuery(accountRelatedTxSQL).WithArgs(txSource.accountID).WillReturnRows(sqltest.MockRows("id").AddRow(id))
+			transaction := &database.Transaction{ID: id}
+			getTransactionsStub := mocka.Function(t, &getRelatedTransactionsByAccountID, []*database.Transaction{transaction}, nil)
+			defer getTransactionsStub.Restore()
 
 			err := txSource.loadRelatedTransactions(tx)
 
 			assert.Nil(t, err)
-			assert.Equal(t, map[int64]*Transaction{id: {ID: id}}, txSource.relatedTxByID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			assert.Equal(t, transaction, txSource.relatedTxByID[id].Transaction)
+			assert.Equal(t, txSource, txSource.relatedTxByID[id].source)
+		})
+	})
+	t.Run("loads related transactions by transaction ids", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			txSource := &transactionSource{txIDs: []int64{69}}
+			transaction := &database.Transaction{ID: id}
+			getTransactionsStub := mocka.Function(t, &getRelatedTransactions, []*database.Transaction{transaction}, nil)
+			defer getTransactionsStub.Restore()
+
+			err := txSource.loadRelatedTransactions(tx)
+
+			assert.Nil(t, err)
+			assert.Equal(t, transaction, txSource.relatedTxByID[id].Transaction)
+			assert.Equal(t, txSource, txSource.relatedTxByID[id].source)
 		})
 	})
 	t.Run("returns nil for existing transactions", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			relatedTx := &Transaction{ID: id}
+			relatedTx := &Transaction{Transaction: &database.Transaction{ID: id}}
 			txSource := &transactionSource{accountID: 69, relatedTxByID: map[int64]*Transaction{id: relatedTx}}
 
 			err := txSource.loadRelatedTransactions(tx)
 
 			assert.Nil(t, err)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
-	t.Run("returns query error", func(t *testing.T) {
+	t.Run("returns DAO error", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			expectedErr := errors.New("test error")
 			txSource := &transactionSource{accountID: 69}
-			mockDB.ExpectQuery(accountRelatedTxSQL).WithArgs(txSource.accountID).WillReturnError(expectedErr)
+			getTransactionsStub := mocka.Function(t, &getRelatedTransactionsByAccountID, nil, expectedErr)
+			defer getTransactionsStub.Restore()
 
 			err := txSource.loadRelatedTransactions(tx)
 
 			assert.Same(t, expectedErr, err)
 			assert.Nil(t, txSource.relatedTxByID)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
 }

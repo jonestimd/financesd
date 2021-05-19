@@ -6,9 +6,8 @@ import (
 
 // TransactionDetail represents a line item of a financial transaction.
 type TransactionDetail struct {
-	ID            int64
-	TransactionID int64
-	// Transaction           *Transaction
+	ID                    int64
+	TransactionID         int64
 	TransactionCategoryID *int64
 	TransactionGroupID    *int64
 	Memo                  *string
@@ -16,7 +15,6 @@ type TransactionDetail struct {
 	AssetQuantity         *float64
 	ExchangeAssetID       *int64
 	RelatedDetailID       *int64
-	RelatedDetail         *TransactionDetail
 	Version               int
 	Audited
 }

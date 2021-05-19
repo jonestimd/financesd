@@ -13,7 +13,7 @@ import (
 )
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
-	transactions := []*model.Transaction{{ID: 42}}
+	transactions := []*model.Transaction{model.NewTransaction(42)}
 	getTransactions := mocka.Function(t, &getAccountTransactions, transactions, nil)
 	defer getTransactions.Restore()
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -42,7 +42,7 @@ func (m *mockTxModel) GetDetails(tx *sql.Tx) ([]*model.TransactionDetail, error)
 func Test_resolveDetails(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns details", func(t *testing.T) {
-			mockTx := &mockTxModel{details: []*model.TransactionDetail{{ID: 42}}, err: errors.New("test error")}
+			mockTx := &mockTxModel{details: []*model.TransactionDetail{model.NewTransactionDetail(42, -1)}, err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockTx)
 
 			result, err := getTxSchema().Fields()["details"].Resolve(params.ResolveParams)
@@ -82,7 +82,7 @@ func Test_resolveRelatedDetail(t *testing.T) {
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns detail", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: &model.TransactionDetail{ID: 42}, err: errors.New("test error")}
+			mockDetail := &mockDetailModel{relatedDetail: model.NewTransactionDetail(42, -1), err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
 
 			result, err := resolver(params.ResolveParams)
@@ -105,7 +105,7 @@ func Test_resolveRelatedTransaction(t *testing.T) {
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail", "transaction").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns transaction", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: &model.TransactionDetail{ID: 42}, err: errors.New("test error")}
+			mockDetail := &mockDetailModel{relatedDetail: model.NewTransactionDetail(42, -1), err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
 
 			result, err := resolver(params.ResolveParams)
@@ -135,7 +135,7 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 		updateErr    error
 		lookupErr    error
 	}{
-		{"returns updated transactions", []int64{42}, []*model.Transaction{{ID: int64(id)}}, nil, nil},
+		{"returns updated transactions", []int64{42}, []*model.Transaction{model.NewTransaction(int64(id))}, nil, nil},
 		{"returns update error", nil, nil, errors.New("test error"), nil},
 		{"returns lookup error", []int64{42}, ([]*model.Transaction)(nil), nil, errors.New("test error")},
 	}

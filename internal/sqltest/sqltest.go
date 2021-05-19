@@ -49,3 +49,8 @@ func TestInTx(t *testing.T, test func(mockDB sqlmock.Sqlmock, tx *sql.Tx)) {
 func MockRows(columns ...string) *sqlmock.Rows {
 	return sqlmock.NewRows(columns)
 }
+
+// UpdateArgs creates an array of expected arguments for running an update query.
+func UpdateArgs(tx *sql.Tx, query string, args ...interface{}) []interface{} {
+	return []interface{}{tx, query, args}
+}

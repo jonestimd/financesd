@@ -3,12 +3,12 @@ package schema
 import (
 	"testing"
 
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/database"
 )
 
 func Test_yesnotype_Serialize(t *testing.T) {
-	y := model.YesNo('Y')
-	n := model.YesNo('N')
+	y := database.YesNo('Y')
+	n := database.YesNo('N')
 	tests := []struct {
 		name   string
 		value  interface{}

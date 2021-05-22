@@ -7,13 +7,13 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
-	transactions := []*model.Transaction{model.NewTransaction(42)}
+	transactions := []*domain.Transaction{domain.NewTransaction(42)}
 	getTransactions := mocka.Function(t, &getAccountTransactions, transactions, nil)
 	defer getTransactions.Restore()
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -29,12 +29,12 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 }
 
 type mockTxModel struct {
-	details []*model.TransactionDetail
+	details []*domain.TransactionDetail
 	err     error
 	tx      *sql.Tx
 }
 
-func (m *mockTxModel) GetDetails(tx *sql.Tx) ([]*model.TransactionDetail, error) {
+func (m *mockTxModel) GetDetails(tx *sql.Tx) ([]*domain.TransactionDetail, error) {
 	m.tx = tx
 	return m.details, m.err
 }
@@ -42,7 +42,7 @@ func (m *mockTxModel) GetDetails(tx *sql.Tx) ([]*model.TransactionDetail, error)
 func Test_resolveDetails(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns details", func(t *testing.T) {
-			mockTx := &mockTxModel{details: []*model.TransactionDetail{model.NewTransactionDetail(42, -1)}, err: errors.New("test error")}
+			mockTx := &mockTxModel{details: []*domain.TransactionDetail{domain.NewTransactionDetail(42, -1)}, err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockTx)
 
 			result, err := getTxSchema().Fields()["details"].Resolve(params.ResolveParams)
@@ -62,18 +62,18 @@ func Test_resolveDetails(t *testing.T) {
 }
 
 type mockDetailModel struct {
-	relatedDetail *model.TransactionDetail
-	relatedTx     *model.Transaction
+	relatedDetail *domain.TransactionDetail
+	relatedTx     *domain.Transaction
 	err           error
 	tx            *sql.Tx
 }
 
-func (m *mockDetailModel) GetRelatedDetail(tx *sql.Tx) (*model.TransactionDetail, error) {
+func (m *mockDetailModel) GetRelatedDetail(tx *sql.Tx) (*domain.TransactionDetail, error) {
 	m.tx = tx
 	return m.relatedDetail, m.err
 }
 
-func (m *mockDetailModel) GetRelatedTransaction(tx *sql.Tx) (*model.Transaction, error) {
+func (m *mockDetailModel) GetRelatedTransaction(tx *sql.Tx) (*domain.Transaction, error) {
 	m.tx = tx
 	return m.relatedTx, m.err
 }
@@ -82,7 +82,7 @@ func Test_resolveRelatedDetail(t *testing.T) {
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns detail", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: model.NewTransactionDetail(42, -1), err: errors.New("test error")}
+			mockDetail := &mockDetailModel{relatedDetail: domain.NewTransactionDetail(42, -1), err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
 
 			result, err := resolver(params.ResolveParams)
@@ -105,7 +105,7 @@ func Test_resolveRelatedTransaction(t *testing.T) {
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail", "transaction").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns transaction", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: model.NewTransactionDetail(42, -1), err: errors.New("test error")}
+			mockDetail := &mockDetailModel{relatedDetail: domain.NewTransactionDetail(42, -1), err: errors.New("test error")}
 			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
 
 			result, err := resolver(params.ResolveParams)
@@ -135,9 +135,9 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 		updateErr    error
 		lookupErr    error
 	}{
-		{"returns updated transactions", []int64{42}, []*model.Transaction{model.NewTransaction(int64(id))}, nil, nil},
+		{"returns updated transactions", []int64{42}, []*domain.Transaction{domain.NewTransaction(int64(id))}, nil, nil},
 		{"returns update error", nil, nil, errors.New("test error"), nil},
-		{"returns lookup error", []int64{42}, ([]*model.Transaction)(nil), nil, errors.New("test error")},
+		{"returns lookup error", []int64{42}, ([]*domain.Transaction)(nil), nil, errors.New("test error")},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,7 @@ func Test_runQuery_populatesModel(t *testing.T) {
 		result, err := runQuery(tx, companyType, query, name)
 
 		assert.Nil(t, err)
-		assert.Equal(t, result, []*Company{{ID: 42, Name: name}})
+		assert.Equal(t, result, []*table.Company{{ID: 42, Name: name}})
 	})
 }
 

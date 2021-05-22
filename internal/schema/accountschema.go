@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/graphql-go/graphql"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 )
 
 // Schema
@@ -47,7 +47,7 @@ var accountQueryFields = &graphql.Field{
 }
 
 type accountModel interface {
-	GetCompany(tx *sql.Tx) (*model.Company, error)
+	GetCompany(tx *sql.Tx) (*domain.Company, error)
 }
 
 func resolveCompany(p graphql.ResolveParams) (interface{}, error) {

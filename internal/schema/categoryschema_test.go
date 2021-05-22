@@ -6,14 +6,14 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	"github.com/jonestimd/financesd/internal/database"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_categoryQueryFields_Resolve(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		categories := []*database.Category{{ID: 42}}
+		categories := []*table.Category{{ID: 42}}
 		getAll := mocka.Function(t, &getAllCategories, categories, nil)
 		defer getAll.Restore()
 		params := newResolveParams(tx, categoryQuery, newField("", "id"), newField("", "code"))

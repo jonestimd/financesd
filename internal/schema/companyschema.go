@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/graphql-go/graphql"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 )
 
 // Schema
@@ -43,7 +43,7 @@ func companyQueryFields() *graphql.Field {
 }
 
 type companyModel interface {
-	GetAccounts(tx *sql.Tx) ([]*model.Account, error)
+	GetAccounts(tx *sql.Tx) ([]*domain.Account, error)
 }
 
 func resolveAccounts(p graphql.ResolveParams) (interface{}, error) {
@@ -71,7 +71,7 @@ var updateCompaniesFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		var err error
-		companies := make([]*model.Company, 0)
+		companies := make([]*domain.Company, 0)
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
 		if ids, ok := p.Args["delete"]; ok {

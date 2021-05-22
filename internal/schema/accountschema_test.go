@@ -7,7 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +15,7 @@ import (
 func Test_accountQueryFields_Resolve(t *testing.T) {
 	companyID := int64(99)
 	accountID := int64(1)
-	accounts := []*model.Account{model.NewAccount(accountID, &companyID)}
+	accounts := []*domain.Account{domain.NewAccount(accountID, &companyID)}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		getAll := mocka.Function(t, &getAllAccounts, accounts, nil)
 		byID := mocka.Function(t, &getAccountByID, accounts, nil)
@@ -58,19 +58,19 @@ func Test_accountQueryFields_Resolve(t *testing.T) {
 }
 
 type mockAccountModel struct {
-	company *model.Company
+	company *domain.Company
 	err     error
 	tx      *sql.Tx
 }
 
-func (a *mockAccountModel) GetCompany(tx *sql.Tx) (*model.Company, error) {
+func (a *mockAccountModel) GetCompany(tx *sql.Tx) (*domain.Company, error) {
 	a.tx = tx
 	return a.company, a.err
 }
 
 func Test_resolveCompany(t *testing.T) {
 	companyID := int64(99)
-	company := model.NewCompany(companyID, "")
+	company := domain.NewCompany(companyID, "")
 	mockAccount := &mockAccountModel{company: company, err: errors.New("test error")}
 	sqltest.TestInTx(t, func(_ sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, "", newField("", "id"), newField("", "name")).setSource(mockAccount)

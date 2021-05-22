@@ -6,14 +6,14 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	"github.com/jonestimd/financesd/internal/database"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_groupQueryFields_Resolve(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		groups := []*database.Group{{ID: 42}}
+		groups := []*table.Group{{ID: 42}}
 		getAll := mocka.Function(t, &getAllGroups, groups, nil)
 		defer getAll.Restore()
 		params := newResolveParams(tx, groupQuery, newField("", "id"), newField("", "name"))

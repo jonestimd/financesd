@@ -16,7 +16,7 @@ func int64sToJson(values []int64) string {
 }
 
 type tableModel interface {
-	ptrTo(column string) interface{}
+	PtrTo(column string) interface{}
 }
 
 // returns a slice of model pointers
@@ -34,7 +34,7 @@ var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...inte
 		m := reflect.New(modelType).Interface()
 		values := make([]interface{}, len(columns))
 		for i, column := range columns {
-			values[i] = m.(tableModel).ptrTo(column)
+			values[i] = m.(tableModel).PtrTo(column)
 		}
 		if err = rows.Scan(values...); err != nil {
 			return models, err

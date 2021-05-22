@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/graphql-go/graphql"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 )
 
 func getDetailFields() graphql.Fields {
@@ -75,7 +75,7 @@ var transactionQueryFields = &graphql.Field{
 }
 
 type txModel interface {
-	GetDetails(tx *sql.Tx) ([]*model.TransactionDetail, error)
+	GetDetails(tx *sql.Tx) ([]*domain.TransactionDetail, error)
 }
 
 func resolveDetails(p graphql.ResolveParams) (interface{}, error) {
@@ -87,8 +87,8 @@ func resolveDetails(p graphql.ResolveParams) (interface{}, error) {
 }
 
 type detailModel interface {
-	GetRelatedDetail(tx *sql.Tx) (*model.TransactionDetail, error)
-	GetRelatedTransaction(tx *sql.Tx) (*model.Transaction, error)
+	GetRelatedDetail(tx *sql.Tx) (*domain.TransactionDetail, error)
+	GetRelatedTransaction(tx *sql.Tx) (*domain.Transaction, error)
 }
 
 func resolveRelatedDetail(p graphql.ResolveParams) (interface{}, error) {
@@ -160,7 +160,7 @@ var updateTxFields = &graphql.Field{
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		var err error
-		transactions := []*model.Transaction{}
+		transactions := []*domain.Transaction{}
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
 		// if ids, ok := p.Args["delete"]; ok {

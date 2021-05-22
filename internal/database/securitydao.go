@@ -2,7 +2,12 @@ package database
 
 import (
 	"database/sql"
+	"reflect"
+
+	"github.com/jonestimd/financesd/internal/database/table"
 )
+
+var securityType = reflect.TypeOf(table.Security{})
 
 const securitySummarySQL = `select t.security_id, count(distinct t.id) transaction_count
 	, sum(coalesce(adjust_shares(t.security_id, t.date, td.asset_quantity), 0)) shares
@@ -31,28 +36,28 @@ left join (
 ) summary on summary.security_id = a.id`
 
 // GetAllSecurities loads all securities.
-func GetAllSecurities(tx *sql.Tx) ([]*Security, error) {
+func GetAllSecurities(tx *sql.Tx) ([]*table.Security, error) {
 	securities, err := runQuery(tx, securityType, securitySQL)
 	if err != nil {
 		return nil, err
 	}
-	return securities.([]*Security), nil
+	return securities.([]*table.Security), nil
 }
 
 // GetSecurityByID returns the security with ID.
-func GetSecurityByID(tx *sql.Tx, id int64) ([]*Security, error) {
+func GetSecurityByID(tx *sql.Tx, id int64) ([]*table.Security, error) {
 	securities, err := runQuery(tx, securityType, securitySQL+" where a.id = ?", id)
 	if err != nil {
 		return nil, err
 	}
-	return securities.([]*Security), nil
+	return securities.([]*table.Security), nil
 }
 
 // GetSecurityBySymbol returns the security for the symbol.
-func GetSecurityBySymbol(tx *sql.Tx, symbol string) ([]*Security, error) {
+func GetSecurityBySymbol(tx *sql.Tx, symbol string) ([]*table.Security, error) {
 	securities, err := runQuery(tx, securityType, securitySQL+" where s.symbol = ?", symbol)
 	if err != nil {
 		return nil, err
 	}
-	return securities.([]*Security), nil
+	return securities.([]*table.Security), nil
 }

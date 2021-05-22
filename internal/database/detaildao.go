@@ -5,14 +5,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
+
+	"github.com/jonestimd/financesd/internal/database/table"
 )
 
-func runDetailQuery(tx *sql.Tx, query string, args ...interface{}) ([]*TransactionDetail, error) {
+var detailType = reflect.TypeOf(table.TransactionDetail{})
+
+func runDetailQuery(tx *sql.Tx, query string, args ...interface{}) ([]*table.TransactionDetail, error) {
 	rows, err := runQuery(tx, detailType, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	return rows.([]*TransactionDetail), nil
+	return rows.([]*table.TransactionDetail), nil
 }
 
 const accountTxDetailsSQL = `select td.*
@@ -21,7 +26,7 @@ join transaction_detail td on t.id = td.transaction_id
 where t.account_id = ?
 order by t.id, td.id`
 
-func GetDetailsByAccountID(tx *sql.Tx, accountID int64) ([]*TransactionDetail, error) {
+func GetDetailsByAccountID(tx *sql.Tx, accountID int64) ([]*table.TransactionDetail, error) {
 	return runDetailQuery(tx, accountTxDetailsSQL, accountID)
 }
 
@@ -30,7 +35,7 @@ from transaction_detail td
 where json_contains(?, cast(transaction_id as json))
 order by t.id, td.id`
 
-func GetDetailsByTxIDs(tx *sql.Tx, txIDs []int64) ([]*TransactionDetail, error) {
+func GetDetailsByTxIDs(tx *sql.Tx, txIDs []int64) ([]*table.TransactionDetail, error) {
 	return runDetailQuery(tx, txDetailsSQL, int64sToJson(txIDs))
 }
 
@@ -40,7 +45,7 @@ join transaction_detail td on tx.id = td.transaction_id
 join transaction_detail rd on td.related_detail_id = rd.id
 where tx.account_id = ?`
 
-func GetRelatedDetailsByAccountID(tx *sql.Tx, accountID int64) ([]*TransactionDetail, error) {
+func GetRelatedDetailsByAccountID(tx *sql.Tx, accountID int64) ([]*table.TransactionDetail, error) {
 	return runDetailQuery(tx, accountRelatedDetailsSQL, accountID)
 }
 
@@ -49,7 +54,7 @@ from transaction_detail td
 join transaction_detail rd on td.related_detail_id = rd.id
 where json_contains(?, cast(td.transaction_id as json))`
 
-func GetRelatedDetailsByTxIDs(tx *sql.Tx, txIDs []int64) ([]*TransactionDetail, error) {
+func GetRelatedDetailsByTxIDs(tx *sql.Tx, txIDs []int64) ([]*table.TransactionDetail, error) {
 	return runDetailQuery(tx, relatedDetailsSQL, int64sToJson(txIDs))
 }
 

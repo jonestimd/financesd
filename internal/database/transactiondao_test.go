@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,13 +28,13 @@ func Test_GetTransactions(t *testing.T) {
 	t.Run("returns transactions", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			txID := int64(69)
-			expectedTx := &Transaction{ID: txID}
+			expectedTx := &table.Transaction{ID: txID}
 			mockDB.ExpectQuery(accountTransactionsSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
 
 			result, err := GetTransactions(tx, accountID)
 
 			assert.Nil(t, err)
-			assert.Equal(t, []*Transaction{expectedTx}, result)
+			assert.Equal(t, []*table.Transaction{expectedTx}, result)
 			assert.Nil(t, mockDB.ExpectationsWereMet())
 		})
 	})
@@ -112,7 +113,7 @@ func Test_UpdateTransaction(t *testing.T) {
 func Test_GetTransactionsByIDs(t *testing.T) {
 	t.Run("returns transactions", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			transactions := []*Transaction{{ID: 42}}
+			transactions := []*table.Transaction{{ID: 42}}
 			runQueryStub := mocka.Function(t, &runQuery, transactions, nil)
 			defer runQueryStub.Restore()
 

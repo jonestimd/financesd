@@ -7,18 +7,19 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
-func assertCompaniesError(t *testing.T, companies []*Company, err error, expectedErr error) {
+func assertCompaniesError(t *testing.T, companies []*table.Company, err error, expectedErr error) {
 	assert.Same(t, expectedErr, err)
 	assert.Nil(t, companies)
 }
 
 func Test_GetAllCompanies(t *testing.T) {
 	t.Run("returns companies", func(t *testing.T) {
-		companies := []*Company{{ID: 1}}
+		companies := []*table.Company{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, companies, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -44,7 +45,7 @@ func Test_GetAllCompanies(t *testing.T) {
 func Test_GetCompanyByID(t *testing.T) {
 	id := int64(42)
 	t.Run("returns companies", func(t *testing.T) {
-		companies := []*Company{{ID: 1}}
+		companies := []*table.Company{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, companies, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -71,7 +72,7 @@ func Test_GetCompanyByID(t *testing.T) {
 func Test_GetCompanyByName(t *testing.T) {
 	name := "the company"
 	t.Run("returns companies", func(t *testing.T) {
-		companies := []*Company{{ID: 1}}
+		companies := []*table.Company{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, companies, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -98,7 +99,7 @@ func Test_GetCompanyByName(t *testing.T) {
 func Test_GetCompaniesByIDs(t *testing.T) {
 	ids := []int64{42, 96}
 	t.Run("returns companies", func(t *testing.T) {
-		companies := []*Company{{ID: 42}}
+		companies := []*table.Company{{ID: 42}}
 		runQueryStub := mocka.Function(t, &runQuery, companies, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {

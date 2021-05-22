@@ -7,13 +7,14 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_GetAllSecurities(t *testing.T) {
 	t.Run("returns securities", func(t *testing.T) {
-		securities := []*Security{{AssetID: 1}}
+		securities := []*table.Security{{AssetID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, securities, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -40,7 +41,7 @@ func Test_GetAllSecurities(t *testing.T) {
 func Test_GetSecurityByID(t *testing.T) {
 	id := int64(42)
 	t.Run("returns security", func(t *testing.T) {
-		securities := []*Security{{AssetID: id}}
+		securities := []*table.Security{{AssetID: id}}
 		runQueryStub := mocka.Function(t, &runQuery, securities, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -68,7 +69,7 @@ func Test_GetSecurityByID(t *testing.T) {
 func Test_GetSecurityBySymbol(t *testing.T) {
 	symbol := "S1"
 	t.Run("returns security", func(t *testing.T) {
-		securities := []*Security{{AssetID: 42}}
+		securities := []*table.Security{{AssetID: 42}}
 		runQueryStub := mocka.Function(t, &runQuery, securities, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {

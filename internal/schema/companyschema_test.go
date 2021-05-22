@@ -7,13 +7,13 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
-	"github.com/jonestimd/financesd/internal/model"
+	"github.com/jonestimd/financesd/internal/domain"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_companyQueryFields_Resolve(t *testing.T) {
-	companies := []*model.Company{model.NewCompany(1, "")}
+	companies := []*domain.Company{domain.NewCompany(1, "")}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		getAll := mocka.Function(t, &getAllCompanies, companies, nil)
 		byID := mocka.Function(t, &getCompanyByID, companies, nil)
@@ -56,19 +56,19 @@ func Test_companyQueryFields_Resolve(t *testing.T) {
 }
 
 type mockCompanyModel struct {
-	accounts []*model.Account
+	accounts []*domain.Account
 	err      error
 	tx       *sql.Tx
 }
 
-func (c *mockCompanyModel) GetAccounts(tx *sql.Tx) ([]*model.Account, error) {
+func (c *mockCompanyModel) GetAccounts(tx *sql.Tx) ([]*domain.Account, error) {
 	c.tx = tx
 	return c.accounts, c.err
 }
 
 func Test_resolveAccounts(t *testing.T) {
 	companyID := int64(42)
-	accounts := []*model.Account{model.NewAccount(123, &companyID)}
+	accounts := []*domain.Account{domain.NewAccount(123, &companyID)}
 	mockCompany := &mockCompanyModel{accounts: accounts, err: errors.New("test error")}
 	sqltest.TestInTx(t, func(_ sqlmock.Sqlmock, tx *sql.Tx) {
 		params := newResolveParams(tx, companyQuery, newField("", "id"), newField("", "name")).setSource(mockCompany)
@@ -88,7 +88,7 @@ func Test_updateCompany_Resolve_add(t *testing.T) {
 		companies interface{}
 		err       error
 	}{
-		{"returns new companies", []*model.Company{model.NewCompany(42, names[0].(string))}, nil},
+		{"returns new companies", []*domain.Company{domain.NewCompany(42, names[0].(string))}, nil},
 		{"returns error", nil, errors.New("test error")},
 	}
 	for _, test := range tests {
@@ -115,7 +115,7 @@ func Test_updateCompany_Resolve_delete(t *testing.T) {
 		companies interface{}
 		err       error
 	}{
-		{"returns new companies", []*model.Company{}, nil},
+		{"returns new companies", []*domain.Company{}, nil},
 		{"returns error", nil, errors.New("test error")},
 	}
 	for _, test := range tests {
@@ -145,7 +145,7 @@ func Test_updateCompany_Resolve_update(t *testing.T) {
 		companies interface{}
 		err       error
 	}{
-		{"returns new companies", []*model.Company{}, nil},
+		{"returns new companies", []*domain.Company{}, nil},
 		{"returns error", nil, errors.New("test error")},
 	}
 	for _, test := range tests {

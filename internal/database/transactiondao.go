@@ -3,27 +3,32 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
+
+	"github.com/jonestimd/financesd/internal/database/table"
 )
+
+var transactionType = reflect.TypeOf(table.Transaction{})
 
 const accountTransactionsSQL = "select * from transaction where account_id = ? order by date, id"
 
-func runTransactionQuery(tx *sql.Tx, query string, args ...interface{}) ([]*Transaction, error) {
+func runTransactionQuery(tx *sql.Tx, query string, args ...interface{}) ([]*table.Transaction, error) {
 	rows, err := runQuery(tx, transactionType, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	return rows.([]*Transaction), nil
+	return rows.([]*table.Transaction), nil
 }
 
 // GetTransactions returns all transactions for the account.
-func GetTransactions(tx *sql.Tx, accountID int64) ([]*Transaction, error) {
+func GetTransactions(tx *sql.Tx, accountID int64) ([]*table.Transaction, error) {
 	return runTransactionQuery(tx, accountTransactionsSQL, accountID)
 }
 
 const transactionsByIDSQL = "select * from transaction where json_contains(?, cast(id as json))"
 
 // GetTransactionsByIDs returns transactions for the specified IDs.
-func GetTransactionsByIDs(tx *sql.Tx, ids []int64) ([]*Transaction, error) {
+func GetTransactionsByIDs(tx *sql.Tx, ids []int64) ([]*table.Transaction, error) {
 	return runTransactionQuery(tx, transactionsByIDSQL, int64sToJson(ids))
 }
 
@@ -35,7 +40,7 @@ const accountRelatedTxSQL = `select rt.*
 	where tx.account_id = ?`
 
 // GetRelatedTransactionsByAccountID returns all related transactions for the account.
-func GetRelatedTransactionsByAccountID(tx *sql.Tx, accountID int64) ([]*Transaction, error) {
+func GetRelatedTransactionsByAccountID(tx *sql.Tx, accountID int64) ([]*table.Transaction, error) {
 	return runTransactionQuery(tx, accountRelatedTxSQL, accountID)
 }
 
@@ -46,7 +51,7 @@ const relatedTxSQL = `select rt.*
 	where json_contains(?, cast(td.transaction_id as json))`
 
 // GetRelatedTransactions returns all related transactions for the transaction IDs.
-func GetRelatedTransactions(tx *sql.Tx, relatedTxIDs []int64) ([]*Transaction, error) {
+func GetRelatedTransactions(tx *sql.Tx, relatedTxIDs []int64) ([]*table.Transaction, error) {
 	return runTransactionQuery(tx, relatedTxSQL, int64sToJson(relatedTxIDs))
 }
 

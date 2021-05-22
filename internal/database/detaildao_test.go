@@ -8,18 +8,19 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
-func testDetailsQuery(t *testing.T, doQuery func(tx *sql.Tx) ([]*TransactionDetail, string, []interface{}, error)) {
+func testDetailsQuery(t *testing.T, doQuery func(tx *sql.Tx) ([]*table.TransactionDetail, string, []interface{}, error)) {
 	expectedErr := errors.New("query failed")
 	tests := []struct {
 		name    string
-		details []*TransactionDetail
+		details []*table.TransactionDetail
 		err     error
 	}{
-		{"returns details", []*TransactionDetail{{ID: 96}}, nil},
+		{"returns details", []*table.TransactionDetail{{ID: 96}}, nil},
 		{"returns query error", nil, expectedErr},
 	}
 	for _, test := range tests {
@@ -39,7 +40,7 @@ func testDetailsQuery(t *testing.T, doQuery func(tx *sql.Tx) ([]*TransactionDeta
 }
 
 func Test_GetDetailsByAccountID(t *testing.T) {
-	testDetailsQuery(t, func(tx *sql.Tx) ([]*TransactionDetail, string, []interface{}, error) {
+	testDetailsQuery(t, func(tx *sql.Tx) ([]*table.TransactionDetail, string, []interface{}, error) {
 		accountID := int64(42)
 
 		result, err := GetDetailsByAccountID(tx, accountID)
@@ -49,7 +50,7 @@ func Test_GetDetailsByAccountID(t *testing.T) {
 }
 
 func Test_GetDetailsByTxIDs(t *testing.T) {
-	testDetailsQuery(t, func(tx *sql.Tx) ([]*TransactionDetail, string, []interface{}, error) {
+	testDetailsQuery(t, func(tx *sql.Tx) ([]*table.TransactionDetail, string, []interface{}, error) {
 		txIDs := []int64{42}
 
 		result, err := GetDetailsByTxIDs(tx, txIDs)
@@ -59,7 +60,7 @@ func Test_GetDetailsByTxIDs(t *testing.T) {
 }
 
 func Test_GetRelatedDetailsByAccountID(t *testing.T) {
-	testDetailsQuery(t, func(tx *sql.Tx) ([]*TransactionDetail, string, []interface{}, error) {
+	testDetailsQuery(t, func(tx *sql.Tx) ([]*table.TransactionDetail, string, []interface{}, error) {
 		accountID := int64(42)
 
 		result, err := GetRelatedDetailsByAccountID(tx, accountID)
@@ -69,7 +70,7 @@ func Test_GetRelatedDetailsByAccountID(t *testing.T) {
 }
 
 func Test_GetRelatedDetailsByTxIDs(t *testing.T) {
-	testDetailsQuery(t, func(tx *sql.Tx) ([]*TransactionDetail, string, []interface{}, error) {
+	testDetailsQuery(t, func(tx *sql.Tx) ([]*table.TransactionDetail, string, []interface{}, error) {
 		txIDs := []int64{42}
 
 		result, err := GetRelatedDetailsByTxIDs(tx, txIDs)

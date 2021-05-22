@@ -8,18 +8,19 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
 
-func assertAccountsError(t *testing.T, result []*Account, err error, expectedErr error) {
+func assertAccountsError(t *testing.T, result []*table.Account, err error, expectedErr error) {
 	assert.Same(t, expectedErr, err)
 	assert.Nil(t, result)
 }
 
 func Test_GetAllAccounts(t *testing.T) {
 	t.Run("returns accounts", func(t *testing.T) {
-		accounts := []*Account{{ID: 1}}
+		accounts := []*table.Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -45,7 +46,7 @@ func Test_GetAllAccounts(t *testing.T) {
 func Test_GetAccountByID(t *testing.T) {
 	id := int64(42)
 	t.Run("returns accounts", func(t *testing.T) {
-		accounts := []*Account{{ID: 1}}
+		accounts := []*table.Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -72,7 +73,7 @@ func Test_GetAccountByID(t *testing.T) {
 func Test_GetAccountsByName(t *testing.T) {
 	name := "account name"
 	t.Run("returns accounts", func(t *testing.T) {
-		accounts := []*Account{{ID: 1}}
+		accounts := []*table.Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -99,7 +100,7 @@ func Test_GetAccountsByName(t *testing.T) {
 func Test_GetAccountsByCompanyID(t *testing.T) {
 	ids := []int64{42, 69}
 	t.Run("returns accounts", func(t *testing.T) {
-		accounts := []*Account{{ID: 1}}
+		accounts := []*table.Account{{ID: 1}}
 		runQueryStub := mocka.Function(t, &runQuery, accounts, nil)
 		defer runQueryStub.Restore()
 		sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {

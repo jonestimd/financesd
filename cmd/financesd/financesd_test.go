@@ -20,19 +20,19 @@ import (
 )
 
 type mockDependencies struct {
-	db           *sql.DB
-	mockDB       sqlmock.Sqlmock
-	staticHTML   *staticHTML
-	sqlOpen      *mocka.Stub
-	newSchema    *mocka.Stub
-	getwd        *mocka.Stub
-	httpHandle   *mocka.Stub
-	netListen    *mocka.Stub
-	serve        *mocka.Stub
-	signalNotify func(c chan<- os.Signal, sig ...os.Signal)
-	loadHTML     *mocka.Stub
-	logAndQuit   func(v ...interface{})
-	exitMessage  []interface{}
+	db              *sql.DB
+	mockDB          sqlmock.Sqlmock
+	staticHandler   *staticHandler
+	sqlOpen         *mocka.Stub
+	newSchema       *mocka.Stub
+	getwd           *mocka.Stub
+	httpHandle      *mocka.Stub
+	netListen       *mocka.Stub
+	serve           *mocka.Stub
+	signalNotify    func(c chan<- os.Signal, sig ...os.Signal)
+	newIndexHandler *mocka.Stub
+	logAndQuit      func(v ...interface{})
+	exitMessage     []interface{}
 }
 
 func (m *mockDependencies) restore(t *testing.T, panicMessage string, verify func()) {
@@ -46,7 +46,7 @@ func (m *mockDependencies) restore(t *testing.T, panicMessage string, verify fun
 	m.httpHandle.Restore()
 	m.netListen.Restore()
 	m.serve.Restore()
-	m.loadHTML.Restore()
+	m.newIndexHandler.Restore()
 	signalNotify = m.signalNotify
 	logAndQuit = m.logAndQuit
 	if verify != nil {
@@ -90,20 +90,20 @@ func makeMocks(t *testing.T) *mockDependencies {
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	staticHTMLValue := &staticHTML{}
+	staticHandlerValue := &staticHandler{}
 	mocks := &mockDependencies{
-		db:           db,
-		mockDB:       mock,
-		staticHTML:   staticHTMLValue,
-		sqlOpen:      mocka.Function(t, &sqlOpen, db, nil),
-		newSchema:    mocka.Function(t, &newSchema, graphql.Schema{}, nil),
-		getwd:        mocka.Function(t, &getwd, "/here", nil),
-		httpHandle:   mocka.Function(t, &httpHandle),
-		netListen:    mocka.Function(t, &netListen, &mockListener{}, nil),
-		serve:        mocka.Function(t, &serve),
-		signalNotify: signalNotify,
-		loadHTML:     mocka.Function(t, &loadHTML, staticHTMLValue),
-		logAndQuit:   logAndQuit,
+		db:              db,
+		mockDB:          mock,
+		staticHandler:   staticHandlerValue,
+		sqlOpen:         mocka.Function(t, &sqlOpen, db, nil),
+		newSchema:       mocka.Function(t, &newSchema, graphql.Schema{}, nil),
+		getwd:           mocka.Function(t, &getwd, "/here", nil),
+		httpHandle:      mocka.Function(t, &httpHandle),
+		netListen:       mocka.Function(t, &netListen, &mockListener{}, nil),
+		serve:           mocka.Function(t, &serve),
+		signalNotify:    signalNotify,
+		newIndexHandler: mocka.Function(t, &newIndexHandler, staticHandlerValue),
+		logAndQuit:      logAndQuit,
 	}
 	signalNotify = func(c chan<- os.Signal, sig ...os.Signal) {
 		c <- os.Interrupt
@@ -128,7 +128,7 @@ func Test_main_connectsToDatabaseAndStartsServer(t *testing.T) {
 	assert.Equal(t, []interface{}{"/finances/api/v1/graphql"}, mocks.httpHandle.GetCall(0).Arguments()[:1])
 	assert.Equal(t, mocks.db, mocks.httpHandle.GetCall(0).Arguments()[1].(*graphqlHandler).db)
 	assert.Equal(t, []interface{}{"/finances/scripts/"}, mocks.httpHandle.GetCall(1).Arguments()[:1])
-	assert.Equal(t, []interface{}{"/finances/", mocks.staticHTML}, mocks.httpHandle.GetCall(2).Arguments())
+	assert.Equal(t, []interface{}{"/finances/", mocks.staticHandler}, mocks.httpHandle.GetCall(2).Arguments())
 	assert.Equal(t, 1, mocks.netListen.CallCount())
 	assert.Equal(t, []interface{}{"tcp", "localhost:8080"}, mocks.netListen.GetCall(0).Arguments())
 	assert.Nil(t, mocks.exitMessage)

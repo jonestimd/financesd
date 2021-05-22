@@ -71,10 +71,10 @@ func main() {
 	if cwd, err := getwd(); err != nil {
 		logAndQuit("can't get current directory")
 	} else {
+		network, address := getListenConfig(config.GetConfig("listen"))
 		httpHandle("/finances/api/v1/graphql", &graphqlHandler{db: db, defaultUser: config.GetString("oauth.user"), handler: gqlHandler})
 		httpHandle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
-		httpHandle("/finances/", loadHTML(cwd, config))
-		network, address := getListenConfig(config.GetConfig("listen"))
+		httpHandle("/finances/", newIndexHandler(cwd, network, address))
 		umask, err := strconv.ParseInt(config.GetString("listen.umask", "0117"), 8, 32)
 		if err != nil {
 			umask = 79
@@ -171,41 +171,62 @@ type staticHTML struct {
 	content string
 }
 
-var loadHTML = func(cwd string, config *configuration.Config) *staticHTML {
+type staticHandler struct {
+	baseUrl  string
+	template *template.Template
+	renders  map[string]*staticHTML
+}
+
+var newIndexHandler = func(cwd string, network string, address string) *staticHandler {
 	file := filepath.Join(cwd, "web", "resources", "index.html")
-	stat, err := os.Stat(file)
-	if err != nil {
-		log.Panicf("Can't stat file: %s, %v", file, err)
-	}
 	htmlTemplate, err := template.New("index.html").ParseFiles(file)
 	if err != nil {
 		log.Panicf("Error reading template html: %v", err)
 	}
-	data := map[string]string{
-		"baseUrl": config.GetString("baseUrl", "http://localhost:8080/finances"),
+	var baseUrl string
+	if network == "tcp" {
+		baseUrl = "http://" + address + "/finances"
+	} else {
+		baseUrl = "unix://" + address + "/finances"
 	}
-	var buff bytes.Buffer
-	if err = htmlTemplate.Execute(&buff, data); err != nil {
-		log.Panicf("Error generating html: %v", err)
-	}
-	content := buff.String()
-	return &staticHTML{content: content, size: int64(len(content)), modTime: stat.ModTime()}
+	return &staticHandler{baseUrl: baseUrl, template: htmlTemplate, renders: make(map[string]*staticHTML)}
 }
 
 var unixEpochTime = time.Unix(0, 0)
 
-func (st *staticHTML) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (st *staticHandler) getHTML(r *http.Request) *staticHTML {
+	baseUrl := r.Header.Get("X-Forwarded-For")
+	if baseUrl == "" {
+		baseUrl = st.baseUrl
+	}
+	var html *staticHTML
+	var ok bool
+	if html, ok = st.renders[baseUrl]; !ok {
+		data := map[string]string{"baseUrl": baseUrl}
+		var buff bytes.Buffer
+		if err := st.template.Execute(&buff, data); err != nil {
+			log.Panicf("Error generating html: %v", err)
+		}
+		content := buff.String()
+		html = &staticHTML{content: content, modTime: time.Now(), size: int64(len(content))}
+		st.renders[baseUrl] = html
+	}
+	return html
+}
+
+func (st *staticHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Header().Set("Allow", "GET, OPTIONS, HEAD")
 	}
-	w.Header().Set("Last-Modified", st.modTime.UTC().Format(http.TimeFormat))
+	html := st.getHTML(r)
+	w.Header().Set("Last-Modified", html.modTime.UTC().Format(http.TimeFormat))
 	ims := r.Header.Get("If-Modified-Since")
-	if ims != "" && !st.modTime.IsZero() && st.modTime != unixEpochTime {
+	if ims != "" && !html.modTime.IsZero() && html.modTime != unixEpochTime {
 		if t, err := http.ParseTime(ims); err == nil {
 			// The Date-Modified header truncates sub-second precision, so
 			// use mtime < t+1s instead of mtime <= t to check for unmodified.
-			if !st.modTime.Before(t.Add(1 * time.Second)) {
+			if !html.modTime.Before(t.Add(1 * time.Second)) {
 				h := w.Header()
 				delete(h, "Content-Type")
 				delete(h, "Content-Length")
@@ -218,9 +239,9 @@ func (st *staticHTML) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
-	w.Header().Set("Content-Length", strconv.FormatInt(st.size, 10))
+	w.Header().Set("Content-Length", strconv.FormatInt(html.size, 10))
 	w.WriteHeader(http.StatusOK)
 	if r.Method == "GET" {
-		io.CopyN(w, strings.NewReader(st.content), st.size)
+		io.CopyN(w, strings.NewReader(html.content), html.size)
 	}
 }

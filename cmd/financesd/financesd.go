@@ -185,7 +185,7 @@ var newIndexHandler = func(cwd string, network string, address string) *staticHa
 	}
 	var baseUrl string
 	if network == "tcp" {
-		baseUrl = "http://" + address + "/finances"
+		baseUrl = "http://" + address + "/finances/"
 	} else {
 		baseUrl = "unix://" + address + "/finances"
 	}
@@ -198,6 +198,9 @@ func (st *staticHandler) getHTML(r *http.Request) *staticHTML {
 	baseUrl := r.Header.Get("X-Forwarded-For")
 	if baseUrl == "" {
 		baseUrl = st.baseUrl
+	}
+	if baseUrl[len(baseUrl)-1] == '/' {
+		baseUrl = baseUrl[:len(baseUrl)-1]
 	}
 	var html *staticHTML
 	var ok bool

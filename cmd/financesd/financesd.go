@@ -8,11 +8,14 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/felixge/httpsnoop"
@@ -24,7 +27,8 @@ import (
 )
 
 var httpHandle = http.Handle
-var httpListenAndServe = http.ListenAndServe
+var netListen = net.Listen
+var signalNotify = signal.Notify
 var logAndQuit = log.Fatal
 var sqlOpen = sql.Open
 var newSchema = schema.New
@@ -70,16 +74,43 @@ func main() {
 		httpHandle("/finances/api/v1/graphql", &graphqlHandler{db: db, defaultUser: config.GetString("oauth.user"), handler: gqlHandler})
 		httpHandle("/finances/scripts/", http.StripPrefix("/finances/scripts/", http.FileServer(http.Dir(filepath.Join(cwd, "web", "dist")))))
 		httpHandle("/finances/", loadHTML(cwd, config))
-		router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
-			log.Printf("%d %-5s %s %s %d %v %s\n", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
-				snoop.Duration.Truncate(time.Millisecond), r.UserAgent())
-		})
-		host := config.GetString("listen.host", "localhost")
-		port := config.GetInt32("listen.port", 8080)
-		log.Printf("Listening at %s:%d/finances\n", host, port)
-		logAndQuit(httpListenAndServe(fmt.Sprintf("%s:%d", host, port), router))
+		network, address := getListenConfig(config.GetConfig("listen"))
+		umask, err := strconv.ParseInt(config.GetString("listen.umask", "0117"), 8, 32)
+		if err != nil {
+			umask = 79
+		}
+		syscall.Umask(int(umask))
+		log.Printf("Listening at %s:%s\n", network, address)
+		listener, err := netListen(network, address)
+		if err != nil {
+			log.Fatalf("Error listening: %v", err)
+		}
+		defer listener.Close()
+		go func() {
+			router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
+				log.Printf("%d %-5s %s %s %d %v %s\n", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
+					snoop.Duration.Truncate(time.Millisecond), r.UserAgent())
+			})
+			serve(listener, router)
+		}()
+
+		sigc := make(chan os.Signal, 1)
+		signalNotify(sigc, os.Interrupt, syscall.SIGTERM)
+		s := <-sigc
+		log.Print("Got signal: ", s)
 	}
+}
+
+var serve = func(listener net.Listener, router http.HandlerFunc) {
+	server := &http.Server{Handler: router}
+	log.Fatal(server.Serve(listener))
+}
+
+func getListenConfig(config *configuration.Config) (network string, address string) {
+	network = config.GetString("network", "tcp")
+	address = config.GetString("address", "localhost:8080")
+	return
 }
 
 type graphqlHandler struct {

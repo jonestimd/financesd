@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -19,17 +20,19 @@ import (
 )
 
 type mockDependencies struct {
-	db                 *sql.DB
-	mockDB             sqlmock.Sqlmock
-	staticHTML         *staticHTML
-	sqlOpen            *mocka.Stub
-	newSchema          *mocka.Stub
-	getwd              *mocka.Stub
-	httpHandle         *mocka.Stub
-	httpListenAndServe *mocka.Stub
-	loadHTML           *mocka.Stub
-	logAndQuit         func(v ...interface{})
-	exitMessage        []interface{}
+	db           *sql.DB
+	mockDB       sqlmock.Sqlmock
+	staticHTML   *staticHTML
+	sqlOpen      *mocka.Stub
+	newSchema    *mocka.Stub
+	getwd        *mocka.Stub
+	httpHandle   *mocka.Stub
+	netListen    *mocka.Stub
+	serve        *mocka.Stub
+	signalNotify func(c chan<- os.Signal, sig ...os.Signal)
+	loadHTML     *mocka.Stub
+	logAndQuit   func(v ...interface{})
+	exitMessage  []interface{}
 }
 
 func (m *mockDependencies) restore(t *testing.T, panicMessage string, verify func()) {
@@ -41,12 +44,45 @@ func (m *mockDependencies) restore(t *testing.T, panicMessage string, verify fun
 	m.newSchema.Restore()
 	m.getwd.Restore()
 	m.httpHandle.Restore()
-	m.httpListenAndServe.Restore()
+	m.netListen.Restore()
+	m.serve.Restore()
 	m.loadHTML.Restore()
+	signalNotify = m.signalNotify
 	logAndQuit = m.logAndQuit
 	if verify != nil {
 		verify()
 	}
+}
+
+type mockListener struct {
+	closed bool
+}
+
+func (l *mockListener) Accept() (net.Conn, error) {
+	return nil, &netError{}
+}
+
+func (l *mockListener) Close() error {
+	l.closed = true
+	return nil
+}
+
+func (l *mockListener) Addr() net.Addr {
+	return nil
+}
+
+type netError struct{}
+
+func (ne *netError) Error() string {
+	return "fake listener"
+}
+
+func (ne *netError) Timeout() bool {
+	return false
+}
+
+func (ne *netError) Temporary() bool {
+	return true
 }
 
 func makeMocks(t *testing.T) *mockDependencies {
@@ -56,17 +92,22 @@ func makeMocks(t *testing.T) *mockDependencies {
 	}
 	staticHTMLValue := &staticHTML{}
 	mocks := &mockDependencies{
-		db:                 db,
-		mockDB:             mock,
-		staticHTML:         staticHTMLValue,
-		sqlOpen:            mocka.Function(t, &sqlOpen, db, nil),
-		newSchema:          mocka.Function(t, &newSchema, graphql.Schema{}, nil),
-		getwd:              mocka.Function(t, &getwd, "/here", nil),
-		httpHandle:         mocka.Function(t, &httpHandle),
-		httpListenAndServe: mocka.Function(t, &httpListenAndServe, errors.New("stopped server")),
-		loadHTML:           mocka.Function(t, &loadHTML, staticHTMLValue),
+		db:           db,
+		mockDB:       mock,
+		staticHTML:   staticHTMLValue,
+		sqlOpen:      mocka.Function(t, &sqlOpen, db, nil),
+		newSchema:    mocka.Function(t, &newSchema, graphql.Schema{}, nil),
+		getwd:        mocka.Function(t, &getwd, "/here", nil),
+		httpHandle:   mocka.Function(t, &httpHandle),
+		netListen:    mocka.Function(t, &netListen, &mockListener{}, nil),
+		serve:        mocka.Function(t, &serve),
+		signalNotify: signalNotify,
+		loadHTML:     mocka.Function(t, &loadHTML, staticHTMLValue),
+		logAndQuit:   logAndQuit,
 	}
-	mocks.logAndQuit = logAndQuit
+	signalNotify = func(c chan<- os.Signal, sig ...os.Signal) {
+		c <- os.Interrupt
+	}
 	logAndQuit = func(v ...interface{}) {
 		mocks.exitMessage = v
 		panic("log.Fatal")
@@ -77,22 +118,20 @@ func makeMocks(t *testing.T) *mockDependencies {
 func Test_main_connectsToDatabaseAndStartsServer(t *testing.T) {
 	mocks := makeMocks(t)
 	mocks.mockDB.ExpectPing()
-	defer mocks.restore(t, "log.Fatal", func() {
-		assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
-		assert.Equal(t, 3, mocks.httpHandle.CallCount())
-		assert.Equal(t, []interface{}{"/finances/api/v1/graphql"}, mocks.httpHandle.GetCall(0).Arguments()[:1])
-		assert.Equal(t, mocks.db, mocks.httpHandle.GetCall(0).Arguments()[1].(*graphqlHandler).db)
-		assert.Equal(t, []interface{}{"/finances/scripts/"}, mocks.httpHandle.GetCall(1).Arguments()[:1])
-		assert.Equal(t, []interface{}{"/finances/", mocks.staticHTML}, mocks.httpHandle.GetCall(2).Arguments())
-		assert.Equal(t, 1, mocks.httpListenAndServe.CallCount())
-		assert.Equal(t, []interface{}{"localhost:8080"}, mocks.httpListenAndServe.GetCall(0).Arguments()[:1])
-		assert.Equal(t, []interface{}{errors.New("stopped server")}, mocks.exitMessage)
-	})
+	defer mocks.restore(t, "", nil)
 	os.Args = os.Args[0:1]
 
 	main()
 
-	assert.Fail(t, "expected log.Fatal")
+	assert.Nil(t, mocks.mockDB.ExpectationsWereMet())
+	assert.Equal(t, 3, mocks.httpHandle.CallCount())
+	assert.Equal(t, []interface{}{"/finances/api/v1/graphql"}, mocks.httpHandle.GetCall(0).Arguments()[:1])
+	assert.Equal(t, mocks.db, mocks.httpHandle.GetCall(0).Arguments()[1].(*graphqlHandler).db)
+	assert.Equal(t, []interface{}{"/finances/scripts/"}, mocks.httpHandle.GetCall(1).Arguments()[:1])
+	assert.Equal(t, []interface{}{"/finances/", mocks.staticHTML}, mocks.httpHandle.GetCall(2).Arguments())
+	assert.Equal(t, 1, mocks.netListen.CallCount())
+	assert.Equal(t, []interface{}{"tcp", "localhost:8080"}, mocks.netListen.GetCall(0).Arguments())
+	assert.Nil(t, mocks.exitMessage)
 }
 
 func Test_main_quitsIfDbConnectionFails(t *testing.T) {

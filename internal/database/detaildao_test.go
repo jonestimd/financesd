@@ -404,3 +404,30 @@ func Test_DeleteTransfer(t *testing.T) {
 		})
 	})
 }
+
+func Test_ValidateDetails(t *testing.T) {
+	transactionIDs := []int64{42, 96, 69}
+	t.Run("runs validation query", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			rows := sqltest.MockRows("id", "error").AddRow(int64(42), "invalid shares").AddRow(int64(96), "shares required")
+			mockDB.ExpectQuery(validateDetailsSQL).WithArgs(int64sToJson(transactionIDs)).WillReturnRows(rows)
+
+			result, err := ValidateDetails(tx, transactionIDs)
+
+			assert.Nil(t, err)
+			assert.Equal(t, map[int64]string{42: "invalid shares", 96: "shares required"}, result)
+			assert.Nil(t, mockDB.ExpectationsWereMet())
+		})
+	})
+	t.Run("returns query error", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			expectedErr := errors.New("query error")
+			mockDB.ExpectQuery(validateDetailsSQL).WithArgs(int64sToJson(transactionIDs)).WillReturnError(expectedErr)
+
+			_, err := ValidateDetails(tx, transactionIDs)
+
+			assert.Same(t, expectedErr, err)
+			assert.Nil(t, mockDB.ExpectationsWereMet())
+		})
+	})
+}

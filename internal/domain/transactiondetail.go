@@ -75,7 +75,9 @@ var updateTxDetails = func(tx *sql.Tx, txId int64, details []map[string]interfac
 					}
 				}
 				if setAmount && !setCategory {
-					return setTransferAmount(tx, id.ID, amount, user)
+					if err := setTransferAmount(tx, id.ID, amount, user); err != nil {
+						return err
+					}
 				}
 			}
 		} else {

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/database"
@@ -57,6 +58,13 @@ func UpdateTransactions(tx *sql.Tx, updates []map[string]interface{}, user strin
 			if err := updateTxDetails(tx, ids[i], detailUpdates, user); err != nil {
 				return nil, err
 			}
+		}
+	}
+	if len(ids) > 0 {
+		if errors, err := validateDetails(tx, ids); err != nil {
+			return nil, err
+		} else if len(errors) > 0 {
+			return nil, fmt.Errorf("transaction detail errors: %v", errors)
 		}
 	}
 	return ids, nil

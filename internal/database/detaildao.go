@@ -183,3 +183,38 @@ func DeleteTransfer(tx *sql.Tx, relatedDetailId int64) error {
 	_, err := runUpdate(tx, deleteEmptyTransactionsSQL)
 	return err
 }
+
+const validateDetailsSQL = `select id, error
+from (
+    select td.id
+    , case when t.security_id is null and tc.security = 'Y' is null then concat('security required for category: ', tc.id)
+        when tc.asset_exchange = 'Y' and td.asset_quantity is null then concat('shares required for category: ', tc.id)
+        when tc.asset_exchange = 'N' and td.asset_quantity is not null then concat('shares not allowed for category: ', tc.id)
+        when tc.income = 'N' and td.asset_quantity < 0 then 'shares must be positive for expense category'
+        when tc.income = 'Y' and td.asset_quantity > 0 then 'shares must be negative for income category'
+        else null
+	  end error
+    from transaction_detail td
+    join transaction t on td.transaction_id = t.id
+    left join transaction_category tc on td.transaction_category_id = tc.id
+	where json_contains(?, td.transaction_id)) errors
+where errors.error is not null;
+
+select *
+from transaction_category`
+
+// ValidateDetails checks for invalid security fields and returns a map of detail ID to validation error.
+func ValidateDetails(tx *sql.Tx, transactionIDs []int64) (map[int64]string, error) {
+	rows, err := tx.Query(validateDetailsSQL, int64sToJson(transactionIDs))
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[int64]string)
+	for rows.Next() {
+		var id int64
+		var text string
+		rows.Scan(&id, &text)
+		result[id] = text
+	}
+	return result, nil
+}

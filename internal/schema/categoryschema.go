@@ -17,6 +17,7 @@ var categorySchema = graphql.NewObject(graphql.ObjectConfig{
 		"parentId":         &graphql.Field{Type: graphql.Int},
 		"security":         &graphql.Field{Type: yesNoType},
 		"income":           &graphql.Field{Type: yesNoType},
+		"assetExchange":    &graphql.Field{Type: yesNoType},
 		"transactionCount": &graphql.Field{Type: graphql.Int},
 	}),
 })

@@ -29,6 +29,7 @@ var getRelatedDetailsByTxIDs = database.GetRelatedDetailsByTxIDs
 var getRelatedDetailsByAccountID = database.GetRelatedDetailsByAccountID
 var insertDetail = database.InsertDetail
 var updateDetail = database.UpdateDetail
+var validateDetails = database.ValidateDetails
 var addOrUpdateTransfer = database.AddOrUpdateTransfer
 var setTransferAmount = database.SetTransferAmount
 var deleteDetails = database.DeleteDetails

@@ -9,6 +9,7 @@ type Category struct {
 	ParentID         *int64
 	Security         *YesNo
 	Income           *YesNo
+	AssetExchange    *YesNo
 	Version          int64
 	TransactionCount int64
 	Audited
@@ -30,6 +31,8 @@ func (tc *Category) PtrTo(column string) interface{} {
 		return &tc.Security
 	case "income":
 		return &tc.Income
+	case "asset_exchange":
+		return &tc.AssetExchange
 	case "version":
 		return &tc.Version
 	case "transaction_count":

@@ -94,12 +94,17 @@ func Test_UpdateTransactions(t *testing.T) {
 				sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 					updateTransactionStub := mocka.Function(t, &updateTransaction, test.err)
 					defer updateTransactionStub.Restore()
+					validateDetailsStub := mocka.Function(t, &validateDetails, nil, nil)
+					defer validateDetailsStub.Restore()
 
 					ids, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
 
 					assert.Equal(t, test.ids, ids)
 					assert.Equal(t, test.err, err)
 					assert.Equal(t, []interface{}{tx, int64(id), int64(version), update, user}, updateTransactionStub.GetCall(0).Arguments())
+					if err == nil {
+						assert.Equal(t, []interface{}{tx, []int64{int64(id)}}, validateDetailsStub.GetCall(0).Arguments())
+					}
 				})
 			})
 		}
@@ -121,14 +126,19 @@ func Test_UpdateTransactions(t *testing.T) {
 			t.Run(test.name, func(t *testing.T) {
 				sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 					updateTransactionStub := mocka.Function(t, &updateTransaction, nil)
-					updateTxDetailsStub := mocka.Function(t, &updateTxDetails, test.err)
 					defer updateTransactionStub.Restore()
+					updateTxDetailsStub := mocka.Function(t, &updateTxDetails, test.err)
 					defer updateTxDetailsStub.Restore()
+					validateDetailsStub := mocka.Function(t, &validateDetails, nil, nil)
+					defer validateDetailsStub.Restore()
 
 					_, err := UpdateTransactions(tx, []map[string]interface{}{update}, user)
 
 					assert.Equal(t, test.err, err)
 					assert.Equal(t, []interface{}{tx, int64(id), update["details"], user}, updateTxDetailsStub.GetCall(0).Arguments())
+					if err == nil {
+						assert.Equal(t, []interface{}{tx, []int64{int64(id)}}, validateDetailsStub.GetCall(0).Arguments())
+					}
 				})
 			})
 		}

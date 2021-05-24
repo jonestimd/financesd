@@ -70,7 +70,7 @@ var transactionQueryFields = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		accountID := p.Args["accountId"].(int)
-		return getAccountTransactions(tx, int64(accountID))
+		return getAccountTransactions(tx, int64(accountID)), nil
 	},
 }
 
@@ -159,7 +159,6 @@ var updateTxFields = &graphql.Field{
 		"delete":    {Type: intList, Description: "IDs of transactions to delete."}, // TODO include versions?
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		var err error
 		transactions := []*domain.Transaction{}
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
@@ -168,10 +167,8 @@ var updateTxFields = &graphql.Field{
 		// }
 		if updates, ok := p.Args["update"]; ok {
 			var ids []int64
-			if ids, err = updateTransactions(tx, updates.([]map[string]interface{}), user); err != nil {
-				return nil, err
-			}
-			transactions, err = getTransactionsByIDs(tx, ids)
+			ids = updateTransactions(tx, updates.([]map[string]interface{}), user)
+			transactions = getTransactionsByIDs(tx, ids)
 		}
 		// if names, ok := p.Args["add"]; ok {
 		// 	if added, err := addCompanies(tx, asStrings(names), user); err != nil {
@@ -180,6 +177,6 @@ var updateTxFields = &graphql.Field{
 		// 		companies = append(companies, added...)
 		// 	}
 		// }
-		return transactions, err
+		return transactions, nil
 	},
 }

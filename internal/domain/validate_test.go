@@ -13,15 +13,23 @@ func Test_validateName(t *testing.T) {
 		value string
 		err   error
 	}{
-		{"returns error for empty name", "", errors.New("name must not be empty")},
-		{"returns error leading whitespace", " x", errors.New("name must not contain leading or trailing white space")},
-		{"returns error trailing whitespace", "x ", errors.New("name must not contain leading or trailing white space")},
-		{"returns nil for valid name", "x", nil},
+		{"panics for empty name", "", errors.New("name must not be empty")},
+		{"panics for leading whitespace", " x", errors.New("name must not contain leading or trailing white space")},
+		{"panics for trailing whitespace", "x ", errors.New("name must not contain leading or trailing white space")},
+		{"returns for valid name", "x", nil},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.err, validateName(test.value))
+			defer func() {
+				if err := recover(); err != nil {
+					assert.Equal(t, test.err, err)
+				} else if test.err != nil {
+					assert.Fail(t, "expected an error")
+				}
+			}()
+
+			validateName(test.value)
 		})
 	}
 }

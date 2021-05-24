@@ -14,7 +14,7 @@ import (
 
 func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 	transactions := []*domain.Transaction{domain.NewTransaction(42)}
-	getTransactions := mocka.Function(t, &getAccountTransactions, transactions, nil)
+	getTransactions := mocka.Function(t, &getAccountTransactions, transactions)
 	defer getTransactions.Restore()
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		accountID := 123
@@ -128,37 +128,20 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 	id := 42
 	name := "new name"
 	args := []map[string]interface{}{{"id": id, "name": name}}
-	tests := []struct {
-		name         string
-		updateIDs    []int64
-		transactions interface{}
-		updateErr    error
-		lookupErr    error
-	}{
-		{"returns updated transactions", []int64{42}, []*domain.Transaction{domain.NewTransaction(int64(id))}, nil, nil},
-		{"returns update error", nil, nil, errors.New("test error"), nil},
-		{"returns lookup error", []int64{42}, ([]*domain.Transaction)(nil), nil, errors.New("test error")},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-				mockUpdateTransactions := mocka.Function(t, &updateTransactions, test.updateIDs, test.updateErr)
-				defer mockUpdateTransactions.Restore()
-				mockGetTransactions := mocka.Function(t, &getTransactionsByIDs, test.transactions, test.lookupErr)
-				defer mockGetTransactions.Restore()
-				params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("update", args)
+	updateIDs := []int64{42}
+	transactions := []*domain.Transaction{domain.NewTransaction(int64(id))}
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		mockUpdateTransactions := mocka.Function(t, &updateTransactions, updateIDs)
+		defer mockUpdateTransactions.Restore()
+		mockGetTransactions := mocka.Function(t, &getTransactionsByIDs, transactions)
+		defer mockGetTransactions.Restore()
+		params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("update", args)
 
-				result, err := updateTxFields.Resolve(params.ResolveParams)
+		result, err := updateTxFields.Resolve(params.ResolveParams)
 
-				assert.Equal(t, test.transactions, result)
-				assert.Equal(t, []interface{}{tx, args, "somebody"}, mockUpdateTransactions.GetFirstCall().Arguments())
-				if test.updateErr == nil {
-					assert.Equal(t, test.lookupErr, err)
-					assert.Equal(t, []interface{}{tx, test.updateIDs}, mockGetTransactions.GetCall(0).Arguments())
-				} else {
-					assert.Equal(t, test.updateErr, err)
-				}
-			})
-		})
-	}
+		assert.Equal(t, transactions, result)
+		assert.Equal(t, []interface{}{tx, args, "somebody"}, mockUpdateTransactions.GetFirstCall().Arguments())
+		assert.Nil(t, err)
+		assert.Equal(t, []interface{}{tx, updateIDs}, mockGetTransactions.GetCall(0).Arguments())
+	})
 }

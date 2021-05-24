@@ -31,13 +31,13 @@ func companyQueryFields() *graphql.Field {
 			tx := p.Context.Value(DbContextKey).(*sql.Tx)
 			if idArg, ok := p.Args["id"]; ok {
 				id := idArg.(int)
-				return getCompanyByID(tx, int64(id))
+				return getCompanyByID(tx, int64(id)), nil
 			}
 			if nameArg, ok := p.Args["name"]; ok {
 				name, _ := nameArg.(string)
-				return getCompanyByName(tx, name)
+				return getCompanyByName(tx, name), nil
 			}
-			return getAllCompanies(tx)
+			return getAllCompanies(tx), nil
 		},
 	}
 }
@@ -70,26 +70,18 @@ var updateCompaniesFields = &graphql.Field{
 		"delete": {Type: intList, Description: "IDs of companies to delete."},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-		var err error
 		companies := make([]*domain.Company, 0)
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
 		if ids, ok := p.Args["delete"]; ok {
-			if _, err = deleteCompanies(tx, asInts(ids)); err != nil {
-				return nil, err
-			}
+			deleteCompanies(tx, asInts(ids))
 		}
 		if updates, ok := p.Args["update"]; ok {
-			if companies, err = updateCompanies(tx, updates, user); err != nil {
-				return nil, err
-			}
+			companies = updateCompanies(tx, updates, user)
 		}
 		if names, ok := p.Args["add"]; ok {
-			if added, err := addCompanies(tx, asStrings(names), user); err != nil {
-				return nil, err
-			} else {
-				companies = append(companies, added...)
-			}
+			added := addCompanies(tx, asStrings(names), user)
+			companies = append(companies, added...)
 		}
 		return companies, nil
 	},

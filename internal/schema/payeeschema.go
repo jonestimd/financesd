@@ -20,6 +20,6 @@ var payeeQueryFields = &graphql.Field{
 	Type: graphql.NewList(payeeSchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return getAllPayees(tx)
+		return getAllPayees(tx), nil
 	},
 }

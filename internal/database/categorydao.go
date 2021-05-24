@@ -14,10 +14,7 @@ const categorySQL = `select c.*,
 from transaction_category c`
 
 // GetAllCategories loads all transaction categories.
-func GetAllCategories(tx *sql.Tx) ([]*table.Category, error) {
-	categories, err := runQuery(tx, categoryType, categorySQL)
-	if err != nil {
-		return nil, err
-	}
-	return categories.([]*table.Category), nil
+func GetAllCategories(tx *sql.Tx) []*table.Category {
+	categories := runQuery(tx, categoryType, categorySQL)
+	return categories.([]*table.Category)
 }

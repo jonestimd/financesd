@@ -14,10 +14,7 @@ const payeeSQL = `select p.*,
 from payee p`
 
 // GetAllPayees loads all payees.
-func GetAllPayees(tx *sql.Tx) ([]*table.Payee, error) {
-	payees, err := runQuery(tx, payeeType, payeeSQL)
-	if err != nil {
-		return nil, err
-	}
-	return payees.([]*table.Payee), nil
+func GetAllPayees(tx *sql.Tx) []*table.Payee {
+	payees := runQuery(tx, payeeType, payeeSQL)
+	return payees.([]*table.Payee)
 }

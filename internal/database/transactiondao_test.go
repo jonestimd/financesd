@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -13,30 +12,16 @@ import (
 )
 
 func Test_GetTransactions(t *testing.T) {
-	accountID := int64(42)
-	t.Run("returns query error", func(t *testing.T) {
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			expectedErr := errors.New("test error")
-			mockDB.ExpectQuery(accountTransactionsSQL).WithArgs(accountID).WillReturnError(expectedErr)
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		accountID := int64(42)
+		txID := int64(69)
+		expectedTx := &table.Transaction{ID: txID}
+		mockDB.ExpectQuery(accountTransactionsSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
 
-			_, err := GetTransactions(tx, accountID)
+		result := GetTransactions(tx, accountID)
 
-			assert.Same(t, expectedErr, err)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
-		})
-	})
-	t.Run("returns transactions", func(t *testing.T) {
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			txID := int64(69)
-			expectedTx := &table.Transaction{ID: txID}
-			mockDB.ExpectQuery(accountTransactionsSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
-
-			result, err := GetTransactions(tx, accountID)
-
-			assert.Nil(t, err)
-			assert.Equal(t, []*table.Transaction{expectedTx}, result)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
-		})
+		assert.Equal(t, []*table.Transaction{expectedTx}, result)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
 	})
 }
 
@@ -72,67 +57,43 @@ func Test_UpdateTransaction(t *testing.T) {
 						update["cleared"],
 						test.field == "accountId", update.IntOrNull("accountId"),
 						user, id, version}}
-				runUpdateStub := mocka.Function(t, &runUpdate, int64(1), nil)
+				runUpdateStub := mocka.Function(t, &runUpdate, int64(1))
 				defer runUpdateStub.Restore()
 
-				err := UpdateTransaction(tx, id, version, update, user)
+				UpdateTransaction(tx, id, version, update, user)
 
-				assert.Nil(t, err)
 				assert.Equal(t, expectedArgs, runUpdateStub.GetCall(0).Arguments())
 				assert.Nil(t, mockDB.ExpectationsWereMet())
 			})
 		})
 	}
-	expectedErr := errors.New("test error")
-	t.Run("returns query error", func(t *testing.T) {
+	t.Run("panics for not found", func(t *testing.T) {
 		update := InputObject{}
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			runUpdateStub := mocka.Function(t, &runUpdate, int64(0), expectedErr)
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(0))
 			defer runUpdateStub.Restore()
+			defer func() {
+				assert.Nil(t, mockDB.ExpectationsWereMet())
+				if err := recover(); err != nil {
+					assert.Equal(t, "transaction not found (42 @ 1)", err.(error).Error())
+				} else {
+					assert.Fail(t, "expected an error")
+				}
+			}()
 
-			err := UpdateTransaction(tx, id, version, update, user)
-
-			assert.Same(t, expectedErr, err)
-			assert.Nil(t, mockDB.ExpectationsWereMet())
-		})
-	})
-	t.Run("returns error for not found", func(t *testing.T) {
-		update := InputObject{}
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			runUpdateStub := mocka.Function(t, &runUpdate, int64(0), nil)
-			defer runUpdateStub.Restore()
-
-			err := UpdateTransaction(tx, id, version, update, user)
-
-			assert.Equal(t, "transaction not found (42 @ 1)", err.Error())
-			assert.Nil(t, mockDB.ExpectationsWereMet())
+			UpdateTransaction(tx, id, version, update, user)
 		})
 	})
 }
 
 func Test_GetTransactionsByIDs(t *testing.T) {
-	t.Run("returns transactions", func(t *testing.T) {
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			transactions := []*table.Transaction{{ID: 42}}
-			runQueryStub := mocka.Function(t, &runQuery, transactions, nil)
-			defer runQueryStub.Restore()
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		transactions := []*table.Transaction{{ID: 42}}
+		runQueryStub := mocka.Function(t, &runQuery, transactions)
+		defer runQueryStub.Restore()
 
-			result, err := GetTransactionsByIDs(tx, []int64{42})
+		result := GetTransactionsByIDs(tx, []int64{42})
 
-			assert.Nil(t, err)
-			assert.Equal(t, transactions, result)
-		})
-	})
-	t.Run("returns query error", func(t *testing.T) {
-		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			expectdErr := errors.New("query error")
-			runQueryStub := mocka.Function(t, &runQuery, nil, expectdErr)
-			defer runQueryStub.Restore()
-
-			result, err := GetTransactionsByIDs(tx, []int64{42})
-
-			assert.Same(t, expectdErr, err)
-			assert.Nil(t, result)
-		})
+		assert.Equal(t, transactions, result)
 	})
 }

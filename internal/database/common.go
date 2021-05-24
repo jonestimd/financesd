@@ -20,14 +20,14 @@ type tableModel interface {
 }
 
 // returns a slice of model pointers
-var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...interface{}) (interface{}, error) {
+var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...interface{}) interface{} {
 	rows, err := tx.Query(sql, args...)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	models := reflect.MakeSlice(reflect.SliceOf(reflect.PtrTo(modelType)), 0, 0)
 	for rows.Next() {
@@ -37,34 +37,38 @@ var runQuery = func(tx *sql.Tx, modelType reflect.Type, sql string, args ...inte
 			values[i] = m.(tableModel).PtrTo(column)
 		}
 		if err = rows.Scan(values...); err != nil {
-			return models, err
+			panic(err)
 		}
 		models = reflect.Append(models, reflect.ValueOf(m))
 	}
-	return models.Interface(), nil
+	return models.Interface()
 }
 
-func execUpdate(tx *sql.Tx, sql string, args ...interface{}) (sql.Result, error) {
+func execUpdate(tx *sql.Tx, sql string, args ...interface{}) sql.Result {
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer stmt.Close()
-	return stmt.Exec(args...)
+	result, err := stmt.Exec(args...)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }
 
-var runUpdate = func(tx *sql.Tx, sql string, args ...interface{}) (int64, error) {
-	rs, err := execUpdate(tx, sql, args...)
+var runUpdate = func(tx *sql.Tx, sql string, args ...interface{}) int64 {
+	count, err := execUpdate(tx, sql, args...).RowsAffected()
 	if err != nil {
-		return 0, err
+		panic(err)
 	}
-	return rs.RowsAffected()
+	return count
 }
 
-var runInsert = func(tx *sql.Tx, sql string, args ...interface{}) (int64, error) {
-	rs, err := execUpdate(tx, sql, args...)
+var runInsert = func(tx *sql.Tx, sql string, args ...interface{}) int64 {
+	id, err := execUpdate(tx, sql, args...).LastInsertId()
 	if err != nil {
-		return 0, err
+		panic(err)
 	}
-	return rs.LastInsertId()
+	return id
 }

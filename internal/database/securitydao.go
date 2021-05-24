@@ -36,28 +36,19 @@ left join (
 ) summary on summary.security_id = a.id`
 
 // GetAllSecurities loads all securities.
-func GetAllSecurities(tx *sql.Tx) ([]*table.Security, error) {
-	securities, err := runQuery(tx, securityType, securitySQL)
-	if err != nil {
-		return nil, err
-	}
-	return securities.([]*table.Security), nil
+func GetAllSecurities(tx *sql.Tx) []*table.Security {
+	securities := runQuery(tx, securityType, securitySQL)
+	return securities.([]*table.Security)
 }
 
 // GetSecurityByID returns the security with ID.
-func GetSecurityByID(tx *sql.Tx, id int64) ([]*table.Security, error) {
-	securities, err := runQuery(tx, securityType, securitySQL+" where a.id = ?", id)
-	if err != nil {
-		return nil, err
-	}
-	return securities.([]*table.Security), nil
+func GetSecurityByID(tx *sql.Tx, id int64) []*table.Security {
+	securities := runQuery(tx, securityType, securitySQL+" where a.id = ?", id)
+	return securities.([]*table.Security)
 }
 
 // GetSecurityBySymbol returns the security for the symbol.
-func GetSecurityBySymbol(tx *sql.Tx, symbol string) ([]*table.Security, error) {
-	securities, err := runQuery(tx, securityType, securitySQL+" where s.symbol = ?", symbol)
-	if err != nil {
-		return nil, err
-	}
-	return securities.([]*table.Security), nil
+func GetSecurityBySymbol(tx *sql.Tx, symbol string) []*table.Security {
+	securities := runQuery(tx, securityType, securitySQL+" where s.symbol = ?", symbol)
+	return securities.([]*table.Security)
 }

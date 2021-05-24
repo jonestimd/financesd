@@ -14,10 +14,7 @@ const groupSQL = `select g.*,
 from transaction_group g`
 
 // GetAllGroups loads all groups.
-func GetAllGroups(tx *sql.Tx) ([]*table.Group, error) {
-	groups, err := runQuery(tx, groupType, groupSQL)
-	if err != nil {
-		return nil, err
-	}
-	return groups.([]*table.Group), nil
+func GetAllGroups(tx *sql.Tx) []*table.Group {
+	groups := runQuery(tx, groupType, groupSQL)
+	return groups.([]*table.Group)
 }

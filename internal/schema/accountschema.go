@@ -36,13 +36,13 @@ var accountQueryFields = &graphql.Field{
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		if idArg, ok := p.Args["id"]; ok {
 			id := idArg.(int)
-			return getAccountByID(tx, int64(id))
+			return getAccountByID(tx, int64(id)), nil
 		}
 		if nameArg, ok := p.Args["name"]; ok {
 			name, _ := nameArg.(string)
-			return getAccountsByName(tx, name)
+			return getAccountsByName(tx, name), nil
 		}
-		return getAllAccounts(tx)
+		return getAllAccounts(tx), nil
 	},
 }
 

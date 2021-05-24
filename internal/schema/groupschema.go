@@ -21,6 +21,6 @@ var groupQueryFields = &graphql.Field{
 	Type: graphql.NewList(groupSchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return getAllGroups(tx)
+		return getAllGroups(tx), nil
 	},
 }

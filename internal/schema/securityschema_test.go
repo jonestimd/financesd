@@ -63,9 +63,9 @@ func Test_securitySchema_Fields(t *testing.T) {
 func Test_securityQueryFields_Resolve_all(t *testing.T) {
 	symbol := "S1"
 	securities := []*table.Security{{AssetID: 42}}
-	getAll := mocka.Function(t, &getAllSecurities, securities, nil)
-	getByID := mocka.Function(t, &getSecurityByID, securities, nil)
-	getBySymbol := mocka.Function(t, &getSecurityBySymbol, securities, nil)
+	getAll := mocka.Function(t, &getAllSecurities, securities)
+	getByID := mocka.Function(t, &getSecurityByID, securities)
+	getBySymbol := mocka.Function(t, &getSecurityBySymbol, securities)
 	defer func() {
 		getAll.Restore()
 		getByID.Restore()

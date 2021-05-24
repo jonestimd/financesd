@@ -17,9 +17,9 @@ func Test_accountQueryFields_Resolve(t *testing.T) {
 	accountID := int64(1)
 	accounts := []*domain.Account{domain.NewAccount(accountID, &companyID)}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
-		getAll := mocka.Function(t, &getAllAccounts, accounts, nil)
-		byID := mocka.Function(t, &getAccountByID, accounts, nil)
-		byName := mocka.Function(t, &getAccountsByName, accounts, nil)
+		getAll := mocka.Function(t, &getAllAccounts, accounts)
+		byID := mocka.Function(t, &getAccountByID, accounts)
+		byName := mocka.Function(t, &getAccountsByName, accounts)
 		defer func() {
 			getAll.Restore()
 			byID.Restore()

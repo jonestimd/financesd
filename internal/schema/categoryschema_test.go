@@ -14,7 +14,7 @@ import (
 func Test_categoryQueryFields_Resolve(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		categories := []*table.Category{{ID: 42}}
-		getAll := mocka.Function(t, &getAllCategories, categories, nil)
+		getAll := mocka.Function(t, &getAllCategories, categories)
 		defer getAll.Restore()
 		params := newResolveParams(tx, categoryQuery, newField("", "id"), newField("", "code"))
 

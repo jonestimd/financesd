@@ -64,12 +64,12 @@ type VersionID struct {
 	Version int64
 }
 
-func (io InputObject) GetVersionID() (*VersionID, error) {
+func (io InputObject) GetVersionID() *VersionID {
 	if id, ok := io.GetInt("id"); ok {
 		if version, ok := io.GetInt("version"); ok {
-			return &VersionID{ID: id.(int64), Version: version.(int64)}, nil
+			return &VersionID{ID: id.(int64), Version: version.(int64)}
 		}
-		return nil, errors.New("version is required for update/delete")
+		panic(errors.New("version is required for update/delete"))
 	}
-	return nil, nil
+	return nil
 }

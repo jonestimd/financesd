@@ -22,9 +22,9 @@ func (c *Company) Resolve(p graphql.ResolveParams) (interface{}, error) {
 }
 
 // GetAccounts returns the accounts for the company.
-func (c *Company) GetAccounts(tx *sql.Tx) ([]*Account, error) {
-	if c.source.accounts == nil && c.source.loadAccounts(tx) != nil {
-		return nil, c.source.err
+func (c *Company) GetAccounts(tx *sql.Tx) []*Account {
+	if c.source.accounts == nil {
+		c.source.loadAccounts(tx)
 	}
 	accounts := make([]*Account, 0, 1)
 	for _, account := range c.source.accounts {
@@ -32,63 +32,50 @@ func (c *Company) GetAccounts(tx *sql.Tx) ([]*Account, error) {
 			accounts = append(accounts, account)
 		}
 	}
-	return accounts, nil
-}
-
-func companiesOrError(companies []*table.Company, err error) ([]*Company, error) {
-	if err != nil {
-		return nil, err
-	}
-	return newCompanySource().setCompanies(companies), nil
+	return accounts
 }
 
 // GetAllCompanies loads all companies.
-func GetAllCompanies(tx *sql.Tx) ([]*Company, error) {
-	return companiesOrError(getAllCompanies(tx))
+func GetAllCompanies(tx *sql.Tx) []*Company {
+	return newCompanySource().setCompanies(getAllCompanies(tx))
 }
 
 // GetCompanyByID returns the company with the ID.
-func GetCompanyByID(tx *sql.Tx, id int64) ([]*Company, error) {
-	return companiesOrError(getCompanyByID(tx, id))
+func GetCompanyByID(tx *sql.Tx, id int64) []*Company {
+	return newCompanySource().setCompanies(getCompanyByID(tx, id))
 }
 
 // GetCompanyByName returns the company with the name.
-func GetCompanyByName(tx *sql.Tx, name string) ([]*Company, error) {
-	return companiesOrError(getCompanyByName(tx, name))
+func GetCompanyByName(tx *sql.Tx, name string) []*Company {
+	return newCompanySource().setCompanies(getCompanyByName(tx, name))
 }
 
 // GetCompaniesByIDs loads specified companies.
-var GetCompaniesByIDs = func(tx *sql.Tx, ids []int64) ([]*Company, error) {
-	return companiesOrError(getCompaniesByIDs(tx, ids))
+var GetCompaniesByIDs = func(tx *sql.Tx, ids []int64) []*Company {
+	return newCompanySource().setCompanies(getCompaniesByIDs(tx, ids))
 }
 
 // AddCompanies adds new companies.
-func AddCompanies(tx *sql.Tx, names []string, user string) ([]*Company, error) {
+func AddCompanies(tx *sql.Tx, names []string, user string) []*Company {
 	companies := make([]*table.Company, len(names))
-	var err error
 	for i, name := range names {
-		if err = validateName(name); err != nil {
-			return nil, err
-		}
-		if companies[i], err = addCompany(tx, name, user); err != nil {
-			return nil, err
-		}
+		validateName(name)
+		companies[i] = addCompany(tx, name, user)
 	}
-	return newCompanySource().setCompanies(companies), nil
+	return newCompanySource().setCompanies(companies)
 }
 
 // UpdateCompanies updates company names.
-func UpdateCompanies(tx *sql.Tx, args interface{}, user string) ([]*Company, error) {
+func UpdateCompanies(tx *sql.Tx, args interface{}, user string) []*Company {
 	updates := args.([]interface{})
 	ids := make([]int64, len(updates))
 	for i, company := range updates {
 		values := company.(map[string]interface{})
 		ids[i] = int64(values["id"].(int))
 		name := values["name"].(string)
+		validateName(name)
 		version := int64(values["version"].(int))
-		if err := updateCompany(tx, ids[i], version, name, user); err != nil {
-			return nil, err
-		}
+		updateCompany(tx, ids[i], version, name, user)
 	}
 	return GetCompaniesByIDs(tx, ids)
 }

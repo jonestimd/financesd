@@ -12,23 +12,20 @@ var transactionType = reflect.TypeOf(table.Transaction{})
 
 const accountTransactionsSQL = "select * from transaction where account_id = ? order by date, id"
 
-func runTransactionQuery(tx *sql.Tx, query string, args ...interface{}) ([]*table.Transaction, error) {
-	rows, err := runQuery(tx, transactionType, query, args...)
-	if err != nil {
-		return nil, err
-	}
-	return rows.([]*table.Transaction), nil
+func runTransactionQuery(tx *sql.Tx, query string, args ...interface{}) []*table.Transaction {
+	rows := runQuery(tx, transactionType, query, args...)
+	return rows.([]*table.Transaction)
 }
 
 // GetTransactions returns all transactions for the account.
-func GetTransactions(tx *sql.Tx, accountID int64) ([]*table.Transaction, error) {
+func GetTransactions(tx *sql.Tx, accountID int64) []*table.Transaction {
 	return runTransactionQuery(tx, accountTransactionsSQL, accountID)
 }
 
 const transactionsByIDSQL = "select * from transaction where json_contains(?, cast(id as json))"
 
 // GetTransactionsByIDs returns transactions for the specified IDs.
-func GetTransactionsByIDs(tx *sql.Tx, ids []int64) ([]*table.Transaction, error) {
+func GetTransactionsByIDs(tx *sql.Tx, ids []int64) []*table.Transaction {
 	return runTransactionQuery(tx, transactionsByIDSQL, int64sToJson(ids))
 }
 
@@ -40,7 +37,7 @@ const accountRelatedTxSQL = `select rt.*
 	where tx.account_id = ?`
 
 // GetRelatedTransactionsByAccountID returns all related transactions for the account.
-func GetRelatedTransactionsByAccountID(tx *sql.Tx, accountID int64) ([]*table.Transaction, error) {
+func GetRelatedTransactionsByAccountID(tx *sql.Tx, accountID int64) []*table.Transaction {
 	return runTransactionQuery(tx, accountRelatedTxSQL, accountID)
 }
 
@@ -51,7 +48,7 @@ const relatedTxSQL = `select rt.*
 	where json_contains(?, cast(td.transaction_id as json))`
 
 // GetRelatedTransactions returns all related transactions for the transaction IDs.
-func GetRelatedTransactions(tx *sql.Tx, relatedTxIDs []int64) ([]*table.Transaction, error) {
+func GetRelatedTransactions(tx *sql.Tx, relatedTxIDs []int64) []*table.Transaction {
 	return runTransactionQuery(tx, relatedTxSQL, int64sToJson(relatedTxIDs))
 }
 
@@ -67,13 +64,13 @@ set date = coalesce(?, date)
 where id = ? and version = ?`
 
 // UpdateTransactions updates transactions.
-func UpdateTransaction(tx *sql.Tx, id int64, version int64, values InputObject, user string) error {
+func UpdateTransaction(tx *sql.Tx, id int64, version int64, values InputObject, user string) {
 	ref, setRef := values.GetString("referenceNumber")
 	payeeId, setPayee := values.GetInt("payeeId")
 	securityId, setSecurity := values.GetInt("securityId")
 	memo, setMemo := values.GetString("memo")
 	accountId, setAccount := values.GetInt("accountId")
-	count, err := runUpdate(tx, updateTxSQL,
+	count := runUpdate(tx, updateTxSQL,
 		values.StringOrNull("date"),
 		setRef, ref,
 		setPayee, payeeId,
@@ -82,10 +79,7 @@ func UpdateTransaction(tx *sql.Tx, id int64, version int64, values InputObject, 
 		values.StringOrNull("cleared"),
 		setAccount, accountId,
 		user, id, version)
-	if err != nil {
-		return err
-	} else if count == 0 {
-		return fmt.Errorf("transaction not found (%d @ %d)", id, version)
+	if count == 0 {
+		panic(fmt.Errorf("transaction not found (%d @ %d)", id, version))
 	}
-	return nil
 }

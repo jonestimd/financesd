@@ -14,7 +14,7 @@ import (
 func Test_payeeQueryFields_Resolve(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		payees := []*table.Payee{{ID: 1}}
-		getAll := mocka.Function(t, &getAllPayees, payees, nil)
+		getAll := mocka.Function(t, &getAllPayees, payees)
 		defer getAll.Restore()
 		params := newResolveParams(tx, payeeQuery, newField("", "id"), newField("", "name"))
 

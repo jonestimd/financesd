@@ -26,6 +26,6 @@ var categoryQueryFields = &graphql.Field{
 	Type: graphql.NewList(categorySchema),
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return getAllCategories(tx)
+		return getAllCategories(tx), nil
 	},
 }

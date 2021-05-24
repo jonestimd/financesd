@@ -135,14 +135,21 @@ func Test_InputObject_GetVersionID(t *testing.T) {
 		expectedErr   error
 	}{
 		{"returns nil for no values", map[string]interface{}{}, nil, nil},
-		{"returns error for id without version", map[string]interface{}{"id": 42}, nil, errors.New("version is required for update/delete")},
+		{"panics for id without version", map[string]interface{}{"id": 42}, nil, errors.New("version is required for update/delete")},
 		{"returns id and version", map[string]interface{}{"id": 42, "version": 96}, &VersionID{42, 96}, nil},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			value, err := test.values.GetVersionID()
+			defer func() {
+				if err := recover(); err != nil {
+					assert.Equal(t, test.expectedErr, err)
+				} else if test.expectedErr != nil {
+					assert.Fail(t, "expected an error")
+				}
+			}()
 
-			assert.Equal(t, test.expectedErr, err)
+			value := test.values.GetVersionID()
+
 			assert.Equal(t, test.expectedValue, value)
 		})
 	}

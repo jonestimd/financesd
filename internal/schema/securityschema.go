@@ -38,10 +38,10 @@ var securityQueryFields = &graphql.Field{
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		if id, ok := p.Args["id"]; ok {
 			intID := id.(int)
-			return getSecurityByID(tx, int64(intID))
+			return getSecurityByID(tx, int64(intID)), nil
 		} else if symbol, ok := p.Args["symbol"]; ok {
-			return getSecurityBySymbol(tx, symbol.(string))
+			return getSecurityBySymbol(tx, symbol.(string)), nil
 		}
-		return getAllSecurities(tx)
+		return getAllSecurities(tx), nil
 	},
 }

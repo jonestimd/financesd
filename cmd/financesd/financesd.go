@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -24,6 +25,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/handler"
 	"github.com/jonestimd/financesd/internal/schema"
+	"github.com/jonestimd/financesd/internal/server"
 )
 
 var httpHandle = http.Handle
@@ -86,10 +88,12 @@ func main() {
 			log.Fatalf("Error listening: %v", err)
 		}
 		defer listener.Close()
+		idSupplier := server.NewIDSupplier()
 		go func() {
 			router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r)
-				log.Printf("%d %-5s %s %s %d %v %s\n", snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
+				requestID := idSupplier.Next()
+				snoop := httpsnoop.CaptureMetrics(http.DefaultServeMux, w, r.WithContext(context.WithValue(r.Context(), requestIdKey, requestID)))
+				log.Printf("[%s] %d %-5s %s %s %d %v %s\n", requestID, snoop.Code, r.Method, r.URL.Path, r.Host, snoop.Written,
 					snoop.Duration.Truncate(time.Millisecond), r.UserAgent())
 			})
 			serve(listener, router)
@@ -121,9 +125,15 @@ type graphqlHandler struct {
 
 type reqContextKey string
 
+const requestIdKey = reqContextKey("requestID")
 const hasErrorKey = reqContextKey("hasError")
 
+var compressSpaces = regexp.MustCompile(`\s+`)
+
 func resultCallback(ctx context.Context, params *graphql.Params, result *graphql.Result, responseBody []byte) {
+	requestID := ctx.Value(requestIdKey)
+	log.Printf("[%s] query: %s", requestID, compressSpaces.ReplaceAllString(params.RequestString, " "))
+	log.Printf("[%s] variables: %v", requestID, params.VariableValues)
 	hasError := ctx.Value(hasErrorKey).(*bool)
 	*hasError = result.HasErrors()
 }
@@ -154,13 +164,14 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx = context.WithValue(ctx, schema.DbContextKey, tx)
 	h.handler.ServeHTTP(w, r.WithContext(ctx))
 	// end transaction
+	requestID := ctx.Value(requestIdKey)
 	if hasError {
-		log.Println("Rolling back")
+		log.Printf("[%s] Rolling back", requestID)
 		if err := tx.Rollback(); err != nil {
-			log.Printf("Rollback failed: %v\n", err)
+			log.Printf("[%s] Rollback failed: %v", requestID, err)
 		}
 	} else if err := tx.Commit(); err != nil {
-		log.Printf("Commit failed: %v\n", err)
+		log.Printf("[%s] Commit failed: %v", requestID, err)
 		http.Error(w, fmt.Sprintf("Commit failed: %v", err), http.StatusInternalServerError)
 	}
 }

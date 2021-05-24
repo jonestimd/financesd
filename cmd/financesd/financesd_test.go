@@ -205,11 +205,13 @@ func Test_resultCallback(t *testing.T) {
 		callback := mockNewHandler.GetCall(0).Arguments()[0].(*handler.Config).ResultCallbackFn
 		var hasError bool
 		ctx := context.WithValue(context.TODO(), hasErrorKey, &hasError)
+		ctx = context.WithValue(ctx, requestIdKey, "request ID")
+		params := &graphql.Params{RequestString: "", VariableValues: map[string]interface{}{}}
 
-		callback(ctx, nil, &graphql.Result{}, nil)
+		callback(ctx, params, &graphql.Result{}, nil)
 		assert.Equal(t, false, hasError)
 
-		callback(ctx, nil, &graphql.Result{Errors: []gqlerrors.FormattedError{{}}}, nil)
+		callback(ctx, params, &graphql.Result{Errors: []gqlerrors.FormattedError{{}}}, nil)
 		assert.Equal(t, true, hasError)
 	})
 	os.Args = os.Args[0:1]

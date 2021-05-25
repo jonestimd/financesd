@@ -166,8 +166,7 @@ var updateTxFields = &graphql.Field{
 		// 	log.Printf("deleting transactions: %v", ids)
 		// }
 		if updates, ok := p.Args["update"]; ok {
-			var ids []int64
-			ids = updateTransactions(tx, updates.([]map[string]interface{}), user)
+			ids := updateTransactions(tx, asMaps(updates, "details"), user)
 			transactions = getTransactionsByIDs(tx, ids)
 		}
 		// if names, ok := p.Args["add"]; ok {

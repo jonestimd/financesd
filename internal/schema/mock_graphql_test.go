@@ -88,6 +88,34 @@ func (b *resolveParamsBuilder) addArg(name string, value interface{}) *resolvePa
 	return b
 }
 
+func (b *resolveParamsBuilder) addArrayArg(name string, maps []map[string]interface{}, nested ...string) *resolveParamsBuilder {
+	if name != "" {
+		if b.Args == nil {
+			b.Args = make(map[string]interface{})
+		}
+		b.Args[name] = asInterfaces(maps, nested...)
+	}
+	return b
+}
+
+// AsInterfaces converts a []map[string]interface{} to a []interface{}.
+func asInterfaces(maps []map[string]interface{}, nested ...string) []interface{} {
+	values := make([]interface{}, len(maps))
+	for i, item := range maps {
+		m := make(map[string]interface{})
+		for key, value := range item {
+			m[key] = value
+		}
+		for _, name := range nested {
+			if value, ok := m[name]; ok {
+				m[name] = asInterfaces(value.([]map[string]interface{}))
+			}
+		}
+		values[i] = m
+	}
+	return values
+}
+
 func (b *resolveParamsBuilder) setSource(source interface{}) *resolveParamsBuilder {
 	b.Source = source
 	return b

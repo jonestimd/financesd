@@ -127,7 +127,7 @@ func Test_resolveRelatedTransaction(t *testing.T) {
 func Test_updateTransactions_Resolve_update(t *testing.T) {
 	id := 42
 	name := "new name"
-	args := []map[string]interface{}{{"id": id, "name": name}}
+	args := []map[string]interface{}{{"id": id, "name": name, "details": []map[string]interface{}{{"id": 96, "version": 1}}}}
 	updateIDs := []int64{42}
 	transactions := []*domain.Transaction{domain.NewTransaction(int64(id))}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
@@ -135,7 +135,7 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 		defer mockUpdateTransactions.Restore()
 		mockGetTransactions := mocka.Function(t, &getTransactionsByIDs, transactions)
 		defer mockGetTransactions.Restore()
-		params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("update", args)
+		params := newResolveParams(tx, companyQuery, newField("", "id")).addArrayArg("update", args, "details")
 
 		result, err := updateTxFields.Resolve(params.ResolveParams)
 

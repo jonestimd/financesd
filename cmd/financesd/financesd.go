@@ -166,7 +166,7 @@ func (h *graphqlHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// end transaction
 	requestID := ctx.Value(requestIdKey)
 	if hasError {
-		log.Printf("[%s] Rolling back", requestID)
+		log.Printf("[%s] Query errors, rolling back", requestID)
 		if err := tx.Rollback(); err != nil {
 			log.Printf("[%s] Rollback failed: %v", requestID, err)
 		}

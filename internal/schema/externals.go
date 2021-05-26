@@ -28,3 +28,4 @@ var getSecurityBySymbol = database.GetSecurityBySymbol
 var getAccountTransactions = domain.GetTransactions
 var getTransactionsByIDs = domain.GetTransactionsByIDs
 var updateTransactions = domain.UpdateTransactions
+var deleteTransactions = domain.DeleteTransactions

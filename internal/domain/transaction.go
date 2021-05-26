@@ -20,7 +20,7 @@ func NewTransaction(id int64) *Transaction {
 }
 
 func (t *Transaction) Resolve(p graphql.ResolveParams) (interface{}, error) {
-	return graphql.DefaultResolveFn(replaceSource(p, t.Transaction))
+	return defaultResolveFn(replaceSource(p, t.Transaction))
 }
 
 // GetDetails returns details for a transaction in the account.
@@ -60,4 +60,10 @@ func UpdateTransactions(tx *sql.Tx, updates []map[string]interface{}, user strin
 		}
 	}
 	return ids
+}
+
+func DeleteTransactions(tx *sql.Tx, ids []map[string]interface{}) {
+	deleteRelatedDetails(tx, ids)
+	deleteTransactionDetails(tx, ids)
+	deleteTransactions(tx, ids)
 }

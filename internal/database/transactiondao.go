@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 
@@ -81,5 +83,14 @@ func UpdateTransaction(tx *sql.Tx, id int64, version int64, values InputObject, 
 		user, id, version)
 	if count == 0 {
 		panic(fmt.Errorf("transaction not found (%d @ %d)", id, version))
+	}
+}
+
+// DeleteTransactions deletes transactions and panics the number of deleted transactions is less than the number of IDs.
+func DeleteTransactions(tx *sql.Tx, ids []map[string]interface{}) {
+	deleteIDs, _ := json.Marshal(ids)
+	count := runUpdate(tx, "delete from transaction where json_contains(?, json_object('id', id, 'version', version))", deleteIDs)
+	if int(count) < len(ids) {
+		panic(errors.New("transaction(s) not found"))
 	}
 }

@@ -124,6 +124,23 @@ func Test_resolveRelatedTransaction(t *testing.T) {
 	})
 }
 
+func Test_updateTransactions_Resolve_delete(t *testing.T) {
+	id := 42
+	args := []map[string]interface{}{{"id": id, "version": 1}}
+	transactions := []*domain.Transaction{}
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		deleteTransactionsStub := mocka.Function(t, &deleteTransactions)
+		defer deleteTransactionsStub.Restore()
+		params := newResolveParams(tx, transactionQuery, newField("", "id")).addArrayArg("delete", args)
+
+		result, err := updateTxFields.Resolve(params.ResolveParams)
+
+		assert.Equal(t, transactions, result)
+		assert.Equal(t, []interface{}{tx, args}, deleteTransactionsStub.GetFirstCall().Arguments())
+		assert.Nil(t, err)
+	})
+}
+
 func Test_updateTransactions_Resolve_update(t *testing.T) {
 	id := 42
 	name := "new name"
@@ -135,7 +152,7 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 		defer mockUpdateTransactions.Restore()
 		mockGetTransactions := mocka.Function(t, &getTransactionsByIDs, transactions)
 		defer mockGetTransactions.Restore()
-		params := newResolveParams(tx, companyQuery, newField("", "id")).addArrayArg("update", args, "details")
+		params := newResolveParams(tx, transactionQuery, newField("", "id")).addArrayArg("update", args, "details")
 
 		result, err := updateTxFields.Resolve(params.ResolveParams)
 

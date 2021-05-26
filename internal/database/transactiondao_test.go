@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -19,6 +20,34 @@ func Test_GetTransactions(t *testing.T) {
 		mockDB.ExpectQuery(accountTransactionsSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
 
 		result := GetTransactions(tx, accountID)
+
+		assert.Equal(t, []*table.Transaction{expectedTx}, result)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
+	})
+}
+
+func Test_GetRelatedTransactionsByAccountID(t *testing.T) {
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		accountID := int64(42)
+		txID := int64(69)
+		expectedTx := &table.Transaction{ID: txID}
+		mockDB.ExpectQuery(accountRelatedTxSQL).WithArgs(accountID).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
+
+		result := GetRelatedTransactionsByAccountID(tx, accountID)
+
+		assert.Equal(t, []*table.Transaction{expectedTx}, result)
+		assert.Nil(t, mockDB.ExpectationsWereMet())
+	})
+}
+
+func Test_GetRelatedTransactions(t *testing.T) {
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		relatedIDs := []int64{42}
+		txID := int64(69)
+		expectedTx := &table.Transaction{ID: txID}
+		mockDB.ExpectQuery(relatedTxSQL).WithArgs(int64sToJson(relatedIDs)).WillReturnRows(sqltest.MockRows("id").AddRow(txID))
+
+		result := GetRelatedTransactions(tx, relatedIDs)
 
 		assert.Equal(t, []*table.Transaction{expectedTx}, result)
 		assert.Nil(t, mockDB.ExpectationsWereMet())
@@ -95,5 +124,38 @@ func Test_GetTransactionsByIDs(t *testing.T) {
 		result := GetTransactionsByIDs(tx, []int64{42})
 
 		assert.Equal(t, transactions, result)
+	})
+}
+
+func Test_DeleteTransactions(t *testing.T) {
+	ids := []map[string]interface{}{{"id": 42, "version": 1}, {"id": 24, "version": 0}}
+	idArg, _ := json.Marshal(ids)
+	t.Run("deletes transactions", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(2))
+			defer runUpdateStub.Restore()
+
+			DeleteTransactions(tx, ids)
+
+			assert.Equal(t,
+				sqltest.UpdateArgs(tx, "delete from transaction where json_contains(?, json_object('id', id, 'version', version))", idArg),
+				runUpdateStub.GetCall(0).Arguments())
+		})
+	})
+	t.Run("panics for transactions not found", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(1))
+			defer runUpdateStub.Restore()
+			defer func() {
+				assert.Nil(t, mockDB.ExpectationsWereMet())
+				if err := recover(); err != nil {
+					assert.Equal(t, "transaction(s) not found", err.(error).Error())
+				} else {
+					assert.Fail(t, "expected an error")
+				}
+			}()
+
+			DeleteTransactions(tx, ids)
+		})
 	})
 }

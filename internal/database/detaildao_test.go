@@ -247,6 +247,50 @@ func Test_DeleteDetails(t *testing.T) {
 	})
 }
 
+func Test_DeleteRelatedDetails(t *testing.T) {
+	txIDs := []map[string]interface{}{{"id": 42, "version": 1}, {"id": 24, "version": 0}}
+	idArg, _ := json.Marshal(txIDs)
+	t.Run("delete details and empty transactions", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(2))
+			runUpdateStub.OnCall(1).Return(int64(0))
+			defer runUpdateStub.Restore()
+
+			DeleteRelatedDetails(tx, txIDs)
+
+			assert.Equal(t, 2, runUpdateStub.CallCount())
+			assert.Equal(t, sqltest.UpdateArgs(tx, deleteRelatedDetailSQL, idArg), runUpdateStub.GetCall(0).Arguments())
+			assert.Equal(t, sqltest.UpdateArgs(tx, deleteEmptyTransactionsSQL), runUpdateStub.GetCall(1).Arguments())
+		})
+	})
+	t.Run("does not delete transactions if no details", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			runUpdateStub := mocka.Function(t, &runUpdate, int64(0))
+			defer runUpdateStub.Restore()
+
+			DeleteRelatedDetails(tx, txIDs)
+
+			assert.Equal(t, 1, runUpdateStub.CallCount())
+		})
+	})
+}
+
+func Test_DeleteTransactionDetails(t *testing.T) {
+	txIDs := []map[string]interface{}{{"id": 42, "version": 1}, {"id": 24, "version": 0}}
+	idArg, _ := json.Marshal(txIDs)
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		runUpdateStub := mocka.Function(t, &runUpdate, int64(2))
+		defer runUpdateStub.Restore()
+
+		DeleteTransactionDetails(tx, txIDs)
+
+		assert.Equal(t, 1, runUpdateStub.CallCount())
+		assert.Equal(t,
+			sqltest.UpdateArgs(tx, "delete from transaction_detail where json_contains(?, json_object('id', transaction_id))", idArg),
+			runUpdateStub.GetCall(0).Arguments())
+	})
+}
+
 func Test_DeleteTransfer(t *testing.T) {
 	relatedDetailID := int64(42)
 	t.Run("delete transfer detail and empty transactions", func(t *testing.T) {

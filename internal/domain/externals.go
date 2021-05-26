@@ -20,6 +20,7 @@ var getAccountsByCompanyIDs = database.GetAccountsByCompanyIDs
 var getTransactions = database.GetTransactions
 var getTransactionsByIDs = database.GetTransactionsByIDs
 var updateTransaction = database.UpdateTransaction
+var deleteTransactions = database.DeleteTransactions
 
 var getDetailsByTxIDs = database.GetDetailsByTxIDs
 var getDetailsByAccountID = database.GetDetailsByAccountID
@@ -33,6 +34,8 @@ var validateDetails = database.ValidateDetails
 var addOrUpdateTransfer = database.AddOrUpdateTransfer
 var setTransferAmount = database.SetTransferAmount
 var deleteDetails = database.DeleteDetails
+var deleteRelatedDetails = database.DeleteRelatedDetails
+var deleteTransactionDetails = database.DeleteTransactionDetails
 var deleteTransfer = database.DeleteTransfer
 
 var defaultResolveFn = graphql.DefaultResolveFn

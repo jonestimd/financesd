@@ -162,9 +162,9 @@ var updateTxFields = &graphql.Field{
 		transactions := []*domain.Transaction{}
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
-		// if ids, ok := p.Args["delete"]; ok {
-		// 	log.Printf("deleting transactions: %v", ids)
-		// }
+		if ids, ok := p.Args["delete"]; ok {
+			deleteTransactions(tx, asMaps(ids))
+		}
 		if updates, ok := p.Args["update"]; ok {
 			ids := updateTransactions(tx, asMaps(updates, "details"), user)
 			transactions = getTransactionsByIDs(tx, ids)

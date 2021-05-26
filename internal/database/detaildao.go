@@ -146,6 +146,21 @@ func DeleteDetails(tx *sql.Tx, ids []*VersionID) {
 	runUpdate(tx, deleteEmptyTransactionsSQL)
 }
 
+const deleteRelatedDetailSQL = `delete from transaction_detail
+where related_detail_id in (select id from transaction_detail where json_contains(?, json_object('id', transaction_id)))`
+
+func DeleteRelatedDetails(tx *sql.Tx, txIDs []map[string]interface{}) {
+	deleteIDs, _ := json.Marshal(txIDs)
+	if count := runUpdate(tx, deleteRelatedDetailSQL, deleteIDs); count > 0 {
+		runUpdate(tx, deleteEmptyTransactionsSQL)
+	}
+}
+
+func DeleteTransactionDetails(tx *sql.Tx, txIDs []map[string]interface{}) {
+	deleteIDs, _ := json.Marshal(txIDs)
+	runUpdate(tx, "delete from transaction_detail where json_contains(?, json_object('id', transaction_id))", deleteIDs)
+}
+
 const deleteTransferDetailSQL = `delete from transaction_detail
 where id = (select related_detail_id from transaction_detail where id = ?)`
 

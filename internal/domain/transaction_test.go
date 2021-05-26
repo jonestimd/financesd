@@ -6,11 +6,26 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/MonsantoCo/mocka/v2"
+	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/database"
 	"github.com/jonestimd/financesd/internal/database/table"
 	"github.com/jonestimd/financesd/internal/sqltest"
 	"github.com/stretchr/testify/assert"
 )
+
+func Test_Transaction_Resolve(t *testing.T) {
+	expectedResult := "result"
+	defaultResolveStub := mocka.Function(t, &defaultResolveFn, expectedResult, nil)
+	defer defaultResolveStub.Restore()
+	p := graphql.ResolveParams{}
+	transaction := NewTransaction(42)
+
+	result, err := transaction.Resolve(p)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedResult, result)
+	assert.Same(t, transaction.Transaction, defaultResolveStub.GetCall(0).Arguments()[0].(graphql.ResolveParams).Source)
+}
 
 func Test_GetTransactions(t *testing.T) {
 	accountID := int64(42)
@@ -96,5 +111,23 @@ func Test_GetTransactionsByIDs(t *testing.T) {
 		assert.Equal(t, len(transactions), len(result))
 		assert.Same(t, transactions[0], result[0].Transaction)
 		assert.Equal(t, []int64{42}, result[0].source.txIDs)
+	})
+}
+
+func Test_DeleteTransactions(t *testing.T) {
+	txIDs := []map[string]interface{}{{"id": 1, "version": 0}, {"id": 2, "version": 9}}
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		deleteRelatedDetailsStub := mocka.Function(t, &deleteRelatedDetails)
+		defer deleteRelatedDetailsStub.Restore()
+		deleteTransactionDetailsStub := mocka.Function(t, &deleteTransactionDetails)
+		defer deleteTransactionDetailsStub.Restore()
+		deleteTransactionsStub := mocka.Function(t, &deleteTransactions)
+		defer deleteTransactionsStub.Restore()
+
+		DeleteTransactions(tx, txIDs)
+
+		assert.Equal(t, 1, deleteRelatedDetailsStub.CallCount())
+		assert.Equal(t, 1, deleteTransactionDetailsStub.CallCount())
+		assert.Equal(t, 1, deleteTransactionsStub.CallCount())
 	})
 }

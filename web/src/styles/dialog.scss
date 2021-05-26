@@ -28,6 +28,9 @@
 }
 
 #company-list {
+    .MuiDialogContent-root {
+        display: flex;
+    }
     .MuiDialog-paper {
         height: calc(100% - 20px);
         max-height: 30em;

@@ -29,6 +29,21 @@ func asInts(arg interface{}) []int {
 	return values
 }
 
+// asMaps converts a []interface{} to a []map[string]interface{}.
+func asMaps(arg interface{}, nested ...string) []map[string]interface{} {
+	items := arg.([]interface{})
+	maps := make([]map[string]interface{}, len(items))
+	for i, m := range items {
+		maps[i] = m.(map[string]interface{})
+		for _, name := range nested {
+			if value, ok := maps[i][name]; ok {
+				maps[i][name] = asMaps(value)
+			}
+		}
+	}
+	return maps
+}
+
 var nonNullInt = graphql.NewNonNull(graphql.Int)
 var nonNullFloat = graphql.NewNonNull(graphql.Float)
 var nonNullString = graphql.NewNonNull(graphql.String)
@@ -36,3 +51,13 @@ var nonNullDate = graphql.NewNonNull(dateType)
 
 var intList = graphql.NewList(nonNullInt)
 var stringList = graphql.NewList(nonNullString)
+
+var idVersionInput = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name: "idVersion",
+	Fields: graphql.InputObjectConfigFieldMap{
+		"id":      &graphql.InputObjectFieldConfig{Type: nonNullInt},
+		"version": &graphql.InputObjectFieldConfig{Type: nonNullInt},
+	},
+})
+
+var idVersionList = newList(idVersionInput)

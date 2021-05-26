@@ -73,7 +73,7 @@ describe('CompanyListModel', () => {
             jest.spyOn(accountStore, 'saveCompanies').mockResolvedValue(true);
             const model = prepareModel();
             const add = model.pendingAdds.map((c) => c.name);
-            const del = model.pendingDeletes.map((c) => c.id);
+            const del = model.pendingDeletes.map(({id, version}) => ({id, version}));
             const update = model.changes.map(({id, name, version}) => ({id, name, version}));
 
             expect(await model.save()).toBe(true);

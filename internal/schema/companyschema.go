@@ -67,14 +67,14 @@ var updateCompaniesFields = &graphql.Field{
 	Args: graphql.FieldConfigArgument{
 		"add":    {Type: stringList, Description: "Unique names of companies to add."},
 		"update": {Type: newList(companyInput), Description: "Changes to be made to existing companies."},
-		"delete": {Type: intList, Description: "IDs of companies to delete."},
+		"delete": {Type: idVersionList, Description: "IDs of companies to delete."},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		companies := make([]*domain.Company, 0)
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
 		user := p.Context.Value(UserKey).(string)
 		if ids, ok := p.Args["delete"]; ok {
-			deleteCompanies(tx, asInts(ids))
+			deleteCompanies(tx, asMaps(ids))
 		}
 		if updates, ok := p.Args["update"]; ok {
 			companies = updateCompanies(tx, updates, user)

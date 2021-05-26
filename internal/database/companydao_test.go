@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -77,13 +78,13 @@ func Test_AddCompany(t *testing.T) {
 		assert.Equal(t, id, results.ID)
 		assert.Equal(t, "company1", results.Name)
 		assert.Equal(t, "somebody", results.ChangeUser)
-		assert.Equal(t, 1, results.Version)
+		assert.Equal(t, 0, results.Version)
 		assert.Nil(t, mock.ExpectationsWereMet())
 	})
 }
 
 func Test_DeleteCompanies(t *testing.T) {
-	ids := []int{42, 96}
+	ids := []map[string]interface{}{{"id": 42, "version": 1}, {"id": 96, "version": 2}}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		count := int64(2)
 		runUpdateStub := mocka.Function(t, &runUpdate, count)
@@ -91,8 +92,9 @@ func Test_DeleteCompanies(t *testing.T) {
 
 		result := DeleteCompanies(tx, ids)
 
+		deleteIDs, _ := json.Marshal(ids)
 		assert.Equal(t,
-			[]interface{}{tx, "delete from company where json_contains(?, cast(id as json))", []interface{}{intsToJson(ids)}},
+			[]interface{}{tx, "delete from company where json_contains(?, json_object('id', id, 'version', version))", []interface{}{deleteIDs}},
 			runUpdateStub.GetCall(0).Arguments())
 		assert.Equal(t, count, result)
 	})

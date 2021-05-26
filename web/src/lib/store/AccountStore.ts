@@ -21,7 +21,7 @@ ${accountFields}
 }`;
 
 export const updateCompaniesQuery = `${companyFields}
-mutation update($add: [String!], $delete: [Int!], $update: [companyInput!]) {
+mutation update($add: [String!], $delete: [idVersion!], $update: [companyInput!]) {
     companies: updateCompanies(add: $add, delete: $delete, update: $update) {...companyFields}
 }`;
 
@@ -32,7 +32,7 @@ interface IAccountsResponse {
 
 export interface IUpdateCompanies {
     add: string[];
-    delete: number[];
+    delete: Pick<ICompany, 'id' | 'version'>[];
     update: Pick<ICompany, 'id' | 'name' | 'version'>[];
 }
 
@@ -101,7 +101,7 @@ export default class AccountStore {
 
     saveCompanies(variables: IUpdateCompanies) {
         return this.loader.load<{companies: ICompany[]}>(savingCompanies, {query: updateCompaniesQuery, variables, updater: ({companies}) => {
-            variables.delete.forEach((id) => this.companiesById.delete(id));
+            variables.delete.forEach(({id}) => this.companiesById.delete(id));
             companies.forEach((c) => {
                 if (this.companiesById.has(c.id)) this.companiesById.get(c.id)?.update(c);
                 else this.companiesById.set(c.id, new CompanyModel(c));

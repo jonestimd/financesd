@@ -32,7 +32,7 @@ export default class CompanyListModel extends ListModel<CompanyRow> {
     async save() {
         const changes = {
             add: this.pendingAdds.map((c) => c.name),
-            delete: Array.from(this.pendingDeletes).map((c) => c.id),
+            delete: Array.from(this.pendingDeletes).map(({id, version}) => ({id, version})),
             update: this.changes.map(({id, name, version}) => ({id, name, version})),
         };
         const success = await this.accountStore.saveCompanies(changes);

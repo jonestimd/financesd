@@ -156,7 +156,7 @@ var updateTxFields = &graphql.Field{
 		"accountId": {Type: nonNullInt, Description: "ID of account for transactions."},
 		"add":       {Type: newList(getTxInput("add")), Description: "Transactions to add."},
 		"update":    {Type: newList(getTxInput("update")), Description: "Changes to be made to existing transactions."},
-		"delete":    {Type: intList, Description: "IDs of transactions to delete."}, // TODO include versions?
+		"delete":    {Type: idVersionList, Description: "IDs of transactions to delete."},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		transactions := []*domain.Transaction{}

@@ -174,7 +174,7 @@ describe('AccountStore', () => {
             expect(accountStore['companiesById'].get(company1.id)).toEqual(expect.objectContaining({name: 'rename', version: 2}));
         });
         it('calls updateCompanies and removes company', async () => {
-            const changes = {add: [], update: [], delete: [company2.id]};
+            const changes = {add: [], update: [], delete: [{id: company2.id, version: company2.version}]};
             jest.spyOn(agent, 'graphql').mockResolvedValue({data: {companies: []}});
 
             expect(await accountStore.saveCompanies(changes)).toBe(true);

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"time"
@@ -39,13 +40,14 @@ func GetCompaniesByIDs(tx *sql.Tx, ids []int64) []*table.Company {
 // AddCompany adds a new company.
 func AddCompany(tx *sql.Tx, name string, user string) *table.Company {
 	changeDate := time.Now()
-	id := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 1)", name, user, changeDate)
-	return &table.Company{ID: id, Name: name, Audited: table.Audited{ChangeUser: user, ChangeDate: &changeDate}, Version: 1}
+	id := runInsert(tx, "insert into company (name, change_user, change_date, version) values (?, ?, ?, 0)", name, user, changeDate)
+	return &table.Company{ID: id, Name: name, Audited: table.Audited{ChangeUser: user, ChangeDate: &changeDate}, Version: 0}
 }
 
 // DeleteCompanies deletes companies and returns the number of deleted companies.
-func DeleteCompanies(tx *sql.Tx, ids []int) int64 {
-	return runUpdate(tx, "delete from company where json_contains(?, cast(id as json))", intsToJson(ids))
+func DeleteCompanies(tx *sql.Tx, ids []map[string]interface{}) int64 {
+	deleteIDs, _ := json.Marshal(ids)
+	return runUpdate(tx, "delete from company where json_contains(?, json_object('id', id, 'version', version))", deleteIDs)
 }
 
 const updateCompanySQL = `update company set name = ?, change_date = current_timestamp, change_user = ?, version = version+1

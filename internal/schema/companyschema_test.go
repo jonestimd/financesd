@@ -98,19 +98,19 @@ func Test_updateCompany_Resolve_add(t *testing.T) {
 }
 
 func Test_updateCompany_Resolve_delete(t *testing.T) {
-	ids := []interface{}{1, 3}
+	ids := []map[string]interface{}{{"id": 1, "version": 2}, {"id": 3, "version": 4}}
 	companies := []*domain.Company{}
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		count := int64(2)
 		mockDeleteCompanies := mocka.Function(t, &deleteCompanies, count)
 		defer mockDeleteCompanies.Restore()
-		params := newResolveParams(tx, companyQuery, newField("", "id")).addArg("delete", ids)
+		params := newResolveParams(tx, companyQuery, newField("", "id")).addArrayArg("delete", ids)
 
 		result, err := updateCompaniesFields.Resolve(params.ResolveParams)
 
 		assert.Nil(t, err)
 		assert.Equal(t, companies, result)
-		assert.Equal(t, []interface{}{tx, asInts(ids)}, mockDeleteCompanies.GetFirstCall().Arguments())
+		assert.Equal(t, []interface{}{tx, ids}, mockDeleteCompanies.GetFirstCall().Arguments())
 	})
 }
 

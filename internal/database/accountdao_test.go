@@ -12,11 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertAccountsError(t *testing.T, result []*table.Account, err error, expectedErr error) {
-	assert.Same(t, expectedErr, err)
-	assert.Nil(t, result)
-}
-
 func Test_GetAllAccounts(t *testing.T) {
 	t.Run("returns accounts", func(t *testing.T) {
 		accounts := []*table.Account{{ID: 1}}

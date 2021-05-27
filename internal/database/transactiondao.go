@@ -54,6 +54,16 @@ func GetRelatedTransactions(tx *sql.Tx, relatedTxIDs []int64) []*table.Transacti
 	return runTransactionQuery(tx, relatedTxSQL, int64sToJson(relatedTxIDs))
 }
 
+const insertTransactionSQL = `insert into transaction
+(account_id, date, reference_number, payee_id, security_id, memo, cleared, change_date, change_user, version)
+values (?, ?, ?, ?, ?, ?, ?, current_timestamp, ?, 0)`
+
+// InsertTransaction inserts a transaction.
+func InsertTransaction(tx *sql.Tx, accountID int64, values InputObject, user string) int64 {
+	return runInsert(tx, insertTransactionSQL, accountID, values.StringOrNull("date"), values.StringOrNull("referenceNumber"),
+		values.IntOrNull("payeeId"), values.IntOrNull("securityId"), values.StringOrNull("memo"), values.StringOrNull("cleared"), user)
+}
+
 const updateTxSQL = `update transaction
 set date = coalesce(?, date)
 , reference_number = case when ? then ? else reference_number end

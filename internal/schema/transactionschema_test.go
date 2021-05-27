@@ -162,3 +162,27 @@ func Test_updateTransactions_Resolve_update(t *testing.T) {
 		assert.Equal(t, []interface{}{tx, updateIDs}, mockGetTransactions.GetCall(0).Arguments())
 	})
 }
+
+func Test_updateTransactions_Resolve_insert(t *testing.T) {
+	name := "new name"
+	accountID := 96
+	args := []map[string]interface{}{{"date": "2020-12-25", "name": name, "details": []map[string]interface{}{{"amount": 96}}}}
+	newIDs := []int64{42}
+	transactions := []*domain.Transaction{domain.NewTransaction(newIDs[0])}
+	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
+		mockInsertTransactions := mocka.Function(t, &insertTransactions, newIDs)
+		defer mockInsertTransactions.Restore()
+		mockGetTransactions := mocka.Function(t, &getTransactionsByIDs, transactions)
+		defer mockGetTransactions.Restore()
+		params := newResolveParams(tx, transactionQuery, newField("", "id")).
+			addArg("accountId", accountID).
+			addArrayArg("add", args, "details")
+
+		result, err := updateTxFields.Resolve(params.ResolveParams)
+
+		assert.Nil(t, err)
+		assert.Equal(t, transactions, result)
+		assert.Equal(t, []interface{}{tx, int64(accountID), args, "somebody"}, mockInsertTransactions.GetFirstCall().Arguments())
+		assert.Equal(t, []interface{}{tx, newIDs}, mockGetTransactions.GetCall(0).Arguments())
+	})
+}

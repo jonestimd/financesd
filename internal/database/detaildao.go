@@ -56,11 +56,11 @@ func GetRelatedDetailsByTxIDs(tx *sql.Tx, txIDs []int64) []*table.TransactionDet
 }
 
 const insertDetailSQL = `insert into transaction_detail
-(amount, transaction_category_id, transaction_group_id, memo, asset_quantity, exchange_asset_id, change_date, change_user, version)
-values (?, ?, ?, ?, ?, current_timestamp, ?, 0)`
+(transaction_id, amount, transaction_category_id, transaction_group_id, memo, asset_quantity, exchange_asset_id, change_date, change_user, version)
+values (?, ?, ?, ?, ?, ?, current_timestamp, ?, 0)`
 
-func InsertDetail(tx *sql.Tx, amount interface{}, values InputObject, user string) {
-	id := runInsert(tx, insertDetailSQL, amount, values.IntOrNull("transactionCategoryId"), values.IntOrNull("transactionGroupId"),
+func InsertDetail(tx *sql.Tx, txID int64, amount interface{}, values InputObject, user string) {
+	id := runInsert(tx, insertDetailSQL, txID, amount, values.IntOrNull("transactionCategoryId"), values.IntOrNull("transactionGroupId"),
 		values.StringOrNull("memo"), values.FloatOrNull("assetQuantity"), values.IntOrNull("exchangeAssetId"), user)
 	if transferAccountId, setTransfer := values.GetInt("transferAccountId"); setTransfer {
 		insertTransferDetail(tx, id, transferAccountId, user)
@@ -190,7 +190,7 @@ select *
 from transaction_category`
 
 // ValidateDetails checks for invalid security fields and returns a map of detail ID to validation error.
-func ValidateDetails(tx *sql.Tx, transactionIDs []int64) map[int64]string {
+func ValidateDetails(tx *sql.Tx, transactionIDs []int64) {
 	rows, err := tx.Query(validateDetailsSQL, int64sToJson(transactionIDs))
 	if err != nil {
 		panic(err)
@@ -202,5 +202,7 @@ func ValidateDetails(tx *sql.Tx, transactionIDs []int64) map[int64]string {
 		rows.Scan(&id, &text)
 		result[id] = text
 	}
-	return result
+	if len(result) > 0 {
+		panic(fmt.Errorf("transaction detail errors: %v", result))
+	}
 }

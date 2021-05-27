@@ -38,7 +38,7 @@ func (d *TransactionDetail) GetRelatedTransaction(tx *sql.Tx) *Transaction {
 	return d.txSource.relatedTxByID[d.TransactionID]
 }
 
-var updateTxDetails = func(tx *sql.Tx, txId int64, details []map[string]interface{}, user string) {
+var updateTxDetails = func(tx *sql.Tx, txID int64, details []map[string]interface{}, user string) {
 	deleteIDs := make([]*database.VersionID, 0)
 	for _, detail := range details {
 		values := database.InputObject(detail)
@@ -69,9 +69,9 @@ var updateTxDetails = func(tx *sql.Tx, txId int64, details []map[string]interfac
 			}
 		} else {
 			if amount, ok := values.GetFloat("amount"); ok && amount != nil {
-				insertDetail(tx, amount, values, user)
+				insertDetail(tx, txID, amount, values, user)
 			} else {
-				panic(errors.New("amount is required to add a transaction detail"))
+				panic(errors.New("new transaction detail requires amount"))
 			}
 		}
 	}

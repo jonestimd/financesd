@@ -2,7 +2,7 @@ package domain
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 
 	"github.com/graphql-go/graphql"
 	"github.com/jonestimd/financesd/internal/database"
@@ -41,6 +41,33 @@ func GetTransactionsByIDs(tx *sql.Tx, ids []int64) []*Transaction {
 	return source.setSource(getTransactionsByIDs(tx, ids))
 }
 
+// InsertTransactions inserts transactions.
+func InsertTransactions(tx *sql.Tx, accountID int64, inserts []map[string]interface{}, user string) []int64 {
+	ids := make([]int64, len(inserts))
+	for i, transaction := range inserts {
+		if detailsArg, ok := transaction["details"]; !ok {
+			panic(errors.New("new transaction requires at least 1 detail"))
+		} else {
+			details := detailsArg.([]map[string]interface{})
+			if len(details) < 1 {
+				panic(errors.New("new transaction requires at least 1 detail"))
+			}
+			ids[i] = insertTransaction(tx, accountID, transaction, user)
+			for _, detail := range details {
+				if amount, ok := database.InputObject(detail).GetFloat("amount"); ok && amount != nil {
+					insertDetail(tx, ids[i], amount, detail, user)
+				} else {
+					panic(errors.New("new transaction detail requires amount"))
+				}
+			}
+		}
+	}
+	if len(ids) > 0 {
+		validateDetails(tx, ids)
+	}
+	return ids
+}
+
 // UpdateTransactions updates transactions.
 func UpdateTransactions(tx *sql.Tx, updates []map[string]interface{}, user string) []int64 {
 	ids := make([]int64, len(updates))
@@ -55,13 +82,12 @@ func UpdateTransactions(tx *sql.Tx, updates []map[string]interface{}, user strin
 		}
 	}
 	if len(ids) > 0 {
-		if errors := validateDetails(tx, ids); len(errors) > 0 {
-			panic(fmt.Errorf("transaction detail errors: %v", errors))
-		}
+		validateDetails(tx, ids)
 	}
 	return ids
 }
 
+// DeleteTransactions deletes transactions.
 func DeleteTransactions(tx *sql.Tx, ids []map[string]interface{}) {
 	deleteRelatedDetails(tx, ids)
 	deleteTransactionDetails(tx, ids)

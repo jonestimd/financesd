@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/graphql-go/graphql"
+	"github.com/jonestimd/financesd/internal/database"
 	"github.com/jonestimd/financesd/internal/domain"
 )
 
@@ -165,17 +166,17 @@ var updateTxFields = &graphql.Field{
 		if ids, ok := p.Args["delete"]; ok {
 			deleteTransactions(tx, asMaps(ids))
 		}
+		ids := make([]int64, 0)
 		if updates, ok := p.Args["update"]; ok {
-			ids := updateTransactions(tx, asMaps(updates, "details"), user)
+			ids = updateTransactions(tx, asMaps(updates, "details"), user)
+		}
+		if inserts, ok := p.Args["add"]; ok {
+			accountID := database.InputObject(p.Args).RequireInt("accountId")
+			ids = append(ids, insertTransactions(tx, accountID, asMaps(inserts, "details"), user)...)
+		}
+		if len(ids) > 0 {
 			transactions = getTransactionsByIDs(tx, ids)
 		}
-		// if names, ok := p.Args["add"]; ok {
-		// 	if added, err := addCompanies(tx, asStrings(names), user); err != nil {
-		// 		return nil, err
-		// 	} else {
-		// 		companies = append(companies, added...)
-		// 	}
-		// }
 		return transactions, nil
 	},
 }

@@ -19,6 +19,7 @@ var getAccountsByCompanyIDs = database.GetAccountsByCompanyIDs
 
 var getTransactions = database.GetTransactions
 var getTransactionsByIDs = database.GetTransactionsByIDs
+var insertTransaction = database.InsertTransaction
 var updateTransaction = database.UpdateTransaction
 var deleteTransactions = database.DeleteTransactions
 

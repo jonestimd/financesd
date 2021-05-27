@@ -27,5 +27,6 @@ var getSecurityByID = database.GetSecurityByID
 var getSecurityBySymbol = database.GetSecurityBySymbol
 var getAccountTransactions = domain.GetTransactions
 var getTransactionsByIDs = domain.GetTransactionsByIDs
+var insertTransactions = domain.InsertTransactions
 var updateTransactions = domain.UpdateTransactions
 var deleteTransactions = domain.DeleteTransactions

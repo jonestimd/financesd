@@ -209,7 +209,7 @@ func Test_updateTxDetails_insert(t *testing.T) {
 			update := database.InputObject{}
 			defer func() {
 				if err := recover(); err != nil {
-					assert.Equal(t, "amount is required to add a transaction detail", err.(error).Error())
+					assert.Equal(t, "new transaction detail requires amount", err.(error).Error())
 				} else {
 					assert.Fail(t, "expected an error")
 				}
@@ -226,7 +226,7 @@ func Test_updateTxDetails_insert(t *testing.T) {
 
 			updateTxDetails(tx, txID, []map[string]interface{}{update}, user)
 
-			assert.Equal(t, []interface{}{tx, 42.0, update, user}, insertDetailStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, txID, 42.0, update, user}, insertDetailStub.GetCall(0).Arguments())
 		})
 	})
 }

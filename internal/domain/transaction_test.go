@@ -56,6 +56,60 @@ func Test_GetDetails(t *testing.T) {
 	assert.Equal(t, detailsByTxID[txID], result)
 }
 
+func Test_InsertTransactions(t *testing.T) {
+	accountID := int64(42)
+	user := "user id"
+	txID := int64(96)
+	errTests := []struct {
+		name    string
+		inserts []map[string]interface{}
+		err     string
+	}{
+		{"panics for no details", []map[string]interface{}{{"date": "2020-12-25"}}, "new transaction requires at least 1 detail"},
+		{"panics for empty details", []map[string]interface{}{{"details": []map[string]interface{}{}}}, "new transaction requires at least 1 detail"},
+		{"panics for no amount", []map[string]interface{}{{"details": []map[string]interface{}{{"memo": "x"}}}}, "new transaction detail requires amount"},
+	}
+	for _, test := range errTests {
+		t.Run(test.name, func(t *testing.T) {
+			sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+				insertTransactionStub := mocka.Function(t, &insertTransaction, txID)
+				defer func() {
+					insertTransactionStub.Restore()
+					if err := recover(); err != nil {
+						assert.Equal(t, test.err, err.(error).Error())
+					} else {
+						assert.Fail(t, "expected an error")
+					}
+				}()
+
+				InsertTransactions(tx, accountID, test.inserts, user)
+			})
+		})
+	}
+	t.Run("returns ids", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			amount := 234.56
+			details := []map[string]interface{}{{"amount": amount}}
+			inserts := []map[string]interface{}{
+				{"date": "2020-12-25", "details": details},
+			}
+			insertTransactionStub := mocka.Function(t, &insertTransaction, txID)
+			defer insertTransactionStub.Restore()
+			insertDetailStub := mocka.Function(t, &insertDetail)
+			defer insertDetailStub.Restore()
+			validateDetailsStub := mocka.Function(t, &validateDetails)
+			defer validateDetailsStub.Restore()
+
+			result := InsertTransactions(tx, accountID, inserts, user)
+
+			assert.Equal(t, []int64{txID}, result)
+			assert.Equal(t, []interface{}{tx, accountID, database.InputObject(inserts[0]), user}, insertTransactionStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, txID, amount, database.InputObject(details[0]), user}, insertDetailStub.GetCall(0).Arguments())
+			assert.Equal(t, []interface{}{tx, []int64{txID}}, validateDetailsStub.GetCall(0).Arguments())
+		})
+	})
+}
+
 func Test_UpdateTransactions(t *testing.T) {
 	user := "user id"
 	id := 42
@@ -68,7 +122,7 @@ func Test_UpdateTransactions(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
 			updateTransactionStub := mocka.Function(t, &updateTransaction)
 			defer updateTransactionStub.Restore()
-			validateDetailsStub := mocka.Function(t, &validateDetails, nil)
+			validateDetailsStub := mocka.Function(t, &validateDetails)
 			defer validateDetailsStub.Restore()
 
 			ids := UpdateTransactions(tx, []map[string]interface{}{update}, user)
@@ -89,7 +143,7 @@ func Test_UpdateTransactions(t *testing.T) {
 			defer updateTransactionStub.Restore()
 			updateTxDetailsStub := mocka.Function(t, &updateTxDetails)
 			defer updateTxDetailsStub.Restore()
-			validateDetailsStub := mocka.Function(t, &validateDetails, nil)
+			validateDetailsStub := mocka.Function(t, &validateDetails)
 			defer validateDetailsStub.Restore()
 
 			UpdateTransactions(tx, []map[string]interface{}{update}, user)

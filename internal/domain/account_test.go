@@ -34,11 +34,6 @@ func Test_Account_GetCompany(t *testing.T) {
 	}
 }
 
-func assertAccountsError(t *testing.T, result []*Account, err error, expectedErr error) {
-	assert.Same(t, expectedErr, err)
-	assert.Nil(t, result)
-}
-
 func Test_GetAllAccounts(t *testing.T) {
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		dbAccounts := []*table.Account{{ID: 1}}

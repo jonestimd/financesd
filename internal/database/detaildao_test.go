@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -68,6 +69,7 @@ func Test_GetRelatedDetailsByTxIDs(t *testing.T) {
 
 func Test_InsertDetail(t *testing.T) {
 	id := int64(42)
+	txID := int64(96)
 	user := "user id"
 	amount := 420.0
 	t.Run("inserts detail with category", func(t *testing.T) {
@@ -82,9 +84,9 @@ func Test_InsertDetail(t *testing.T) {
 			runInsertStub := mocka.Function(t, &runInsert, id)
 			defer runInsertStub.Restore()
 
-			InsertDetail(tx, amount, values, user)
+			InsertDetail(tx, txID, amount, values, user)
 
-			assert.Equal(t, sqltest.UpdateArgs(tx, insertDetailSQL, amount, int64(96), int64(69), "notes", 4.2, int64(24), user),
+			assert.Equal(t, sqltest.UpdateArgs(tx, insertDetailSQL, txID, amount, int64(96), int64(69), "notes", 4.2, int64(24), user),
 				runInsertStub.GetCall(0).Arguments())
 		})
 	})
@@ -96,9 +98,9 @@ func Test_InsertDetail(t *testing.T) {
 			insertTransferStub := mocka.Function(t, &insertTransferDetail)
 			defer insertTransferStub.Restore()
 
-			InsertDetail(tx, amount, values, user)
+			InsertDetail(tx, txID, amount, values, user)
 
-			assert.Equal(t, sqltest.UpdateArgs(tx, insertDetailSQL, amount, nil, nil, nil, nil, nil, user), runInsertStub.GetCall(0).Arguments())
+			assert.Equal(t, sqltest.UpdateArgs(tx, insertDetailSQL, txID, amount, nil, nil, nil, nil, nil, user), runInsertStub.GetCall(0).Arguments())
 			assert.Equal(t, []interface{}{tx, id, int64(96), user}, insertTransferStub.GetCall(0).Arguments())
 		})
 	})
@@ -322,13 +324,29 @@ func Test_ValidateDetails(t *testing.T) {
 	transactionIDs := []int64{42, 96, 69}
 	t.Run("runs validation query", func(t *testing.T) {
 		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
-			rows := sqltest.MockRows("id", "error").AddRow(int64(42), "invalid shares").AddRow(int64(96), "shares required")
+			rows := sqltest.MockRows("id", "error")
 			mockDB.ExpectQuery(validateDetailsSQL).WithArgs(int64sToJson(transactionIDs)).WillReturnRows(rows)
 
-			result := ValidateDetails(tx, transactionIDs)
+			ValidateDetails(tx, transactionIDs)
 
-			assert.Equal(t, map[int64]string{42: "invalid shares", 96: "shares required"}, result)
 			assert.Nil(t, mockDB.ExpectationsWereMet())
+		})
+	})
+	t.Run("panics for validation errors", func(t *testing.T) {
+		sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+			rows := sqltest.MockRows("id", "error").AddRow(int64(42), "invalid shares").AddRow(int64(96), "shares required")
+			mockDB.ExpectQuery(validateDetailsSQL).WithArgs(int64sToJson(transactionIDs)).WillReturnRows(rows)
+			defer func() {
+				assert.Nil(t, mockDB.ExpectationsWereMet())
+				if err := recover(); err != nil {
+					result := map[int64]string{42: "invalid shares", 96: "shares required"}
+					assert.Equal(t, fmt.Errorf("transaction detail errors: %v", result), err)
+				} else {
+					assert.Fail(t, "expected an error")
+				}
+			}()
+
+			ValidateDetails(tx, transactionIDs)
 		})
 	})
 	t.Run("panics for query error", func(t *testing.T) {

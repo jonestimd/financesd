@@ -2,7 +2,6 @@ package schema
 
 import (
 	"database/sql"
-	"errors"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -28,28 +27,19 @@ func Test_transactionQueryFields_Resolve_returnsRows(t *testing.T) {
 	})
 }
 
-type mockTxModel struct {
-	details []*domain.TransactionDetail
-	err     error
-	tx      *sql.Tx
-}
-
-func (m *mockTxModel) GetDetails(tx *sql.Tx) ([]*domain.TransactionDetail, error) {
-	m.tx = tx
-	return m.details, m.err
-}
-
 func Test_resolveDetails(t *testing.T) {
+	txID := int64(42)
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns details", func(t *testing.T) {
-			mockTx := &mockTxModel{details: []*domain.TransactionDetail{domain.NewTransactionDetail(42, -1)}, err: errors.New("test error")}
-			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockTx)
+			details := []*domain.TransactionDetail{domain.NewTransactionDetail(96, txID)}
+			domainTx := domain.NewTransaction(txID)
+			domainTx.SetDetails(details)
+			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(domainTx)
 
 			result, err := getTxSchema().Fields()["details"].Resolve(params.ResolveParams)
 
-			assert.Same(t, mockTx.err, err)
-			assert.Equal(t, mockTx.details, result)
-			assert.Same(t, tx, mockTx.tx)
+			assert.Nil(t, err)
+			assert.Equal(t, details, result)
 		})
 		t.Run("returns error for invalid source", func(t *testing.T) {
 			params := newResolveParams(tx, transactionQuery, newField("", "id"))
@@ -61,35 +51,21 @@ func Test_resolveDetails(t *testing.T) {
 	})
 }
 
-type mockDetailModel struct {
-	relatedDetail *domain.TransactionDetail
-	relatedTx     *domain.Transaction
-	err           error
-	tx            *sql.Tx
-}
-
-func (m *mockDetailModel) GetRelatedDetail(tx *sql.Tx) (*domain.TransactionDetail, error) {
-	m.tx = tx
-	return m.relatedDetail, m.err
-}
-
-func (m *mockDetailModel) GetRelatedTransaction(tx *sql.Tx) (*domain.Transaction, error) {
-	m.tx = tx
-	return m.relatedTx, m.err
-}
-
 func Test_resolveRelatedDetail(t *testing.T) {
+	detailID := int64(96)
+	relatedID := int64(69)
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns detail", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: domain.NewTransactionDetail(42, -1), err: errors.New("test error")}
-			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
+			detail := domain.NewTransactionDetail(detailID, 42)
+			relatedDetail := domain.NewTransactionDetail(relatedID, 24)
+			detail.SetRelatedDetail(relatedDetail)
+			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(detail)
 
 			result, err := resolver(params.ResolveParams)
 
-			assert.Same(t, mockDetail.err, err)
-			assert.Equal(t, mockDetail.relatedDetail, result)
-			assert.Same(t, tx, mockDetail.tx)
+			assert.Nil(t, err)
+			assert.Equal(t, relatedDetail, result)
 		})
 		t.Run("returns error for invalid source", func(t *testing.T) {
 			params := newResolveParams(tx, transactionQuery, newField("", "id"))
@@ -102,17 +78,20 @@ func Test_resolveRelatedDetail(t *testing.T) {
 }
 
 func Test_resolveRelatedTransaction(t *testing.T) {
+	detailID := int64(96)
+	txID := int64(69)
 	resolver := findSchemaField(getTxSchema(), "details", "relatedDetail", "transaction").Resolve
 	sqltest.TestInTx(t, func(mock sqlmock.Sqlmock, tx *sql.Tx) {
 		t.Run("returns transaction", func(t *testing.T) {
-			mockDetail := &mockDetailModel{relatedDetail: domain.NewTransactionDetail(42, -1), err: errors.New("test error")}
-			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(mockDetail)
+			detail := domain.NewTransactionDetail(detailID, txID)
+			relatedTx := domain.NewTransaction(24)
+			detail.SetRelatedTransaction(relatedTx)
+			params := newResolveParams(tx, transactionQuery, newField("", "id")).setSource(detail)
 
 			result, err := resolver(params.ResolveParams)
 
-			assert.Same(t, mockDetail.err, err)
-			assert.Equal(t, mockDetail.relatedTx, result)
-			assert.Same(t, tx, mockDetail.tx)
+			assert.Nil(t, err)
+			assert.Equal(t, relatedTx, result)
 		})
 		t.Run("returns error for invalid source", func(t *testing.T) {
 			params := newResolveParams(tx, transactionQuery, newField("", "id"))

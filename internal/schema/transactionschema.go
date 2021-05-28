@@ -76,26 +76,26 @@ var transactionQueryFields = &graphql.Field{
 }
 
 type txModel interface {
-	GetDetails(tx *sql.Tx) ([]*domain.TransactionDetail, error)
+	GetDetails(tx *sql.Tx) []*domain.TransactionDetail
 }
 
 func resolveDetails(p graphql.ResolveParams) (interface{}, error) {
 	if transaction, ok := p.Source.(txModel); ok {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return transaction.GetDetails(tx)
+		return transaction.GetDetails(tx), nil
 	}
 	return nil, errors.New("invalid source")
 }
 
 type detailModel interface {
-	GetRelatedDetail(tx *sql.Tx) (*domain.TransactionDetail, error)
-	GetRelatedTransaction(tx *sql.Tx) (*domain.Transaction, error)
+	GetRelatedDetail(tx *sql.Tx) *domain.TransactionDetail
+	GetRelatedTransaction(tx *sql.Tx) *domain.Transaction
 }
 
 func resolveRelatedDetail(p graphql.ResolveParams) (interface{}, error) {
 	if detail, ok := p.Source.(detailModel); ok {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return detail.GetRelatedDetail(tx)
+		return detail.GetRelatedDetail(tx), nil
 	}
 	return nil, errors.New("invalid source")
 }
@@ -103,7 +103,7 @@ func resolveRelatedDetail(p graphql.ResolveParams) (interface{}, error) {
 func resolveRelatedTransaction(p graphql.ResolveParams) (interface{}, error) {
 	if detail, ok := p.Source.(detailModel); ok {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
-		return detail.GetRelatedTransaction(tx)
+		return detail.GetRelatedTransaction(tx), nil
 	}
 	return nil, errors.New("invalid source")
 }

@@ -19,6 +19,11 @@ func NewTransaction(id int64) *Transaction {
 	return &Transaction{Transaction: &table.Transaction{ID: id}}
 }
 
+// SetDetails allows tests to initialize the transaction details.
+func (t *Transaction) SetDetails(details []*TransactionDetail) {
+	t.source = &transactionSource{detailsByTxID: map[int64][]*TransactionDetail{t.ID: details}}
+}
+
 func (t *Transaction) Resolve(p graphql.ResolveParams) (interface{}, error) {
 	return defaultResolveFn(replaceSource(p, t.Transaction))
 }

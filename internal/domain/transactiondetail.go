@@ -23,6 +23,12 @@ func (d *TransactionDetail) Resolve(p graphql.ResolveParams) (interface{}, error
 	return defaultResolveFn(replaceSource(p, d.TransactionDetail))
 }
 
+// SetRelatedDetail allows test to initialize the related detail.
+func (d *TransactionDetail) SetRelatedDetail(detail *TransactionDetail) {
+	d.RelatedDetailID = &detail.ID
+	d.txSource = &transactionSource{relatedDetailsByID: map[int64]*TransactionDetail{detail.ID: detail}}
+}
+
 // GetRelatedDetail returns the related detail.
 func (d *TransactionDetail) GetRelatedDetail(tx *sql.Tx) *TransactionDetail {
 	if d.RelatedDetailID == nil {
@@ -30,6 +36,11 @@ func (d *TransactionDetail) GetRelatedDetail(tx *sql.Tx) *TransactionDetail {
 	}
 	d.txSource.loadRelatedDetails(tx)
 	return d.txSource.relatedDetailsByID[*d.RelatedDetailID]
+}
+
+// SetRelatedTransaction allows test to initialize the related transaction.
+func (d *TransactionDetail) SetRelatedTransaction(transaction *Transaction) {
+	d.txSource = &transactionSource{relatedTxByID: map[int64]*Transaction{d.TransactionID: transaction}}
 }
 
 // GetRelatedTransaction returns the transaction for a related detail.

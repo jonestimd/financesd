@@ -54,6 +54,31 @@ func Test_GetRelatedTransactions(t *testing.T) {
 	})
 }
 
+func Test_InsertTransaction(t *testing.T) {
+	accountID := int64(96)
+	user := "user id"
+	id := int64(42)
+	values := map[string]interface{}{
+		"date":            "2020-12-25",
+		"referenceNumber": "abc",
+		"payeeId":         123,
+		"securityId":      456,
+		"memo":            "notes",
+		"cleared":         true,
+	}
+	sqltest.TestInTx(t, func(mockDB sqlmock.Sqlmock, tx *sql.Tx) {
+		runInsertStub := mocka.Function(t, &runInsert, id)
+		defer runInsertStub.Restore()
+
+		result := InsertTransaction(tx, int64(accountID), values, user)
+
+		assert.Equal(t, id, result)
+		assert.Equal(t,
+			sqltest.UpdateArgs(tx, insertTransactionSQL, accountID, "2020-12-25", "abc", int64(123), int64(456), "notes", "Y", user),
+			runInsertStub.GetCall(0).Arguments())
+	})
+}
+
 func Test_UpdateTransaction(t *testing.T) {
 	user := "user id"
 	id := int64(42)
@@ -68,7 +93,7 @@ func Test_UpdateTransaction(t *testing.T) {
 		{"sets payee", "payeeId", 96},
 		{"sets security", "securityId", 96},
 		{"sets memo", "memo", "notes"},
-		{"sets cleared", "cleared", "Y"},
+		{"sets cleared", "cleared", true},
 		{"sets account", "accountId", 96},
 	}
 	for _, test := range tests {
@@ -83,7 +108,7 @@ func Test_UpdateTransaction(t *testing.T) {
 						test.field == "payeeId", update.IntOrNull("payeeId"),
 						test.field == "securityId", update.IntOrNull("securityId"),
 						test.field == "memo", update["memo"],
-						update["cleared"],
+						update.YesNoOrNull("cleared"),
 						test.field == "accountId", update.IntOrNull("accountId"),
 						user, id, version}}
 				runUpdateStub := mocka.Function(t, &runUpdate, int64(1))

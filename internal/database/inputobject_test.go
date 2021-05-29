@@ -127,6 +127,25 @@ func Test_InputObject_StringOrNull(t *testing.T) {
 	}
 }
 
+func Test_InputObject_YesNoOrNull(t *testing.T) {
+	tests := []struct {
+		name          string
+		values        InputObject
+		expectedValue interface{}
+	}{
+		{"returns nil for no value", map[string]interface{}{}, nil},
+		{"returns Y for true", map[string]interface{}{"key": true}, "Y"},
+		{"returns N for false", map[string]interface{}{"key": false}, "N"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			value := test.values.YesNoOrNull("key")
+
+			assert.Equal(t, test.expectedValue, value)
+		})
+	}
+}
+
 func Test_InputObject_GetVersionID(t *testing.T) {
 	tests := []struct {
 		name          string

@@ -59,6 +59,17 @@ func (io InputObject) StringOrNull(key string) interface{} {
 	return nil
 }
 
+func (io InputObject) YesNoOrNull(key string) interface{} {
+	if b, ok := io[key].(bool); ok {
+		if b {
+			return "Y"
+		} else {
+			return "N"
+		}
+	}
+	return nil
+}
+
 type VersionID struct {
 	ID      int64
 	Version int64

@@ -61,7 +61,7 @@ values (?, ?, ?, ?, ?, ?, ?, current_timestamp, ?, 0)`
 // InsertTransaction inserts a transaction.
 func InsertTransaction(tx *sql.Tx, accountID int64, values InputObject, user string) int64 {
 	return runInsert(tx, insertTransactionSQL, accountID, values.StringOrNull("date"), values.StringOrNull("referenceNumber"),
-		values.IntOrNull("payeeId"), values.IntOrNull("securityId"), values.StringOrNull("memo"), values.StringOrNull("cleared"), user)
+		values.IntOrNull("payeeId"), values.IntOrNull("securityId"), values.StringOrNull("memo"), values.YesNoOrNull("cleared"), user)
 }
 
 const updateTxSQL = `update transaction
@@ -88,7 +88,7 @@ func UpdateTransaction(tx *sql.Tx, id int64, version int64, values InputObject, 
 		setPayee, payeeId,
 		setSecurity, securityId,
 		setMemo, memo,
-		values.StringOrNull("cleared"),
+		values.YesNoOrNull("cleared"),
 		setAccount, accountId,
 		user, id, version)
 	if count == 0 {

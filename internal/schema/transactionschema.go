@@ -79,6 +79,8 @@ type txModel interface {
 	GetDetails(tx *sql.Tx) []*domain.TransactionDetail
 }
 
+var _ txModel = (*domain.Transaction)(nil)
+
 func resolveDetails(p graphql.ResolveParams) (interface{}, error) {
 	if transaction, ok := p.Source.(txModel); ok {
 		tx := p.Context.Value(DbContextKey).(*sql.Tx)
@@ -91,6 +93,8 @@ type detailModel interface {
 	GetRelatedDetail(tx *sql.Tx) *domain.TransactionDetail
 	GetRelatedTransaction(tx *sql.Tx) *domain.Transaction
 }
+
+var _ detailModel = (*domain.TransactionDetail)(nil)
 
 func resolveRelatedDetail(p graphql.ResolveParams) (interface{}, error) {
 	if detail, ok := p.Source.(detailModel); ok {

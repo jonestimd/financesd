@@ -30,7 +30,7 @@ func GetDetailsByAccountID(tx *sql.Tx, accountID int64) []*table.TransactionDeta
 const txDetailsSQL = `select td.*
 from transaction_detail td
 where json_contains(?, cast(transaction_id as json))
-order by t.id, td.id`
+order by td.transaction_id, td.id`
 
 func GetDetailsByTxIDs(tx *sql.Tx, txIDs []int64) []*table.TransactionDetail {
 	return runDetailQuery(tx, txDetailsSQL, int64sToJson(txIDs))
@@ -184,10 +184,7 @@ from (
     join transaction t on td.transaction_id = t.id
     left join transaction_category tc on td.transaction_category_id = tc.id
 	where json_contains(?, td.transaction_id)) errors
-where errors.error is not null;
-
-select *
-from transaction_category`
+where errors.error is not null`
 
 // ValidateDetails checks for invalid security fields and returns a map of detail ID to validation error.
 func ValidateDetails(tx *sql.Tx, transactionIDs []int64) {

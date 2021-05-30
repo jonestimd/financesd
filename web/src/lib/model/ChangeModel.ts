@@ -1,4 +1,6 @@
+import {mapValues} from 'lodash';
 import {action, makeObservable, observable} from 'mobx';
+import {Nullable} from './entityUtils';
 
 type Entries<T> = {
     [K in keyof T]: [K, T[K]]
@@ -19,7 +21,7 @@ export default class ChangeModel<T> {
     }
 
     get changes() {
-        return this._values;
+        return mapValues(this._values, (v) => v ?? null) as Nullable<Partial<T>>;
     }
 
     get<K extends keyof T>(key: K): T[K] {

@@ -1,3 +1,4 @@
+import {runInAction} from 'mobx';
 import {newDetail} from 'src/test/detailFactory';
 import {newTx} from 'src/test/transactionFactory';
 import {RootStore} from '../store/RootStore';
@@ -11,8 +12,9 @@ describe('TransactionTableModel', () => {
         newTx({details: [newDetail({amount: 23.45})]}),
         newTx({details: [newDetail({amount: 34.56})]}),
     ];
-    const model = new TransactionTableModel(transactions, categoryStore);
-
+    let model: TransactionTableModel;
+    beforeEach(() => model = new TransactionTableModel(transactions, categoryStore));
+    afterEach(() => model.dispose());
     describe('constructor', () => {
         it('creates TransactionModels', () => {
             expect(model.transactions[0]).toBeInstanceOf(TransactionModel);
@@ -22,6 +24,13 @@ describe('TransactionTableModel', () => {
             expect(model.transactions[0].balance).toEqual(subtotals[0]);
             expect(model.transactions[1].balance).toEqual(subtotals[0] + subtotals[1]);
             expect(model.transactions[2].balance).toEqual(subtotals[0] + subtotals[1] + subtotals[2]);
+        });
+        it('updates balances', () => {
+            runInAction(() => model.transactions[1].details[0].amount += 10);
+
+            expect(model.transactions[0].balance).toBeCloseTo(12.34);
+            expect(model.transactions[1].balance).toBeCloseTo(12.34 + 23.45 + 10);
+            expect(model.transactions[2].balance).toBeCloseTo(12.34 + 23.45 + 10 + 34.56);
         });
     });
     describe('get groups', () => {
@@ -57,6 +66,59 @@ describe('TransactionTableModel', () => {
     describe('get rowCount', () => {
         it('returns count of transactions+details', () => {
             expect(model.rowCount).toEqual(transactions.length * 2);
+        });
+    });
+    describe('getTransaction', () => {
+        it('return transaction with id', () => {
+            expect(model.getTransaction(transactions[0].id)).toEqual(expect.objectContaining(transactions[0]));
+        });
+    });
+    describe('isChanged', () => {
+        it('returns false for no changes', () => {
+            expect(model.isChanged).toBe(false);
+        });
+        it('returns true if a transaction has changes', () => {
+            model.transactions[1].memo = 'notes';
+
+            expect(model.isChanged).toBe(true);
+        });
+    });
+    describe('get changes', () => {
+        it('returns updates for changed transactions', () => {
+            model.transactions[1].memo = 'notes';
+            model.transactions[1].cleared = true;
+
+            const changes = model.changes;
+
+            const {id, version} = transactions[1];
+            expect(changes).toEqual({updates: [{id, version, memo: 'notes', cleared: true}]});
+        });
+    });
+    describe('update', () => {
+        it('replaces transactions', () => {
+            const {id} = transactions[1];
+            const updated = newTx({id, version: transactions[1].version + 1, memo: 'notes'});
+
+            model.update([updated]);
+
+            expect(model.getTransaction(id)).toEqual(expect.objectContaining(updated));
+        });
+        it('re-sorts transactions', () => {
+            const {id} = transactions[1];
+            const updated = newTx({id, version: transactions[1].version + 1, date: '1999-01-01'});
+
+            model.update([updated]);
+
+            expect(model.transactions[0].id).toEqual(id);
+        });
+    });
+    describe('remove', () => {
+        it('removes transactions with ids', () => {
+            const {id} = transactions[1];
+
+            model.remove([{id}]);
+
+            expect(model.transactions.map((t) => t.id)).toEqual([transactions[0].id, transactions[2].id]);
         });
     });
 });

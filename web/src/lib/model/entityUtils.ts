@@ -1,3 +1,7 @@
+export type Nullable<T> = {
+    [P in keyof T]?: T[P] | null;
+};
+
 export interface IName {
     name: string;
 }
@@ -28,6 +32,10 @@ export function sortValues<T>(itemMap: Map<unknown, T>, comparator: Comparator<T
 
 export interface INumberId {
     id: number;
+}
+
+export interface IVersionId extends INumberId {
+    version: number;
 }
 
 export function addToMap<T extends INumberId>(byId: Map<number, T>, items: T[]): void {

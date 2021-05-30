@@ -36,7 +36,7 @@ describe('ChangeModel', () => {
 
             model.set('value', undefined);
 
-            expect(model.changes).toEqual({value: undefined});
+            expect(model.changes).toEqual({value: null});
             expect(model.isChanged).toBe(true);
         });
         it('resets change', () => {

@@ -14,6 +14,7 @@ import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Auto
 import {AccountModel} from 'src/lib/model/account/AccountModel';
 import {TextField} from '@material-ui/core';
 import settingsStore from 'src/lib/store/settingsStore';
+import TransactionTableModel from 'src/lib/model/TransactionTableModel';
 
 const accountId = '123';
 const history = {push: jest.fn()} as unknown as History;
@@ -25,7 +26,7 @@ jest.mock('react-router', () => ({
 } as object));
 
 describe('TransactionsPage', () => {
-    const {accountStore, transactionStore} = new RootStore();
+    const {accountStore, categoryStore, transactionStore} = new RootStore();
     const account = newAccountModel({}, newCompanyModel());
     const props = {
         match: {params: {accountId}},
@@ -42,6 +43,36 @@ describe('TransactionsPage', () => {
 
         expect(transactionStore.loadTransactions).toBeCalledWith(parseInt(accountId));
         expect(accountStore.getAccount).toBeCalledWith(parseInt(accountId));
+    });
+    describe('save button', () => {
+        it('is disabled when no transactions are changed', () => {
+            const tableModel = new TransactionTableModel([], categoryStore);
+            jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(false);
+            transactionStore['transactionsByAccountId'].set(parseInt(accountId), tableModel);
+
+            const component = shallow(<TransactionsPage {...props} />);
+
+            expect(component.find('#save-button')).toHaveProp('disabled', true);
+        });
+        it('is enabled when transactions are changed', () => {
+            const tableModel = new TransactionTableModel([], categoryStore);
+            jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(true);
+            transactionStore['transactionsByAccountId'].set(parseInt(accountId), tableModel);
+
+            const component = shallow(<TransactionsPage {...props} />);
+
+            expect(component.find('#save-button')).toHaveProp('disabled', false);
+        });
+        it('calls transactionStore.updateTransactions', () => {
+            const tableModel = new TransactionTableModel([], categoryStore);
+            jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(true);
+            jest.spyOn(transactionStore, 'saveTransactions').mockResolvedValue(true);
+            const component = shallow(<TransactionsPage {...props} />);
+
+            component.find('#save-button').simulate('click');
+
+            expect(transactionStore.saveTransactions).toBeCalledWith(parseInt(accountId));
+        });
     });
     describe('account input', () => {
         it('displays account name', () => {

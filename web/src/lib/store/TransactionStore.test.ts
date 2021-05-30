@@ -1,7 +1,8 @@
 import TransactionTableModel from '../model/TransactionTableModel';
 import {RootStore} from './RootStore';
 import * as agent from '../agent';
-import {loadingTransactions, query} from './TransactionStore';
+import {loadingTransactions, query, savingTransactions, updateTxMutation} from './TransactionStore';
+import {newTx} from 'src/test/transactionFactory';
 
 describe('TransactionStore', () => {
     const accountId = 1;
@@ -70,6 +71,32 @@ describe('TransactionStore', () => {
             expect(transactionStore.getTransactionsModel(accountId)).toBe(TransactionTableModel.EMPTY);
             expect(alertStore.addAlert).toBeCalledWith('error', 'Error loading transactions');
             expect(console.error).toBeCalledWith('error from Loading transactions', error);
+        });
+    });
+    describe('updateTransactions', () => {
+        it('ignores unknown account id', async () => {
+            jest.spyOn(agent, 'graphql').mockRejectedValue(new Error('unexpected call'));
+
+            expect(await transactionStore.saveTransactions(accountId)).toBe(true);
+
+            expect(messageStore.addProgressMessage).not.toBeCalled();
+            expect(messageStore.removeProgressMessage).not.toBeCalled();
+        });
+        it('calls updateTransactions mutation', async () => {
+            const updates = [{id: 1, version: 2, memo: 'notes'}];
+            const tableModel = new TransactionTableModel([], categoryStore);
+            jest.spyOn(tableModel, 'changes', 'get').mockReturnValue({updates});
+            jest.spyOn(tableModel, 'update');
+            transactionStore['transactionsByAccountId'].set(accountId, tableModel);
+            const updatedTransactions = [newTx()];
+            jest.spyOn(agent, 'graphql').mockResolvedValue({data: {transactions: updatedTransactions}});
+
+            expect(await transactionStore.saveTransactions(accountId)).toBe(true);
+
+            expect(agent.graphql).toBeCalledWith(updateTxMutation, {accountId, updates});
+            expect(tableModel.update).toBeCalledWith(updatedTransactions);
+            expect(messageStore.addProgressMessage).toBeCalledWith(savingTransactions);
+            expect(messageStore.removeProgressMessage).toBeCalledWith(savingTransactions);
         });
     });
 });

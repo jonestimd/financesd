@@ -21,7 +21,12 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
     const {accountStore, transactionStore} = React.useContext(RootStoreContext);
     React.useEffect(() => void transactionStore.loadTransactions(accountId), [transactionStore, accountId]);
     const account = accountStore.getAccount(accountId);
+    const transactionsModel = transactionStore.getTransactionsModel(accountId);
     const mode = settingsStore.transactionsView;
+    const onSave = () => {
+        void transactionStore.saveTransactions(accountId);
+        // TODO restore focus
+    };
     return <>
         <TopAppBar currentPage='transactions'>
             <Autocomplete options={accountStore.accounts} loading={accountStore.accounts.length === 0}
@@ -37,7 +42,7 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
             <span className='filler'/>
             {/* TODO filter input */}
             {/* TODO cleared balance */}
-            <IconButton disabled><Icon>save</Icon></IconButton>
+            <IconButton id='save-button' disabled={!transactionsModel.isChanged} onClick={onSave}><Icon>save</Icon></IconButton>
             <ToggleButtonGroup value={mode} exclusive size='small'
                 onChange={(_event: React.MouseEvent, value: ViewMode) => settingsStore.transactionsView = value}>
                 <ToggleButton value='list'><Icon>list</Icon></ToggleButton>

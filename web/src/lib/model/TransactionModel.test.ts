@@ -58,6 +58,13 @@ describe('TransactionModel', () => {
             expect(model.isChanged).toBe(true);
         });
     });
+    describe('get changes', () => {
+        it('returns changes with id and version', () => {
+            model.memo = 'notes';
+
+            expect(model.changes).toEqual({memo: 'notes', id: model.id, version: model.version});
+        });
+    });
     describe('subtotal', () => {
         it('returns total of detail amounts', () => {
             expect(model.subtotal).toEqual(model.details[0].amount + model.details[1].amount);

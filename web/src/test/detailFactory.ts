@@ -1,4 +1,4 @@
-import {ITransactionDetail} from 'src/lib/model/TransactionModel';
+import {ITransactionDetail} from 'lib/model/TransactionModel';
 
 let nextId = 0;
 

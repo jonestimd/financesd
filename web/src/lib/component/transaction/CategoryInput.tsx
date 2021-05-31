@@ -3,10 +3,10 @@ import {observer} from 'mobx-react-lite';
 import {TextFieldProps} from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {RootStoreContext} from '../../store/RootStore';
-import {ITransactionDetail} from 'src/lib/model/TransactionModel';
+import {ITransactionDetail} from 'lib/model/TransactionModel';
 import autocompleteProps from './autocompleteProps';
-import {CategoryModel} from 'src/lib/model/CategoryModel';
-import {AccountModel} from 'src/lib/model/account/AccountModel';
+import {CategoryModel} from 'lib/model/CategoryModel';
+import {AccountModel} from 'lib/model/account/AccountModel';
 import IconInput from '../IconInput';
 
 interface IProps {

@@ -1,12 +1,12 @@
 import React from 'react';
 import {mount, shallow} from 'enzyme';
 import HeaderDetailTable from './HeaderDetailTable';
-import IMixedRowTableModel from 'src/lib/model/IMixedRowTableModel';
+import IMixedRowTableModel from 'lib/model/IMixedRowTableModel';
 import {sortedIndex} from 'lodash';
 import HeaderRow from './HeaderRow';
 import Row from './Row';
 import {IColumn} from './Column';
-import {mockTableSelectionHook} from 'src/test/mockHooks';
+import {mockTableSelectionHook} from 'test/mockHooks';
 import ScrollViewport from '../scroll/ScrollViewport';
 import {TableHead, TableBody} from '@material-ui/core';
 

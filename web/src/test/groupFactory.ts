@@ -1,4 +1,4 @@
-import {IGroup, GroupModel} from 'src/lib/model/GroupModel';
+import {IGroup, GroupModel} from 'lib/model/GroupModel';
 
 let nextId = 0;
 

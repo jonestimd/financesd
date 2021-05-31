@@ -1,5 +1,5 @@
-import TransactionModel, {ITransaction} from 'src/lib/model/TransactionModel';
-import CategoryStore from 'src/lib/store/CategoryStore';
+import TransactionModel, {ITransaction} from 'lib/model/TransactionModel';
+import CategoryStore from 'lib/store/CategoryStore';
 import {defaultCategoryStore} from './categoryFactory';
 
 let nextId = 0;

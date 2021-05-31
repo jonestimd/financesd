@@ -1,6 +1,6 @@
 import CompanyRow from './CompanyRow';
-import {newAccountModel} from 'src/test/accountFactory';
-import {testAction} from 'src/test/mobxUtils';
+import {newAccountModel} from 'test/accountFactory';
+import {testAction} from 'test/mobxUtils';
 
 describe('CompanyRow', () => {
     describe('get id', () => {

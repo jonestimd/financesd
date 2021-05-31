@@ -1,11 +1,11 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import CategoryInput, {IOption} from './CategoryInput';
-import {newDetail} from 'src/test/detailFactory';
+import {newDetail} from 'test/detailFactory';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel} from 'src/test/accountFactory';
-import {newCategoryModel} from 'src/test/categoryFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newAccountModel} from 'test/accountFactory';
+import {newCategoryModel} from 'test/categoryFactory';
 import {Icon} from '@material-ui/core';
 
 describe('CategoryInput', () => {

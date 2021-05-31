@@ -2,7 +2,7 @@ import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
 import {AccountModel} from '../model/account/AccountModel';
-import {newAccount, newAccountModel, newCompany, newCompanyModel} from 'src/test/accountFactory';
+import {newAccount, newAccountModel, newCompany, newCompanyModel} from 'test/accountFactory';
 import {loadingAccounts, query, savingCompanies, updateCompaniesQuery} from './AccountStore';
 import {CompanyModel} from '../model/account/CompanyModel';
 

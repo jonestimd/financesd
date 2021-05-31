@@ -2,10 +2,10 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import SecurityInput from './SecurityInput';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newSecurityModel} from 'src/test/securityFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newSecurityModel} from 'test/securityFactory';
 import {Icon} from '@material-ui/core';
-import {newTxModel} from 'src/test/transactionFactory';
+import {newTxModel} from 'test/transactionFactory';
 
 describe('SecurityInput', () => {
     const {securityStore} = new RootStore();

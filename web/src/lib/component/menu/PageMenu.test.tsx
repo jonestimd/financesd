@@ -4,7 +4,7 @@ import PageMenu from './PageMenu';
 import MainMenu from './MainMenu';
 import CompaniesMenu from './CompaniesMenu';
 import AccountsMenu from './AccountsMenu';
-import {newCompanyModel} from 'src/test/accountFactory';
+import {newCompanyModel} from 'test/accountFactory';
 
 describe('PageMenu', () => {
     it('defaults to MainMenu', () => {

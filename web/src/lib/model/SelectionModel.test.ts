@@ -1,5 +1,5 @@
-import {createDiv} from 'src/test/htmlUtils';
-import {testAction} from 'src/test/mobxUtils';
+import {createDiv} from 'test/htmlUtils';
+import {testAction} from 'test/mobxUtils';
 import SelectionModel from './SelectionModel';
 
 describe('SelectionModel', () => {

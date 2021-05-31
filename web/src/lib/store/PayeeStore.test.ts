@@ -2,7 +2,7 @@ import {RootStore} from './RootStore';
 import * as entityUtils from '../model/entityUtils';
 import * as agent from '../agent';
 import {loadingPayees, query} from './PayeeStore';
-import {newPayee, newPayeeModel} from 'src/test/payeeFactory';
+import {newPayee, newPayeeModel} from 'test/payeeFactory';
 import {PayeeModel} from '../model/PayeeModel';
 
 describe('PayeeStore', () => {

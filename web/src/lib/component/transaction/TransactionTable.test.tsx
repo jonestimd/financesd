@@ -1,17 +1,17 @@
 import React from 'react';
 import {shallow, ShallowWrapper} from 'enzyme';
 import TransactionTable from './TransactionTable';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel} from 'src/test/accountFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newAccountModel} from 'test/accountFactory';
 import HeaderDetailTable from '../table/HeaderDetailTable';
-import TransactionTableModel from 'src/lib/model/TransactionTableModel';
-import {newTxModel} from 'src/test/transactionFactory';
-import {newPayeeModel} from 'src/test/payeeFactory';
-import {newSecurityModel} from 'src/test/securityFactory';
-import {newDetail} from 'src/test/detailFactory';
-import {newGroupModel} from 'src/test/groupFactory';
-import {newCategoryModel} from 'src/test/categoryFactory';
-import TransactionModel, {ITransactionDetail} from 'src/lib/model/TransactionModel';
+import TransactionTableModel from 'lib/model/TransactionTableModel';
+import {newTxModel} from 'test/transactionFactory';
+import {newPayeeModel} from 'test/payeeFactory';
+import {newSecurityModel} from 'test/securityFactory';
+import {newDetail} from 'test/detailFactory';
+import {newGroupModel} from 'test/groupFactory';
+import {newCategoryModel} from 'test/categoryFactory';
+import TransactionModel, {ITransactionDetail} from 'lib/model/TransactionModel';
 
 const account = newAccountModel();
 

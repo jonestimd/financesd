@@ -19,7 +19,7 @@
         "sourceMap": true,
         "target": "es2019",
         "outDir": "dist",
-        "baseUrl": ".",
+        "baseUrl": "src",
         "paths": {}
     }
 }

@@ -6,7 +6,7 @@ import Row from './Row';
 import {IColumn} from './Column';
 import {TableHead, TableBody} from '@material-ui/core';
 import TextCellEditor from './TextCellEditor';
-import SelectionModel from 'src/lib/model/SelectionModel';
+import SelectionModel from 'lib/model/SelectionModel';
 
 class TestRow {
     constructor(

@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import ScrollViewport, {IScrollableProps} from './ScrollViewport';
-import {mockUseEffect} from 'src/test/mockHooks';
+import {mockUseEffect} from 'test/mockHooks';
 
 describe('ScrollViewport', () => {
     const document = new Document();

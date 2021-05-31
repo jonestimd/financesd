@@ -1,4 +1,4 @@
-import {newCategory, newCategoryModel} from 'src/test/categoryFactory';
+import {newCategory, newCategoryModel} from 'test/categoryFactory';
 import {RootStore} from '../store/RootStore';
 import {CategoryModel} from './CategoryModel';
 

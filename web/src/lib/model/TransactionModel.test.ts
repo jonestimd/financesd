@@ -1,6 +1,6 @@
-import {newCategoryModel} from 'src/test/categoryFactory';
-import {newDetail} from 'src/test/detailFactory';
-import {newTx, newTxModel} from 'src/test/transactionFactory';
+import {newCategoryModel} from 'test/categoryFactory';
+import {newDetail} from 'test/detailFactory';
+import {newTx, newTxModel} from 'test/transactionFactory';
 import {RootStore} from '../store/RootStore';
 import TransactionModel from './TransactionModel';
 

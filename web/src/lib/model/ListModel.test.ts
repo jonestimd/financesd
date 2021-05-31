@@ -1,6 +1,6 @@
 import ListModel from './ListModel';
-import {testAction} from 'src/test/mobxUtils';
-import {createDiv} from 'src/test/htmlUtils';
+import {testAction} from 'test/mobxUtils';
+import {createDiv} from 'test/htmlUtils';
 import SelectionModel from './SelectionModel';
 
 interface ITestRow {

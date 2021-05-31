@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import GroupInput from './GroupInput';
-import {newDetail} from 'src/test/detailFactory';
+import {newDetail} from 'test/detailFactory';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newGroup} from 'src/test/groupFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newGroup} from 'test/groupFactory';
 import {Icon} from '@material-ui/core';
 
 describe('GroupInput', () => {

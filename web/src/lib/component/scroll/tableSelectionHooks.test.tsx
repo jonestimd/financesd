@@ -1,8 +1,8 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {useSelection, ISelectionOptions} from './tableSelectionHooks';
-import {createDiv} from 'src/test/htmlUtils';
-import {mockScrollHook} from 'src/test/mockHooks';
+import {createDiv} from 'test/htmlUtils';
+import {mockScrollHook} from 'test/mockHooks';
 
 const hook: Partial<ReturnType<typeof useSelection>> = {};
 

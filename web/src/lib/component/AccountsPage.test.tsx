@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import {RootStore} from '../store/RootStore';
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'test/accountFactory';
 import AccountsPage from './AccountsPage';
 import Table from './table/Table';
 import {IColumn} from './table/Column';

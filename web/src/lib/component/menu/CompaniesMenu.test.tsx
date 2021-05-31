@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import CompaniesMenu from './CompaniesMenu';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newAccountModel, newCompanyModel} from 'test/accountFactory';
 import {MenuAccount} from './AccountsMenu';
-import settingsStore from 'src/lib/store/settingsStore';
+import settingsStore from 'lib/store/settingsStore';
 import {Checkbox, ListItem, ListItemText, MenuItem} from '@material-ui/core';
 import {runInAction} from 'mobx';
 import ChildMenu from './ChildMenu';

@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import TransactionModel from 'src/lib/model/TransactionModel';
-import {SecurityModel} from 'src/lib/model/SecurityModel';
+import TransactionModel from 'lib/model/TransactionModel';
+import {SecurityModel} from 'lib/model/SecurityModel';
 import Security from './Security';
-import {newTx} from 'src/test/transactionFactory';
-import {RootStore} from 'src/lib/store/RootStore';
+import {newTx} from 'test/transactionFactory';
+import {RootStore} from 'lib/store/RootStore';
 import {Icon} from '@material-ui/core';
 
 describe('Security', () => {

@@ -3,7 +3,7 @@ import {observer} from 'mobx-react-lite';
 import {TextFieldProps} from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {RootStoreContext} from '../../store/RootStore';
-import TransactionModel from 'src/lib/model/TransactionModel';
+import TransactionModel from 'lib/model/TransactionModel';
 import autocompleteProps from './autocompleteProps';
 import IconInput from '../IconInput';
 

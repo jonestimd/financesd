@@ -1,4 +1,4 @@
-import {newPayee} from 'src/test/payeeFactory';
+import {newPayee} from 'test/payeeFactory';
 import {PayeeModel} from './PayeeModel';
 
 describe('PayeeModel', () => {

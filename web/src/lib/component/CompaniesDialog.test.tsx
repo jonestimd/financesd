@@ -4,7 +4,7 @@ import {RootStore} from '../store/RootStore';
 import CompaniesDialog from './CompaniesDialog';
 import {DialogActions, DialogTitle, IconButton} from '@material-ui/core';
 import CompanyListModelClass from '../model/account/CompanyListModel';
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'test/accountFactory';
 import AccountStore from '../store/AccountStore';
 import CompanyRow from '../model/account/CompanyRow';
 import {IColumn} from './table/Column';

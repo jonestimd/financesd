@@ -1,6 +1,6 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import {mockUseEffect} from 'src/test/mockHooks';
+import {mockUseEffect} from 'test/mockHooks';
 import {RootStore, RootStoreContext} from '../store/RootStore';
 import * as history from 'history';
 import type * as main from './main';

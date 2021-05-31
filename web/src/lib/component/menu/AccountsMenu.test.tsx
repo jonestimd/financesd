@@ -1,6 +1,6 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {newAccountModel, newCompanyModel} from 'test/accountFactory';
 import AccountsMenu, {MenuAccount} from './AccountsMenu';
 import {ListItemText, MenuItem} from '@material-ui/core';
 import {Link} from 'react-router-dom';

@@ -1,4 +1,4 @@
-import {newAccount, newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {newAccount, newAccountModel, newCompanyModel} from 'test/accountFactory';
 import settingsStore from '../../store/settingsStore';
 import {AccountModel} from './AccountModel';
 

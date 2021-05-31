@@ -1,4 +1,4 @@
-import {newSecurity, newSecurityModel} from 'src/test/securityFactory';
+import {newSecurity, newSecurityModel} from 'test/securityFactory';
 import {SecurityModel} from './SecurityModel';
 
 describe('SecurityModel', () => {

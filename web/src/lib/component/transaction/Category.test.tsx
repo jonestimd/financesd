@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import Category from './Category';
-import {CategoryModel} from 'src/lib/model/CategoryModel';
-import {AccountModel} from 'src/lib/model/account/AccountModel';
-import {newDetail} from 'src/test/detailFactory';
-import {RootStore} from 'src/lib/store/RootStore';
+import {CategoryModel} from 'lib/model/CategoryModel';
+import {AccountModel} from 'lib/model/account/AccountModel';
+import {newDetail} from 'test/detailFactory';
+import {RootStore} from 'lib/store/RootStore';
 
 const detail = newDetail();
 

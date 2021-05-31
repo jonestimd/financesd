@@ -1,16 +1,16 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import TransactionList from './TransactionList';
-import {RootStore} from 'src/lib/store/RootStore';
-import TransactionTableModel from 'src/lib/model/TransactionTableModel';
+import {RootStore} from 'lib/store/RootStore';
+import TransactionTableModel from 'lib/model/TransactionTableModel';
 import ListViewport from '../scroll/ListViewport';
-import {newTxModel} from 'src/test/transactionFactory';
+import {newTxModel} from 'test/transactionFactory';
 import Memo from './Memo';
 import {Checkbox} from '@material-ui/core';
-import {newDetail} from 'src/test/detailFactory';
-import TransactionModel from 'src/lib/model/TransactionModel';
+import {newDetail} from 'test/detailFactory';
+import TransactionModel from 'lib/model/TransactionModel';
 import * as selectionHooks from '../scroll/listSelectionHooks';
-import {mockListSelectionHook} from 'src/test/mockHooks';
+import {mockListSelectionHook} from 'test/mockHooks';
 import Transaction from './Transaction';
 
 const Wrapper: React.FC<{children: React.ReactElement}> = ({children}) => <>{children}</>;

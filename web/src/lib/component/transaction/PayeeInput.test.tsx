@@ -2,10 +2,10 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import PayeeInput from './PayeeInput';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newPayee} from 'src/test/payeeFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newPayee} from 'test/payeeFactory';
 import {Icon} from '@material-ui/core';
-import {newTxModel} from 'src/test/transactionFactory';
+import {newTxModel} from 'test/transactionFactory';
 
 describe('PayeeInput', () => {
     const {payeeStore} = new RootStore();

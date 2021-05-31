@@ -2,7 +2,7 @@ import TransactionTableModel from '../model/TransactionTableModel';
 import {RootStore} from './RootStore';
 import * as agent from '../agent';
 import {loadingTransactions, query, savingTransactions, updateTxMutation} from './TransactionStore';
-import {newTx} from 'src/test/transactionFactory';
+import {newTx} from 'test/transactionFactory';
 
 describe('TransactionStore', () => {
     const accountId = 1;

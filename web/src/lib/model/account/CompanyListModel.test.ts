@@ -1,6 +1,6 @@
-import {RootStore} from 'src/lib/store/RootStore';
-import {newCompanyModel} from 'src/test/accountFactory';
-import {testAction} from 'src/test/mobxUtils';
+import {RootStore} from 'lib/store/RootStore';
+import {newCompanyModel} from 'test/accountFactory';
+import {testAction} from 'test/mobxUtils';
 import CompanyListModel, {nameKey} from './CompanyListModel';
 import CompanyRow from './CompanyRow';
 

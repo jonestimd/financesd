@@ -2,7 +2,7 @@ import React from 'react';
 import {shallow} from 'enzyme';
 import ListViewport, {IProps} from './ListViewport';
 import ScrollViewport from './ScrollViewport';
-import {mockTableSelectionHook} from 'src/test/mockHooks';
+import {mockTableSelectionHook} from 'test/mockHooks';
 
 describe('ListViewport', () => {
     const rowHeight = 10;

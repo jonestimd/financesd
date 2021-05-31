@@ -80,7 +80,7 @@
     "coverageProvider": "babel",
     "testEnvironment": "jsdom",
     "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/web/src/$1"
+      "^(lib|test)/(.*)$": "<rootDir>/web/src/$1/$2"
     },
     "globals": {
       "ts-jest": {

@@ -1,4 +1,4 @@
-import {newGroup} from 'src/test/groupFactory';
+import {newGroup} from 'test/groupFactory';
 import {GroupModel} from './GroupModel';
 
 

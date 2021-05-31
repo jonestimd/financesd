@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import MessageStore from 'src/lib/store/MessageStore';
-import GroupStore from 'src/lib/store/GroupStore';
+import MessageStore from 'lib/store/MessageStore';
+import GroupStore from 'lib/store/GroupStore';
 import Group from './Group';
-import {GroupModel} from 'src/lib/model/GroupModel';
-import AlertStore from 'src/lib/store/AlertStore';
+import {GroupModel} from 'lib/model/GroupModel';
+import AlertStore from 'lib/store/AlertStore';
 
 describe('Group', () => {
     const groupStore = new GroupStore(new MessageStore(), new AlertStore());

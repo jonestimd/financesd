@@ -1,7 +1,7 @@
-import {ICategory, CategoryModel} from 'src/lib/model/CategoryModel';
-import AlertStore from 'src/lib/store/AlertStore';
-import CategoryStore from 'src/lib/store/CategoryStore';
-import MessageStore from 'src/lib/store/MessageStore';
+import {ICategory, CategoryModel} from 'lib/model/CategoryModel';
+import AlertStore from 'lib/store/AlertStore';
+import CategoryStore from 'lib/store/CategoryStore';
+import MessageStore from 'lib/store/MessageStore';
 
 let nextId = 0;
 

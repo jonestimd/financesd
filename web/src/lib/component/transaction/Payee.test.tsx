@@ -1,10 +1,10 @@
 import React from 'react';
 import {shallow} from 'enzyme';
-import TransactionModel from 'src/lib/model/TransactionModel';
-import {PayeeModel} from 'src/lib/model/PayeeModel';
+import TransactionModel from 'lib/model/TransactionModel';
+import {PayeeModel} from 'lib/model/PayeeModel';
 import Payee from './Payee';
-import {newTx} from 'src/test/transactionFactory';
-import {RootStore} from 'src/lib/store/RootStore';
+import {newTx} from 'test/transactionFactory';
+import {RootStore} from 'lib/store/RootStore';
 import {Icon} from '@material-ui/core';
 
 const txData = newTx();

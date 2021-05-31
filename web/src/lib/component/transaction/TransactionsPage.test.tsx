@@ -1,20 +1,20 @@
 import React, {ChangeEvent} from 'react';
 import {shallow} from 'enzyme';
 import {History} from 'history';
-import {RootStore} from 'src/lib/store/RootStore';
-import {newAccountModel, newCompanyModel} from 'src/test/accountFactory';
+import {RootStore} from 'lib/store/RootStore';
+import {newAccountModel, newCompanyModel} from 'test/accountFactory';
 import TransactionsPage from './TransactionsPage';
 import TransactionList from './TransactionList';
 import TransactionTable from './TransactionTable';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import TopAppBar from '../TopAppBar';
-import {mockUseEffect} from 'src/test/mockHooks';
+import {mockUseEffect} from 'test/mockHooks';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
-import {AccountModel} from 'src/lib/model/account/AccountModel';
+import {AccountModel} from 'lib/model/account/AccountModel';
 import {TextField} from '@material-ui/core';
-import settingsStore from 'src/lib/store/settingsStore';
-import TransactionTableModel from 'src/lib/model/TransactionTableModel';
+import settingsStore from 'lib/store/settingsStore';
+import TransactionTableModel from 'lib/model/TransactionTableModel';
 
 const accountId = '123';
 const history = {push: jest.fn()} as unknown as History;

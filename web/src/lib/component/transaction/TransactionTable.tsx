@@ -3,9 +3,12 @@ import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
 import {IColumn} from '../table/Column';
 import HeaderDetailTable from '../table/HeaderDetailTable';
-import TransactionModel, {ITransactionDetail} from '../../model/TransactionModel';
+import TransactionModel from '../../model/TransactionModel';
 import * as formats from '../../formats';
 import classNames from 'classnames';
+import DetailModel from 'lib/model/DetailModel';
+import {CategoryModel} from 'lib/model/CategoryModel';
+import {AccountModel} from 'lib/model/account/AccountModel';
 
 interface IProps {
     accountId?: number;
@@ -18,18 +21,22 @@ function numberClass(value: number, classes?: string) {
 }
 
 const getDetails = (tx: TransactionModel) => tx.details;
-const renderAmount = (detail: ITransactionDetail) => formats.currency.format(detail.amount);
-const renderShares = (detail: ITransactionDetail) => {
+const renderAmount = (detail: DetailModel) => formats.currency.format(detail.amount);
+const renderShares = (detail: DetailModel) => {
     return detail.assetQuantity ? formats.shares.format(detail.assetQuantity) : '';
 };
 const dummyRender = () => '';
+
+const isAccount = (x: CategoryModel | AccountModel): x is AccountModel => 'balance' in x;
+const categoryClass = (x: CategoryModel | AccountModel | null) => classNames({transfer: x && isAccount(x)});
+const renderCategory = ({category}: DetailModel) => <span className={categoryClass(category)}>{category?.displayName ?? ''}</span>;
 
 // TODO fixed column widths (manually adjustable
 // TODO fix keyboard scrolling
 // - slowness
 // - always display selected row
 const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
-    const {accountStore, categoryStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
+    const {accountStore, groupStore, payeeStore, securityStore, transactionStore} = React.useContext(RootStoreContext);
     const account = accountStore.getAccount(accountId);
     const renderSecurity = useCallback((tx: TransactionModel) => securityStore.getSecurity(tx?.securityId)?.name ?? '', [securityStore]);
     // TODO filter security columns on non-security account
@@ -43,16 +50,10 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
         {key: 'transaction.cleared', render: (tx) => tx.cleared ? <span>&#x2713;</span> : null, className: 'boolean'},
         {key: 'transaction.balance', render: (tx) => formats.currency.format(tx.balance), className: (tx) => numberClass(tx?.balance ?? 0)},
     ], [payeeStore, renderSecurity]);
-    const renderCategory = useCallback((detail: ITransactionDetail) => {
-        if (detail.relatedDetail) {
-            return <span className='transfer'>{accountStore.getAccount(detail.relatedDetail.transaction.accountId)?.name}</span>;
-        }
-        return <span>{categoryStore.getCategory(detail.transactionCategoryId)?.displayName ?? ''}</span>;
-    }, [accountStore, categoryStore]);
-    const renderGroup = useCallback(({transactionGroupId}: ITransactionDetail) => {
+    const renderGroup = useCallback(({transactionGroupId}: DetailModel) => {
         return <span className='group'>{groupStore.getGroup(transactionGroupId)?.name ?? ''}</span>;
     }, [groupStore]);
-    const subcolumns: IColumn<ITransactionDetail>[] = useMemo(() => [
+    const subcolumns: IColumn<DetailModel>[] = useMemo(() => [
         {key: 'detail.group', colspan: 2, render: renderGroup, className: 'group'},
         {key: 'detail.category', render: renderCategory, className: 'category'},
         {key: 'detail.memo', render: (detail) => detail.memo},
@@ -60,7 +61,7 @@ const TransactionTable: React.FC<IProps> = observer(({accountId}) => {
         {key: 'detail.amount', render: renderAmount, className: (detail) => numberClass(detail?.amount ?? 0)},
         {key: 'dummy1', header: dummyRender, render: dummyRender},
         {key: 'dummy2', header: dummyRender, render: dummyRender},
-    ], [renderCategory, renderGroup]);
+    ], [renderGroup]);
     return (
         <HeaderDetailTable
             className={securityAccountTypes.includes(account?.type ?? '') ? 'security-transactions' : 'transactions'}

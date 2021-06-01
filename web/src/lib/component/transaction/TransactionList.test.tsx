@@ -19,7 +19,7 @@ describe('TransactionList', () => {
     const {categoryStore, transactionStore, accountStore} = new RootStore();
     const detail = newDetail({amount: 123.45});
     const txModel = newTxModel({categoryStore, memo: 'transaction memo', details: [detail], balance: 567.89});
-    const transactionsModel = new TransactionTableModel([txModel], categoryStore);
+    const transactionsModel = new TransactionTableModel([txModel], accountStore, categoryStore);
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({transactionStore, accountStore});

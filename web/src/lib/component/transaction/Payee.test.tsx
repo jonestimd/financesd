@@ -11,13 +11,13 @@ const txData = newTx();
 
 describe('Payee', () => {
     const rootStore = new RootStore();
-    const {payeeStore, categoryStore} = rootStore;
+    const {payeeStore, accountStore, categoryStore} = rootStore;
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({payeeStore});
     });
     it('returns null if no payee', () => {
-        const tx = new TransactionModel(txData, categoryStore);
+        const tx = new TransactionModel(txData, accountStore, categoryStore);
 
         const component = shallow(<Payee transaction={tx} />);
 
@@ -26,7 +26,7 @@ describe('Payee', () => {
     it('shows payee', () => {
         const name = 'the payee';
         jest.spyOn(payeeStore, 'getPayee').mockReturnValue({name} as PayeeModel);
-        const tx = new TransactionModel({...txData, payeeId: -1}, categoryStore);
+        const tx = new TransactionModel({...txData, payeeId: -1}, accountStore, categoryStore);
 
         const component = shallow(<Payee transaction={tx} />);
 

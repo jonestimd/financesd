@@ -6,14 +6,14 @@ import TransactionModel from './TransactionModel';
 import TransactionTableModel from './TransactionTableModel';
 
 describe('TransactionTableModel', () => {
-    const {categoryStore} = new RootStore();
+    const {accountStore, categoryStore} = new RootStore();
     const transactions = [
         newTx({details: [newDetail({amount: 12.34})]}),
         newTx({details: [newDetail({amount: 23.45})]}),
         newTx({details: [newDetail({amount: 34.56})]}),
     ];
     let model: TransactionTableModel;
-    beforeEach(() => model = new TransactionTableModel(transactions, categoryStore));
+    beforeEach(() => model = new TransactionTableModel(transactions, accountStore, categoryStore));
     afterEach(() => model.dispose());
     describe('constructor', () => {
         it('creates TransactionModels', () => {
@@ -70,7 +70,8 @@ describe('TransactionTableModel', () => {
     });
     describe('getTransaction', () => {
         it('return transaction with id', () => {
-            expect(model.getTransaction(transactions[0].id)).toEqual(expect.objectContaining(transactions[0]));
+            const {details, ...rest} = transactions[0];
+            expect(model.getTransaction(transactions[0].id)).toEqual(expect.objectContaining(rest));
         });
     });
     describe('isChanged', () => {

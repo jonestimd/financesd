@@ -46,7 +46,8 @@ export default class TransactionStore {
             this.pendingAccounts.push(accountId);
             return this.loader.load<{transactions: ITransaction[]}>(loadingTransactions, {query, variables: {accountId},
                 updater: ({transactions}) => {
-                    this.transactionsByAccountId.set(accountId, new TransactionTableModel(transactions, this.rootStore.categoryStore));
+                    const {accountStore, categoryStore} = this.rootStore;
+                    this.transactionsByAccountId.set(accountId, new TransactionTableModel(transactions, accountStore, categoryStore));
                 },
                 completer: () => this.pendingAccounts.splice(this.pendingAccounts.indexOf(accountId), 1),
             });

@@ -1,6 +1,8 @@
+import AccountStore from 'lib/store/AccountStore';
 import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 import ChangeModel from './ChangeModel';
+import DetailModel, {IAddDetail, ITransactionDetail} from './DetailModel';
 import {IVersionId, Nullable} from './entityUtils';
 
 export const securityTxFields = ['date', 'ref', 'payee', 'security', 'description'] as const;
@@ -13,27 +15,6 @@ export type DetailField = typeof securityDetailFields[number];
 
 const fieldsPerItem = (showSecurity?: boolean) => showSecurity ? securityTxFields.length : txFields.length;
 
-export interface IRelatedTransaction {
-    id: number;
-    accountId: number;
-}
-
-export interface IRelatedDetail {
-    id: number;
-    transaction: IRelatedTransaction;
-}
-
-export interface ITransactionDetail {
-    id: number;
-    version: number;
-    transactionCategoryId?: number;
-    transactionGroupId?: number;
-    memo?: string;
-    amount: number;
-    assetQuantity?: number;
-    relatedDetail?: IRelatedDetail;
-}
-
 export interface ITransaction {
     id: number;
     version: number;
@@ -44,10 +25,6 @@ export interface ITransaction {
     memo?: string;
     cleared: boolean;
     details: ITransactionDetail[];
-}
-
-interface IAddDetail extends Omit<ITransactionDetail, 'id' | 'version' | 'relatedDetail'> {
-    transferAccountId: number
 }
 
 export interface IAddTransaction extends Omit<ITransaction, 'id' | 'version' | 'cleared' | 'details'> {
@@ -77,17 +54,19 @@ export default class TransactionModel implements ITransaction {
 
     id: number;
     @observable version: number;
-    @observable details: ITransactionDetail[];
+    readonly details = observable.array<DetailModel>();
     @observable balance = 0;
     private _changes: ChangeModel<Omit<ITransaction, 'id' | 'version' | 'details'>>;
-    categoryStore: CategoryStore;
+    // private readonly accountStore: AccountStore;
+    private readonly categoryStore: CategoryStore;
 
-    constructor(transaction: ITransaction, categoryStore: CategoryStore) {
+    constructor(transaction: ITransaction, accountStore: AccountStore, categoryStore: CategoryStore) {
         makeObservable(this);
         this.id = transaction.id;
         this.version = transaction.version;
-        this.details = transaction.details;
+        this.details.replace(transaction.details.map((detail) => new DetailModel(detail, accountStore, categoryStore)));
         this._changes = new ChangeModel(transaction);
+        // this.accountStore = accountStore;
         this.categoryStore = categoryStore;
     }
 
@@ -146,7 +125,7 @@ export default class TransactionModel implements ITransaction {
     }
 
     get isChanged() {
-        return this._changes.isChanged;
+        return this._changes.isChanged || this.details.some((d) => d.isChanged);
     }
 
     get changes(): IUpdateTransaction {

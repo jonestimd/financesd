@@ -1,5 +1,4 @@
 import React from 'react';
-import {ITransactionDetail} from '../../model/TransactionModel';
 import {Currency, Shares} from '../../formats';
 import Category from './Category';
 import Group from './Group';
@@ -10,15 +9,16 @@ import CategoryInput from './CategoryInput';
 import classNames from 'classnames';
 import GroupInput from './GroupInput';
 import IconInput from '../IconInput';
+import DetailModel from 'lib/model/DetailModel';
 
 interface IProps {
-    detail: ITransactionDetail;
+    detail: DetailModel;
     editField: DetailField | false;
     // TODO use to filter categories
     showSecurity?: boolean;
 }
 
-const fieldRenderers: Record<DetailField, (detail: ITransactionDetail) => React.ReactNode> = {
+const fieldRenderers: Record<DetailField, (detail: DetailModel) => React.ReactNode> = {
     amount: ({amount}) => <span key='amount'><Currency>{amount}</Currency></span>,
     category: (detail) => <Category key='category' detail={detail} />,
     group: ({transactionGroupId}) => <Group key='group' id={transactionGroupId} />,
@@ -48,14 +48,18 @@ const trailing = ({detail, editField}: IProps) => {
 };
 
 const TxDetail = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({detail, editField, showSecurity, ...inputProps}) => {
-    const {amount, assetQuantity, memo} = detail;
+    const {amountText, assetQuantityText, memo} = detail;
     return <>
         {leading({detail, editField})}
-        {editField === 'amount' && <TextField {...inputProps} type='number' value={amount ?? ''} required InputProps={{autoFocus: true, startAdornment: <span>$</span>}} />}
+        {editField === 'amount' && <TextField {...inputProps} type='number' value={amountText} required
+            onChange={({currentTarget}) => detail.amountText = currentTarget.value}
+            InputProps={{autoFocus: true, startAdornment: <span>$</span>}} />}
         {editField === 'category' && <CategoryInput detail={detail} {...inputProps} />}
         {editField === 'group' && <GroupInput detail={detail} {...inputProps} />}
-        {editField === 'shares' && <IconInput {...inputProps} type='number' value={assetQuantity ?? ''} icon='request_page' />}
-        {editField === 'memo' && <IconInput {...inputProps} value={memo ?? ''} icon='notes' />}
+        {editField === 'shares' && <IconInput {...inputProps} type='number' value={assetQuantityText} icon='request_page'
+            onChange={({currentTarget}) => detail.assetQuantityText = currentTarget.value} />}
+        {editField === 'memo' && <IconInput {...inputProps} value={memo ?? ''} icon='notes'
+            onChange={({currentTarget}) => detail.memo = currentTarget.value || undefined} />}
         {trailing({detail, editField})}
     </>;
 }, {forwardRef: true});

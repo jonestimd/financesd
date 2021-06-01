@@ -6,8 +6,8 @@ import {newTx} from 'test/transactionFactory';
 
 describe('TransactionStore', () => {
     const accountId = 1;
-    const {transactionStore, categoryStore, messageStore, alertStore} = new RootStore();
-    const tableModel = new TransactionTableModel([], categoryStore);
+    const {transactionStore, accountStore, categoryStore, messageStore, alertStore} = new RootStore();
+    const tableModel = new TransactionTableModel([], accountStore, categoryStore);
 
     beforeEach(() => {
         transactionStore['transactionsByAccountId'].clear();
@@ -84,7 +84,7 @@ describe('TransactionStore', () => {
         });
         it('calls updateTransactions mutation', async () => {
             const updates = [{id: 1, version: 2, memo: 'notes'}];
-            const tableModel = new TransactionTableModel([], categoryStore);
+            const tableModel = new TransactionTableModel([], accountStore, categoryStore);
             jest.spyOn(tableModel, 'changes', 'get').mockReturnValue({updates});
             jest.spyOn(tableModel, 'update');
             transactionStore['transactionsByAccountId'].set(accountId, tableModel);

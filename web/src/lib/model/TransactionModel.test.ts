@@ -6,14 +6,16 @@ import TransactionModel from './TransactionModel';
 
 
 describe('TransactionModel', () => {
-    const {categoryStore} = new RootStore();
+    const {accountStore, categoryStore} = new RootStore();
     const transaction = newTx({details: [newDetail(), newDetail()]});
-    const model = new TransactionModel(transaction, categoryStore);
+    const model = new TransactionModel(transaction, accountStore, categoryStore);
 
     beforeEach(() => model.reset());
     describe('constructor', () => {
         it('populates transaction properties', () => {
-            expect(model).toEqual(expect.objectContaining(transaction));
+            const {details, ...tx} = transaction;
+            expect(model).toEqual(expect.objectContaining(tx));
+            details.forEach((detail, i) => expect(model.details[i]).toEqual(expect.objectContaining(detail)));
         });
     });
     describe('set date', () => {

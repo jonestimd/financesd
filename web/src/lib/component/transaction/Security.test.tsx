@@ -9,13 +9,13 @@ import {Icon} from '@material-ui/core';
 
 describe('Security', () => {
     const rootStore = new RootStore();
-    const {securityStore, categoryStore} = rootStore;
+    const {securityStore, accountStore, categoryStore} = rootStore;
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({securityStore});
     });
     it('returns null if no security', () => {
-        const tx = new TransactionModel(newTx(), categoryStore);
+        const tx = new TransactionModel(newTx(), accountStore, categoryStore);
 
         const component = shallow(<Security transaction={tx} />);
 
@@ -25,7 +25,7 @@ describe('Security', () => {
         const securityId = 123;
         const name = 'the security';
         jest.spyOn(securityStore, 'getSecurity').mockReturnValue({displayName: name} as SecurityModel);
-        const tx = new TransactionModel(newTx({securityId}), categoryStore);
+        const tx = new TransactionModel(newTx({securityId}), accountStore, categoryStore);
 
         const component = shallow(<Security transaction={tx} />);
 

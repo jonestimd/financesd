@@ -1,19 +1,24 @@
-import {mapValues} from 'lodash';
-import {action, makeObservable, observable} from 'mobx';
+import {action, makeObservable, observable, ObservableMap} from 'mobx';
 import {Nullable} from './entityUtils';
 
-type Entries<T> = {
+type Entry<T> = {
     [K in keyof T]: [K, T[K]]
-}[keyof T][];
+}[keyof T];
+
+interface MapOf<T> extends Omit<ObservableMap<keyof T, unknown>, 'get' | 'set' | 'entries'> {
+    get<K extends keyof T>(key: K): T[K];
+    set<K extends keyof T>(key: K, value: T[K]): void;
+    entries(): IterableIterator<Entry<T>>;
+}
 
 function filterNulls<T>(value: T): T {
-    const entries = Object.entries(value) as Entries<T>;
+    const entries = Object.entries(value) as Entry<T>[];
     return Object.fromEntries(entries.filter(([, value]) => value !== null)) as unknown as T;
 }
 
 export default class ChangeModel<T> {
-    @observable protected readonly _originalValues: T;
-    @observable protected readonly _values: Partial<T> = {};
+    protected readonly _originalValues: T;
+    protected readonly _values = observable.map() as MapOf<Partial<T>>;
 
     constructor(data: T) {
         makeObservable(this);
@@ -21,41 +26,45 @@ export default class ChangeModel<T> {
     }
 
     get changes() {
-        return mapValues(this._values, (v) => v ?? null) as Nullable<Partial<T>>;
+        return Array.from(this._values.entries()).reduce<Nullable<Partial<T>>>((changes, [key, value]) => ({
+            ...changes,
+            [key]: value ?? null,
+        }), {});
     }
 
-    get<K extends keyof T>(key: K): T[K] {
+    get<K extends keyof T>(key: K): T[K] { // TODO should return | undefined
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return key in this._values ? this._values[key]! : this._originalValues[key];
+        return this._values.has(key) ? this._values.get(key)! : this._originalValues[key];
     }
 
     @action
     set<K extends keyof T>(key: K, value: Partial<T>[K]) {
-        if (this._originalValues[key] === value) delete this._values[key];
-        else this._values[key] = value;
+        if (this._originalValues[key] === value) this._values.delete(key);
+        else this._values.set(key, value);
     }
 
     @action
     undo(key: keyof T) {
-        delete this._values[key];
+        this._values.delete(key);
     }
 
     get isChanged() {
-        return Object.keys(this._values).length > 0;
+        return this._values.size > 0;
     }
 
     @action
     commit() {
-        const entries = Object.entries(this._values) as Entries<T>;
+        const entries = Array.from(this._values.entries());
         entries.forEach(([key, value]) => {
-            this._originalValues[key] = value;
-            delete this._values[key];
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this._originalValues[key] = value!;
+            this._values.delete(key);
         });
     }
 
     @action
     revert() {
-        const keys = Object.keys(this._values) as (keyof T)[];
-        keys.forEach((key) => delete this._values[key]);
+        const keys = Array.from(this._values.keys());
+        keys.forEach((key) => this._values.delete(key));
     }
 }

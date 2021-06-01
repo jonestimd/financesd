@@ -1,7 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import GroupInput from './GroupInput';
-import {newDetail} from 'test/detailFactory';
+import {newDetailModel} from 'test/detailFactory';
 import Autocomplete, {AutocompleteRenderInputParams} from '@material-ui/lab/Autocomplete';
 import {RootStore} from 'lib/store/RootStore';
 import {newGroup} from 'test/groupFactory';
@@ -16,7 +16,7 @@ describe('GroupInput', () => {
         jest.spyOn(React, 'useContext').mockReturnValue({groupStore});
     });
     it('displays list of accounts and categories', () => {
-        const detail = newDetail();
+        const detail = newDetailModel();
 
         const component = shallow(<GroupInput detail={detail} />);
 
@@ -24,7 +24,7 @@ describe('GroupInput', () => {
         expect(component.find(Autocomplete)).toHaveProp('value', null);
     });
     it('uses name for option labels', () => {
-        const detail = newDetail();
+        const detail = newDetailModel();
         const component = shallow(<GroupInput detail={detail} />);
 
         const getOptionLabel = component.find(Autocomplete).prop('getOptionLabel')!;
@@ -32,7 +32,7 @@ describe('GroupInput', () => {
         expect(getOptionLabel(groups[0])).toEqual(groups[0].name);
     });
     it('displays options containing text, ignoring case', () => {
-        const detail = newDetail();
+        const detail = newDetailModel();
         const component = shallow(<GroupInput detail={detail} />);
 
         const filterOptions = component.find(Autocomplete).prop('filterOptions')!;
@@ -41,14 +41,14 @@ describe('GroupInput', () => {
         expect(filterOptions(groups, {inputValue: 'some', getOptionLabel: () => ''})).toEqual(groups.slice(0,1));
     });
     it('displays selected group', () => {
-        const detail = newDetail({transactionGroupId: groups[1].id});
+        const detail = newDetailModel({transactionGroupId: groups[1].id});
 
         const component = shallow(<GroupInput detail={detail} />);
 
         expect(component.find(Autocomplete)).toHaveProp('value', groups[1]);
     });
     it('displays input with workspaces icon', () => {
-        const detail = newDetail();
+        const detail = newDetailModel();
         const component = shallow(<GroupInput detail={detail} />);
         const renderInput = component.find(Autocomplete).prop('renderInput')!;
 
@@ -57,5 +57,21 @@ describe('GroupInput', () => {
         expect(input).toHaveProp('InputProps', expect.objectContaining({
             startAdornment: <Icon>workspaces</Icon>,
         }));
+    });
+    it('sets detail.transactionGroupId', () => {
+        const detail = newDetailModel();
+        const component = shallow(<GroupInput detail={detail} />);
+
+        component.find(Autocomplete).simulate('change', {}, groups[0]);
+
+        expect(detail.transactionGroupId).toEqual(groups[0].id);
+    });
+    it('clears detail.transactionGroupId', () => {
+        const detail = newDetailModel({transactionGroupId: groups[0].id});
+        const component = shallow(<GroupInput detail={detail} />);
+
+        component.find(Autocomplete).simulate('change', {}, null);
+
+        expect(detail.transactionGroupId).toBeUndefined();
     });
 });

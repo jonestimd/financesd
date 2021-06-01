@@ -1,6 +1,7 @@
 import TransactionModel, {ITransaction} from 'lib/model/TransactionModel';
+import AccountStore from 'lib/store/AccountStore';
 import CategoryStore from 'lib/store/CategoryStore';
-import {defaultCategoryStore} from './categoryFactory';
+import {RootStore} from 'lib/store/RootStore';
 
 let nextId = 0;
 
@@ -16,12 +17,15 @@ export function newTx(overrides: Partial<ITransaction> = {}): ITransaction {
 }
 
 interface ModelOverrides extends Partial<ITransaction> {
+    accountStore?: AccountStore;
     categoryStore?: CategoryStore;
     balance?: number;
 }
 
-export function newTxModel({categoryStore, balance, ...overrides}: ModelOverrides = {}): TransactionModel {
-    const model = new TransactionModel(newTx(overrides), categoryStore ?? defaultCategoryStore);
+const rootStore = new RootStore();
+
+export function newTxModel({accountStore, categoryStore, balance, ...overrides}: ModelOverrides = {}): TransactionModel {
+    const model = new TransactionModel(newTx(overrides), accountStore ?? rootStore.accountStore, categoryStore ?? rootStore.categoryStore);
     if (balance !== undefined) model.balance = balance;
     return model;
 }

@@ -8,10 +8,11 @@ import TransactionTableModel from 'lib/model/TransactionTableModel';
 import {newTxModel} from 'test/transactionFactory';
 import {newPayeeModel} from 'test/payeeFactory';
 import {newSecurityModel} from 'test/securityFactory';
-import {newDetail} from 'test/detailFactory';
+import {newDetail, newDetailModel} from 'test/detailFactory';
 import {newGroupModel} from 'test/groupFactory';
 import {newCategoryModel} from 'test/categoryFactory';
-import TransactionModel, {ITransactionDetail} from 'lib/model/TransactionModel';
+import TransactionModel from 'lib/model/TransactionModel';
+import DetailModel from 'lib/model/DetailModel';
 
 const account = newAccountModel();
 
@@ -22,7 +23,7 @@ const getDetailColumn = (component: ShallowWrapper, key: string) => getDetailCol
 
 describe('TransactionTable', () => {
     const rootStore = new RootStore();
-    const transactionsModel = new TransactionTableModel([], rootStore.categoryStore);
+    const transactionsModel = new TransactionTableModel([], rootStore.accountStore, rootStore.categoryStore);
     const payee = newPayeeModel();
     const security = newSecurityModel();
     const txModel = newTxModel({
@@ -117,7 +118,7 @@ describe('TransactionTable', () => {
     describe('detail row', () => {
         const group = newGroupModel();
         const category = newCategoryModel();
-        const detail = newDetail({
+        const detail = newDetailModel({
             transactionGroupId: group.id,
             transactionCategoryId: category.id,
             memo: 'detail memo',
@@ -142,26 +143,20 @@ describe('TransactionTable', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
             const renderer = getDetailColumn(component, 'detail.category')!.render;
 
-            expect(renderer(newDetail())).toEqual(<span>{''}</span>);
+            expect(renderer({category: null})).toEqual(<span className=''>{''}</span>);
         });
         it('displays category', () => {
-            rootStore.categoryStore['categoriesById'].set(category.id, category);
             const component = shallow(<TransactionTable accountId={account.id} />);
             const renderer = getDetailColumn(component, 'detail.category')!.render;
 
-            expect(renderer(detail)).toEqual(<span>{category.displayName}</span>);
+            expect(renderer({category})).toEqual(<span className=''>{category.displayName}</span>);
         });
         it('displays transfer account', () => {
             const relatedAccount = newAccountModel();
-            const relatedTx = {accountId: relatedAccount.id};
-            const relatedDetail = {transaction: relatedTx};
-            jest.spyOn(rootStore.accountStore, 'getAccount').mockReturnValueOnce(relatedAccount);
             const component = shallow(<TransactionTable accountId={account.id} />);
             const renderer = getDetailColumn(component, 'detail.category')!.render;
 
-            expect(renderer({relatedDetail})).toEqual(<span className='transfer'>{relatedAccount.name}</span>);
-
-            expect(rootStore.accountStore.getAccount).toBeCalledWith(relatedTx.accountId);
+            expect(renderer({category: relatedAccount})).toEqual(<span className='transfer'>{relatedAccount.name}</span>);
         });
         it('displays memo', () => {
             const component = shallow(<TransactionTable accountId={account.id} />);
@@ -176,7 +171,7 @@ describe('TransactionTable', () => {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             expect(renderer(detail)).toEqual(`${detail.assetQuantity}`);
             expect(renderer({})).toEqual('');
-            const className = rest.className as (detail: Partial<ITransactionDetail>) => string;
+            const className = rest.className as (detail: Partial<DetailModel>) => string;
             expect(className({assetQuantity: 0})).toEqual('security number');
             expect(className({assetQuantity: -1})).toEqual('security number negative');
         });
@@ -185,7 +180,7 @@ describe('TransactionTable', () => {
             const {render: renderer, ...rest} = getDetailColumn(component, 'detail.amount')!;
 
             expect(renderer(detail)).toEqual(`$${detail.amount}`);
-            const className = rest.className as (detail: Partial<ITransactionDetail>) => string;
+            const className = rest.className as (detail: Partial<DetailModel>) => string;
             expect(className({amount: 0})).toEqual('number');
             expect(className({amount: -1})).toEqual('number negative');
         });

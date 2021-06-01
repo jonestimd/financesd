@@ -3,14 +3,14 @@ import {observer} from 'mobx-react-lite';
 import {TextFieldProps} from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {RootStoreContext} from '../../store/RootStore';
-import {ITransactionDetail} from 'lib/model/TransactionModel';
+import DetailModel from 'lib/model/DetailModel';
 import autocompleteProps from './autocompleteProps';
 import {CategoryModel} from 'lib/model/CategoryModel';
 import {AccountModel} from 'lib/model/account/AccountModel';
 import IconInput from '../IconInput';
 
 interface IProps {
-    detail: ITransactionDetail;
+    detail: DetailModel;
 }
 
 export type IOption = CategoryModel | AccountModel;
@@ -21,12 +21,9 @@ const CategoryInput = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>
         const categories = categoryStore.categories as IOption[];
         return categories.concat(accountStore.accounts);
     }, [accountStore.accounts, categoryStore.categories]);
-    const selectedValue = detail.transactionCategoryId
-        ? categoryStore.getCategory(detail.transactionCategoryId) ?? null
-        : accountStore.getAccount(detail.relatedDetail?.transaction.accountId) ?? null;
     return (
         <Autocomplete ref={ref} {...autocompleteProps} options={options} getOptionLabel={(o) => o.displayName}
-            value={selectedValue}
+            value={detail.category} onChange={(_event, value) => detail.category = value}
             filterOptions={(options, state) => options.filter((o) => o.displayName.toLowerCase().includes(state.inputValue.toLowerCase()))}
             renderInput={(params) => <IconInput {...params} {...inputProps} icon='category' />} />
     );

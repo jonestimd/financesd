@@ -4,15 +4,16 @@ import TxDetail from './TxDetail';
 import Category from './Category';
 import {Currency, Shares} from 'lib/formats';
 import Group from './Group';
-import {newDetail} from 'test/detailFactory';
+import {newDetailModel} from 'test/detailFactory';
 import {TextField} from '@material-ui/core';
 import CategoryInput from './CategoryInput';
 import GroupInput from './GroupInput';
 import IconInput from '../IconInput';
 
-const detail = newDetail({transactionGroupId: 456});
+const detail = newDetailModel({transactionGroupId: 456});
 
 describe('TxDetail', () => {
+    beforeEach(() => detail.reset());
     it('shows amount, category and group', () => {
         const component = shallow(<TxDetail detail={detail} editField={false} />);
 
@@ -24,24 +25,30 @@ describe('TxDetail', () => {
     });
     it('shows asset quantity', () => {
         const assetQuantity = 100.789;
+        detail.assetQuantity = assetQuantity;
 
-        const component = shallow(<TxDetail detail={{...detail, assetQuantity}} editField={false} />);
+        const component = shallow(<TxDetail detail={detail} editField={false} />);
 
         expect(component.find('.shares').find(Shares)).toHaveProp('children', assetQuantity);
     });
     it('shows memo', () => {
         const memo = 'note to self';
+        detail.memo = memo;
 
-        const component = shallow(<TxDetail detail={{...detail, memo}} editField={false} />);
+        const component = shallow(<TxDetail detail={detail} editField={false} />);
 
         expect(component.find('.memo')).toHaveText(memo);
     });
     it('edits amount', () => {
         const component = shallow(<TxDetail detail={detail} editField='amount' />);
+        const value = detail.amountText;
 
         const input = component.find(TextField);
+        input.simulate('change', {currentTarget: {value: '234.56'}});
 
-        expect(input).toHaveProp({type: 'number', value: detail.amount, required: true});
+        expect(input).toHaveProp({type: 'number', value, required: true});
+        expect(detail.amount).toEqual(234.56);
+        expect(detail.amountText).toEqual('234.56');
     });
     it('edits category', () => {
         const component = shallow(<TxDetail detail={detail} editField='category' />);
@@ -58,19 +65,49 @@ describe('TxDetail', () => {
         expect(input).toHaveProp('detail', detail);
     });
     it('edits shares', () => {
-        const detail = newDetail({assetQuantity: 123});
+        const detail = newDetailModel({assetQuantity: 123});
         const component = shallow(<TxDetail detail={detail} editField='shares' />);
+        const value = detail.assetQuantityText;
 
         const input = component.find(IconInput);
+        input.simulate('change', {currentTarget: {value: '234.567'}});
 
-        expect(input).toHaveProp({type: 'number', value: detail.assetQuantity, icon: 'request_page'});
+        expect(input).toHaveProp({type: 'number', value, icon: 'request_page'});
+        expect(detail.assetQuantity).toEqual(234.567);
+        expect(detail.assetQuantityText).toEqual('234.567');
     });
-    it('edits memo', () => {
-        const detail = newDetail({memo: 'some notes'});
-        const component = shallow(<TxDetail detail={detail} editField='memo' />);
+    describe('memo input', () => {
+        it('displays existing memo', () => {
+            const detail = newDetailModel({memo: 'some notes'});
+            const component = shallow(<TxDetail detail={detail} editField='memo' />);
 
-        const input = component.find(IconInput);
+            const input = component.find(IconInput);
 
-        expect(input).toHaveProp({value: detail.memo, icon: 'notes'});
+            expect(input).toHaveProp({value: detail.memo, icon: 'notes'});
+        });
+        it('displays blank for no memo', () => {
+            const detail = newDetailModel();
+            const component = shallow(<TxDetail detail={detail} editField='memo' />);
+
+            const input = component.find(IconInput);
+
+            expect(input).toHaveProp({value: '', icon: 'notes'});
+        });
+        it('sets memo on detail', () => {
+            const detail = newDetailModel();
+            const component = shallow(<TxDetail detail={detail} editField='memo' />);
+
+            component.find(IconInput).simulate('change', {currentTarget: {value: 'some notes'}});
+
+            expect(detail.memo).toEqual('some notes');
+        });
+        it('clears memo on detail', () => {
+            const detail = newDetailModel({memo: 'some notes'});
+            const component = shallow(<TxDetail detail={detail} editField='memo' />);
+
+            component.find(IconInput).simulate('change', {currentTarget: {value: ''}});
+
+            expect(detail.memo).toBeUndefined();
+        });
     });
 });

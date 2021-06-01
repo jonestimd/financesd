@@ -1,20 +1,21 @@
 import TransactionModel, {ITransaction, IUpdateTransactions} from './TransactionModel';
+import AccountStore from 'lib/store/AccountStore';
 import CategoryStore from '../store/CategoryStore';
-import {action, autorun, computed, IReactionDisposer, makeObservable} from 'mobx';
+import {action, autorun, computed, IReactionDisposer, makeObservable, observable} from 'mobx';
 import IMixedRowTableModel from './IMixedRowTableModel';
 import {sortedIndex} from 'lodash';
-import MessageStore from '../store/MessageStore';
-import AlertStore from '../store/AlertStore';
 import {INumberId} from './entityUtils';
 
 export default class TransactionTableModel implements IMixedRowTableModel<TransactionModel> {
-    transactions: TransactionModel[] = [];
+    readonly transactions = observable.array<TransactionModel>();
+    private readonly accountStore: AccountStore;
     private readonly categoryStore: CategoryStore;
     private readonly balanceDisposer: IReactionDisposer;
     static EMPTY: TransactionTableModel;
 
-    constructor(transactions: ITransaction[], categoryStore: CategoryStore) {
+    constructor(transactions: ITransaction[], accountStore: AccountStore, categoryStore: CategoryStore) {
         makeObservable(this);
+        this.accountStore = accountStore;
         this.categoryStore = categoryStore;
         this.update(transactions);
         this.balanceDisposer = autorun(() => {
@@ -74,15 +75,15 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
         const ids = items.map((t) => t.id);
         const transactions = this.transactions
             .filter((t) => !ids.includes(t.id))
-            .concat(items.map((t) => new TransactionModel(t, this.categoryStore)));
-        this.transactions = transactions.sort(TransactionModel.compare);
+            .concat(items.map((t) => new TransactionModel(t, this.accountStore, this.categoryStore)));
+        this.transactions.replace(transactions.sort(TransactionModel.compare));
     }
 
     @action
     remove(items: INumberId[]) {
         const ids = items.map((item) => item.id);
-        this.transactions = this.transactions.filter((t) => !ids.includes(t.id));
+        this.transactions.replace(this.transactions.filter((t) => !ids.includes(t.id)));
     }
 }
 
-TransactionTableModel.EMPTY = new TransactionTableModel([], new CategoryStore(new MessageStore(), new AlertStore()));
+TransactionTableModel.EMPTY = new TransactionTableModel([], {} as AccountStore, {} as CategoryStore);

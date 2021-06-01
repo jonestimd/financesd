@@ -1,7 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
-import {ITransactionDetail} from 'lib/model/TransactionModel';
+import {ITransactionDetail} from 'lib/model/DetailModel';
 
 interface IProps {
     detail: ITransactionDetail;

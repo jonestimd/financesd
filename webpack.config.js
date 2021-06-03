@@ -31,7 +31,7 @@ module.exports = {
     ]
   },
   resolve: {
-    modules: [path.resolve(__dirname, 'public'), 'node_modules'],
+    modules: [path.resolve(__dirname, 'web/src'), 'node_modules'],
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     // alias: { // enable production profiling
     //   'react-dom': 'react-dom/profiling',

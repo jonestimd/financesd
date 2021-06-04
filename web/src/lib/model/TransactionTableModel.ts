@@ -1,7 +1,7 @@
 import TransactionModel, {ITransaction, IUpdateTransactions} from './TransactionModel';
 import AccountStore from 'lib/store/AccountStore';
 import CategoryStore from '../store/CategoryStore';
-import {action, autorun, computed, IReactionDisposer, makeObservable, observable} from 'mobx';
+import {action, computed, IReactionDisposer, makeObservable, observable, reaction, runInAction} from 'mobx';
 import IMixedRowTableModel from './IMixedRowTableModel';
 import {sortedIndex} from 'lodash';
 import {INumberId} from './entityUtils';
@@ -18,12 +18,15 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
         this.accountStore = accountStore;
         this.categoryStore = categoryStore;
         this.update(transactions);
-        this.balanceDisposer = autorun(() => {
-            let balance = 0;
-            for (const transaction of this.transactions) {
-                transaction.balance = balance += transaction.subtotal;
-            }
-        });
+        this.balanceDisposer = reaction(
+            () => this.transactions.map((t) => t.subtotal),
+            (subtotals) => runInAction(() => {
+                subtotals.reduce((balance, subtotal, i) => {
+                    return this.transactions[i].balance = subtotal + balance;
+                }, 0);
+            }),
+            {fireImmediately: true},
+        );
     }
 
     dispose() {
@@ -59,6 +62,11 @@ export default class TransactionTableModel implements IMixedRowTableModel<Transa
     @computed
     get isChanged() {
         return this.transactions.some((t) => t.isChanged);
+    }
+
+    @computed
+    get isValid() {
+        return ! this.transactions.some((t) => !t.isValid);
     }
 
     getTransaction(id: number) {

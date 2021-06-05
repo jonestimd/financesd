@@ -3,7 +3,7 @@ import AccountStore from 'lib/store/AccountStore';
 import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 import ChangeModel from './ChangeModel';
-import DetailModel, {IAddDetail, ITransactionDetail} from './DetailModel';
+import DetailModel, {IAddDetail, ITransactionDetail, IUpdateDetail} from './DetailModel';
 import {IVersionId, Nullable} from './entityUtils';
 
 export const securityTxFields = ['date', 'ref', 'payee', 'security', 'description'] as const;
@@ -36,7 +36,7 @@ export interface IAddTransaction extends Omit<ITransaction, 'id' | 'version' | '
 export interface IUpdateTransaction extends Nullable<Partial<Omit<ITransaction, 'id' | 'version' | 'details'>>> {
     id: ITransaction['id'];
     version: ITransaction['version'];
-    details?: Partial<IAddDetail>[];
+    details?: IUpdateDetail[];
 }
 
 export interface IUpdateTransactions {
@@ -130,7 +130,8 @@ export default class TransactionModel implements ITransaction {
     }
 
     get changes(): IUpdateTransaction {
-        return {...this._changes.changes, id: this.id, version: this.version};
+        const details = this.details.filter((d) => d.isChanged).map((d) => d.changes);
+        return {...this._changes.changes, id: this.id, version: this.version, details};
     }
 
     reset() {

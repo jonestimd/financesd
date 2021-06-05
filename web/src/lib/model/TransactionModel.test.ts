@@ -64,7 +64,15 @@ describe('TransactionModel', () => {
         it('returns changes with id and version', () => {
             model.memo = 'notes';
 
-            expect(model.changes).toEqual({memo: 'notes', id: model.id, version: model.version});
+            expect(model.changes).toEqual({memo: 'notes', details: [], id: model.id, version: model.version});
+        });
+        it('returns detail changes with id and version', () => {
+            const detail = model.details[1];
+            const detailChanges = {id: detail.id, version: detail.version, amount: -detail.amount};
+            jest.spyOn(detail, 'isChanged', 'get').mockReturnValue(true);
+            jest.spyOn(detail, 'changes', 'get').mockReturnValue(detailChanges);
+
+            expect(model.changes).toEqual({details: [detailChanges], id: model.id, version: model.version});
         });
     });
     describe('isValid', () => {

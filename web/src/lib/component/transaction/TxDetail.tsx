@@ -23,7 +23,7 @@ const fieldRenderers: Record<DetailField, (detail: DetailModel) => React.ReactNo
     amount: ({amount}) => <span key='amount'><Currency>{amount}</Currency></span>,
     category: (detail) => <Category key='category' detail={detail} />,
     group: ({transactionGroupId}) => <Group key='group' id={transactionGroupId} />,
-    shares: ({assetQuantity}) => assetQuantity ? <span key='shares' className='shares'><Shares>{assetQuantity}</Shares></span> : null,
+    shares: ({assetQuantity}) => assetQuantity ? <span key='shares' className='shares'><Icon>request_page</Icon><Shares>{assetQuantity}</Shares></span> : null,
     memo: ({memo}) => memo ? <span key='memo' className='memo'><Icon>notes</Icon>{memo}</span> : null,
 };
 

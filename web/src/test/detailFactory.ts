@@ -15,13 +15,17 @@ export function newDetail(overrides: Partial<ITransactionDetail> = {}): ITransac
 }
 
 interface IModelOverrides extends Partial<ITransactionDetail> {
+    amountText?: string;
+    assetQuantityText?: string;
     accountStore?: AccountStore;
     categoryStore?: CategoryStore;
 }
 
 const rootStore = new RootStore();
 
-export function newDetailModel(overrides: IModelOverrides = {}) {
-    const {accountStore = rootStore.accountStore, categoryStore = rootStore.categoryStore, ...detailOverrides} = overrides;
-    return new DetailModel(newDetail(detailOverrides), accountStore, categoryStore);
+export function newDetailModel({amountText, assetQuantityText, accountStore, categoryStore, ...overrides}: IModelOverrides = {}) {
+    const model = new DetailModel(newDetail(overrides), accountStore ?? rootStore.accountStore, categoryStore ?? rootStore.categoryStore);
+    if (amountText !== undefined) model.amountText = amountText;
+    if (assetQuantityText !== undefined) model.assetQuantityText = assetQuantityText;
+    return model;
 }

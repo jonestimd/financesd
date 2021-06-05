@@ -1,6 +1,7 @@
 import React from 'react';
 import {shallow} from 'enzyme';
 import * as formats from './formats';
+import {isDate, parseDate} from './formats';
 
 describe('formats', () => {
     describe('numberClass', () => {
@@ -65,6 +66,44 @@ describe('formats', () => {
             expect(result.type()).toEqual('em');
             expect(result).toHaveClassName('negative');
             expect(result).toHaveText('-1.234568');
+        });
+    });
+    describe('isDate', () => {
+        it('returns true if date matches year-month-day', () => {
+            expect(isDate('1234-1-1')).toBe(true);
+            expect(isDate('2345-01-01')).toBe(true);
+            expect(isDate('3456-12-31')).toBe(true);
+        });
+        it('returns false if year not 4 digits', () => {
+            expect(isDate('345-11-02')).toBe(false);
+            expect(isDate('34567-11-02')).toBe(false);
+        });
+        it('returns false if month > 12', () => {
+            expect(isDate('3456-13-02')).toBe(false);
+        });
+        it('returns false if month is 0', () => {
+            expect(isDate('3456-0-02')).toBe(false);
+            expect(isDate('3456-00-02')).toBe(false);
+        });
+        it('returns false if day > 31', () => {
+            expect(isDate('3456-12-32')).toBe(false);
+        });
+        it('returns false if day is 0', () => {
+            expect(isDate('3456-12-0')).toBe(false);
+            expect(isDate('3456-12-00')).toBe(false);
+        });
+    });
+    describe('parseDate', () => {
+        it('returns undefined for invalid date', () => {
+            expect(parseDate('2021-06-0')).toBeUndefined();
+            expect(parseDate('2021-0-01')).toBeUndefined();
+            expect(parseDate('202-01-01')).toBeUndefined();
+            expect(parseDate('20201-01-01')).toBeUndefined();
+        });
+        it('returns date', () => {
+            expect(parseDate('2021-06-03')).toEqual(new Date('2021-06-03'));
+            expect(parseDate('2021-6-03')).toEqual(new Date('2021-06-03'));
+            expect(parseDate('2021-6-3')).toEqual(new Date('2021-06-03'));
         });
     });
 });

@@ -4,12 +4,13 @@ import Category from './Category';
 import Group from './Group';
 import {DetailField, securityDetailFields} from '../../model/TransactionModel';
 import {observer} from 'mobx-react-lite';
-import {TextField, TextFieldProps} from '@material-ui/core';
+import {Icon, TextFieldProps} from '@material-ui/core';
 import CategoryInput from './CategoryInput';
 import classNames from 'classnames';
 import GroupInput from './GroupInput';
 import IconInput from '../IconInput';
 import DetailModel from 'lib/model/DetailModel';
+import NumberInput from '../NumberInput';
 
 interface IProps {
     detail: DetailModel;
@@ -23,7 +24,7 @@ const fieldRenderers: Record<DetailField, (detail: DetailModel) => React.ReactNo
     category: (detail) => <Category key='category' detail={detail} />,
     group: ({transactionGroupId}) => <Group key='group' id={transactionGroupId} />,
     shares: ({assetQuantity}) => assetQuantity ? <span key='shares' className='shares'><Shares>{assetQuantity}</Shares></span> : null,
-    memo: ({memo}) => memo ? <span key='memo' className='memo'>{memo}</span> : null,
+    memo: ({memo}) => memo ? <span key='memo' className='memo'><Icon>notes</Icon>{memo}</span> : null,
 };
 
 const leading = ({detail, editField}: IProps) => {
@@ -47,13 +48,15 @@ const trailing = ({detail, editField}: IProps) => {
     );
 };
 
+// TODO validate number inputs: no alpha, precision, sign, shares required/not allowed
+// TODO clean up amountText, assetQuantityText on blur
+
 const TxDetail = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({detail, editField, showSecurity, ...inputProps}) => {
     const {amountText, assetQuantityText, memo} = detail;
     return <>
         {leading({detail, editField})}
-        {editField === 'amount' && <TextField {...inputProps} type='number' value={amountText} required
-            onChange={({currentTarget}) => detail.amountText = currentTarget.value}
-            InputProps={{autoFocus: true, startAdornment: <span>$</span>}} />}
+        {editField === 'amount' && <NumberInput {...inputProps} value={amountText} precision={2}
+            onChange={(value) => detail.amountText = value} startAdornment={<span>$</span>} />}
         {editField === 'category' && <CategoryInput detail={detail} {...inputProps} />}
         {editField === 'group' && <GroupInput detail={detail} {...inputProps} />}
         {editField === 'shares' && <IconInput {...inputProps} type='number' value={assetQuantityText} icon='request_page'

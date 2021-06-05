@@ -167,4 +167,15 @@ describe('DetailModel', () => {
             expect(model.changes).toEqual({id: model.id, version: model.version, assetQuantity: null});
         });
     });
+    describe('isValid', () => {
+        it('returns false for blank amount', () => {
+            expect(newDetailModel({amountText: ''}).isValid).toBe(false);
+        });
+        it('returns false for invalid amount', () => {
+            expect(newDetailModel({amountText: '-'}).isValid).toBe(false);
+        });
+        it('returns true for valid amount', () => {
+            expect(newDetailModel({amountText: '0'}).isValid).toBe(true);
+        });
+    });
 });

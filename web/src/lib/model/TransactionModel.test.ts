@@ -67,6 +67,28 @@ describe('TransactionModel', () => {
             expect(model.changes).toEqual({memo: 'notes', id: model.id, version: model.version});
         });
     });
+    describe('isValid', () => {
+        it('returns false if date is invalid', () => {
+            model.details.forEach((d) => jest.spyOn(d, 'isValid', 'get').mockReturnValue(true));
+
+            model.date = '2020';
+
+            expect(model.isValid).toBe(false);
+        });
+        it('returns false if detail is invalid', () => {
+            model.date = '2020-01-01';
+
+            jest.spyOn(model.details[0], 'isValid', 'get').mockReturnValue(false);
+
+            expect(model.isValid).toBe(false);
+        });
+        it('returns true if date and details are valid', () => {
+            model.date = '2020-01-01';
+            model.details.forEach((d) => jest.spyOn(d, 'isValid', 'get').mockReturnValue(true));
+
+            expect(model.isValid).toBe(true);
+        });
+    });
     describe('subtotal', () => {
         it('returns total of detail amounts', () => {
             expect(model.subtotal).toEqual(model.details[0].amount + model.details[1].amount);

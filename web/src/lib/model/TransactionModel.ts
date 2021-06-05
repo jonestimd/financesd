@@ -1,3 +1,4 @@
+import {parseDate} from 'lib/formats';
 import AccountStore from 'lib/store/AccountStore';
 import {computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
@@ -134,6 +135,11 @@ export default class TransactionModel implements ITransaction {
 
     reset() {
         this._changes.revert();
+    }
+
+    @computed
+    get isValid() {
+        return !!parseDate(this.date) && !this.details.some((d) => !d.isValid);
     }
 
     @computed

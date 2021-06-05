@@ -48,15 +48,27 @@ describe('TransactionsPage', () => {
         it('is disabled when no transactions are changed', () => {
             const tableModel = new TransactionTableModel([], accountStore, categoryStore);
             jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(false);
+            jest.spyOn(tableModel, 'isValid', 'get').mockReturnValue(true);
             transactionStore['transactionsByAccountId'].set(parseInt(accountId), tableModel);
 
             const component = shallow(<TransactionsPage {...props} />);
 
             expect(component.find('#save-button')).toHaveProp('disabled', true);
         });
-        it('is enabled when transactions are changed', () => {
+        it('is disabled when transactions are changed but not valid', () => {
             const tableModel = new TransactionTableModel([], accountStore, categoryStore);
             jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(true);
+            jest.spyOn(tableModel, 'isValid', 'get').mockReturnValue(false);
+            transactionStore['transactionsByAccountId'].set(parseInt(accountId), tableModel);
+
+            const component = shallow(<TransactionsPage {...props} />);
+
+            expect(component.find('#save-button')).toHaveProp('disabled', true);
+        });
+        it('is enabled when transactions are changed and valid', () => {
+            const tableModel = new TransactionTableModel([], accountStore, categoryStore);
+            jest.spyOn(tableModel, 'isChanged', 'get').mockReturnValue(true);
+            jest.spyOn(tableModel, 'isValid', 'get').mockReturnValue(true);
             transactionStore['transactionsByAccountId'].set(parseInt(accountId), tableModel);
 
             const component = shallow(<TransactionsPage {...props} />);

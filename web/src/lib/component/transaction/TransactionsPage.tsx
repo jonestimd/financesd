@@ -42,7 +42,9 @@ const TransactionsPage: React.FC<IProps> = observer(({match: {params: {accountId
             <span className='filler'/>
             {/* TODO filter input */}
             {/* TODO cleared balance */}
-            <IconButton id='save-button' disabled={!transactionsModel.isChanged} onClick={onSave}><Icon>save</Icon></IconButton>
+            <IconButton id='save-button' disabled={!transactionsModel.isChanged || !transactionsModel.isValid} onClick={onSave}>
+                <Icon>save</Icon>
+            </IconButton>
             <ToggleButtonGroup value={mode} exclusive size='small'
                 onChange={(_event: React.MouseEvent, value: ViewMode) => settingsStore.transactionsView = value}>
                 <ToggleButton value='list'><Icon>list</Icon></ToggleButton>

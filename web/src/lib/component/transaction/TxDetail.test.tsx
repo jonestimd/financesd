@@ -5,10 +5,11 @@ import Category from './Category';
 import {Currency, Shares} from 'lib/formats';
 import Group from './Group';
 import {newDetailModel} from 'test/detailFactory';
-import {TextField} from '@material-ui/core';
+import {Icon} from '@material-ui/core';
 import CategoryInput from './CategoryInput';
 import GroupInput from './GroupInput';
 import IconInput from '../IconInput';
+import NumberInput from '../NumberInput';
 
 const detail = newDetailModel({transactionGroupId: 456});
 
@@ -37,16 +38,16 @@ describe('TxDetail', () => {
 
         const component = shallow(<TxDetail detail={detail} editField={false} />);
 
-        expect(component.find('.memo')).toHaveText(memo);
+        expect(component.find('.memo')).toHaveProp('children', [<Icon>notes</Icon>, memo]);
     });
     it('edits amount', () => {
         const component = shallow(<TxDetail detail={detail} editField='amount' />);
         const value = detail.amountText;
 
-        const input = component.find(TextField);
-        input.simulate('change', {currentTarget: {value: '234.56'}});
+        const input = component.find(NumberInput);
+        input.simulate('change', '234.56');
 
-        expect(input).toHaveProp({type: 'number', value, required: true});
+        expect(input).toHaveProp({value, precision: 2, startAdornment: <span>$</span>});
         expect(detail.amount).toEqual(234.56);
         expect(detail.amountText).toEqual('234.56');
     });

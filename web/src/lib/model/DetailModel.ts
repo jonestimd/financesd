@@ -60,7 +60,7 @@ export default class DetailModel implements ITransactionDetail {
             ...detail,
             transferAccountId: detail.relatedDetail?.transaction.accountId,
             amountText: String(detail.amount),
-            assetQuantityText: detail.assetQuantity ? String(detail.assetQuantity) : '',
+            assetQuantityText: toString(detail.assetQuantity),
         });
     }
 
@@ -166,6 +166,10 @@ export default class DetailModel implements ITransactionDetail {
 
     get isChanged() {
         return this._changes.isChanged;
+    }
+
+    get isValid() {
+        return this.amountText != '' && !isNaN(this.amount);
     }
 
     get changes(): IUpdateDetail {

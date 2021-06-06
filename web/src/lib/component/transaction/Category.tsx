@@ -1,10 +1,10 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {RootStoreContext} from '../../store/RootStore';
-import {ITransactionDetail} from 'lib/model/DetailModel';
+import DetailModel from 'lib/model/DetailModel';
 
 interface IProps {
-    detail: ITransactionDetail;
+    detail: DetailModel;
 }
 
 const Category: React.FC<IProps> = observer(({detail: {relatedDetail, transactionCategoryId}}) => {

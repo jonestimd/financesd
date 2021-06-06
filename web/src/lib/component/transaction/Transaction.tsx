@@ -34,7 +34,7 @@ const Transaction: React.FC<IProps> = observer(({tx, selected, showSecurity, fie
             if (key === 'Tab' && !ctrlKey && !altKey) {
                 event.stopPropagation();
                 event.preventDefault();
-                setField(tx.nextField(fieldIndex + (shiftKey ? -1 : 1), showSecurity));
+                setField(tx.clampField(fieldIndex + (shiftKey ? -1 : 1), showSecurity));
             }
         },
     };
@@ -55,7 +55,7 @@ const Transaction: React.FC<IProps> = observer(({tx, selected, showSecurity, fie
                     ? <IconInput value={tx.memo ?? ''} {...inputProps} icon='notes' onChange={(event) => tx.memo = event.currentTarget.value} />
                     : <Memo text={tx.memo} />}
                 {tx.details.map((detail, index) =>
-                    <TxDetail key={detail.id} detail={detail} editField={index === itemIndex && detailField} showSecurity={showSecurity} {...inputProps} />)}
+                    <TxDetail key={detail.id ?? -index} detail={detail} editField={index === itemIndex && detailField} showSecurity={showSecurity} {...inputProps} />)}
             </div>
             <div className='trailing'>
                 <Checkbox checked={tx.cleared} onChange={(_event, checked) => tx.cleared = checked} />

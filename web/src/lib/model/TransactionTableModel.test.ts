@@ -92,15 +92,15 @@ describe('TransactionTableModel', () => {
             const changes = model.changes;
 
             const {id, version} = transactions[1];
-            expect(changes).toEqual({updates: [{id, version, memo: 'notes', cleared: true}]});
+            expect(changes).toEqual({updates: [{id, version, memo: 'notes', cleared: true, details: []}]});
         });
     });
     describe('update', () => {
         it('replaces transactions', () => {
             const {id} = transactions[1];
-            const updated = newTx({id, version: transactions[1].version + 1, memo: 'notes'});
+            const {details, ...updated} = newTx({id, version: transactions[1].version + 1, memo: 'notes'});
 
-            model.update([updated]);
+            model.update([{...updated, details}]);
 
             expect(model.getTransaction(id)).toEqual(expect.objectContaining(updated));
         });

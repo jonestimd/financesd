@@ -2,6 +2,7 @@ import {newCategoryModel} from 'test/categoryFactory';
 import {newDetail} from 'test/detailFactory';
 import {newTx, newTxModel} from 'test/transactionFactory';
 import {RootStore} from '../store/RootStore';
+import DetailModel from './DetailModel';
 import TransactionModel from './TransactionModel';
 
 
@@ -16,6 +17,12 @@ describe('TransactionModel', () => {
             const {details, ...tx} = transaction;
             expect(model).toEqual(expect.objectContaining(tx));
             details.forEach((detail, i) => expect(model.details[i]).toEqual(expect.objectContaining(detail)));
+        });
+        it('adds empty detail if no details', () => {
+            const model = new TransactionModel(newTx({}), accountStore, categoryStore);
+
+            expect(model.details).toHaveLength(1);
+            expect(model.details[0].isEmpty).toBe(true);
         });
     });
     describe('set date', () => {
@@ -71,8 +78,36 @@ describe('TransactionModel', () => {
             const detailChanges = {id: detail.id, version: detail.version, amount: -detail.amount};
             jest.spyOn(detail, 'isChanged', 'get').mockReturnValue(true);
             jest.spyOn(detail, 'changes', 'get').mockReturnValue(detailChanges);
+            model.details.push(new DetailModel(accountStore, categoryStore));
 
             expect(model.changes).toEqual({details: [detailChanges], id: model.id, version: model.version});
+        });
+    });
+    describe('reset', () => {
+        it('clears changes', () => {
+            model.memo = 'notes';
+            model.payeeId = -2;
+            model.securityId = -3;
+
+            model.reset();
+
+            expect(model.memo).toBeUndefined();
+            expect(model.payeeId).toBeUndefined();
+            expect(model.securityId).toBeUndefined();
+        });
+        it('removes empty detail', () => {
+            model.details.push(new DetailModel(accountStore, categoryStore));
+
+            model.reset();
+
+            expect(model.details).toHaveLength(2);
+        });
+        it('resets details', () => {
+            model.details.forEach((d) => jest.spyOn(d, 'reset'));
+
+            model.reset();
+
+            model.details.forEach((d) => expect(d.reset).toBeCalled());
         });
     });
     describe('isValid', () => {
@@ -142,6 +177,22 @@ describe('TransactionModel', () => {
                 expect(model.getField(index, false)).toEqual({transactionField, detailField, itemIndex});
             }));
     });
+    describe('removeEmptyDetail', () => {
+        it('removes new empty detail if not last detail', () => {
+            model.details.push(new DetailModel(accountStore, categoryStore));
+
+            model.removeEmptyDetail();
+
+            expect(model.details).toHaveLength(2);
+        });
+        it('does not remove new empty detail if it is the only detail', () => {
+            const model = newTxModel({details: [], accountStore, categoryStore});
+
+            model.removeEmptyDetail();
+
+            expect(model.details).toHaveLength(1);
+        });
+    });
     describe('fieldCount', () => {
         it('returns 4 * (details + 1) for !showSecurity', () => {
             expect(model.fieldCount(false)).toEqual(4 * (model.details.length + 1));
@@ -150,26 +201,41 @@ describe('TransactionModel', () => {
             expect(model.fieldCount(true)).toEqual(5 * (model.details.length + 1));
         });
     });
-    describe('nextField', () => {
+    describe('clampField', () => {
         const lastField = model.fieldCount(false)-1;
 
         it('returns 0 for 0', () => {
-            expect(model.nextField(0, false)).toEqual(0);
+            expect(model.clampField(0, false)).toEqual(0);
         });
         it('returns last field for last field', () => {
-            expect(model.nextField(lastField, false)).toEqual(lastField);
+            expect(model.clampField(lastField, false)).toEqual(lastField);
         });
-        it('returns 0 for > last field', () => {
-            expect(model.nextField(lastField+1, false)).toEqual(0);
+        it('adds empty detail for > last field', () => {
+            expect(model.clampField(lastField+1, false)).toEqual(lastField+1);
+
+            expect(model.details).toHaveLength(3);
+            expect(model.details[2].isEmpty).toBe(true);
+        });
+        it('returns 0 for > last field of empty detail', () => {
+            model.details.push(new DetailModel(accountStore, categoryStore));
+
+            expect(model.clampField(lastField+5, false)).toEqual(0);
+        });
+        it('removes empty detail for field of last pre-existing detail', () => {
+            model.details.push(new DetailModel(accountStore, categoryStore));
+
+            expect(model.clampField(lastField, false)).toEqual(lastField);
+
+            expect(model.details).toHaveLength(2);
         });
         it('returns last field for < 0', () => {
-            expect(model.nextField(-1, false)).toEqual(lastField);
+            expect(model.clampField(-1, false)).toEqual(lastField);
         });
     });
     describe('compare', () => {
         it('sorts by date', () => {
-            const tx1 = newTx({date: '2020-12-01'});
-            const tx2 = newTx({date: '2020-12-02'});
+            const tx1 = newTxModel({date: '2020-12-01'});
+            const tx2 = newTxModel({date: '2020-12-02'});
 
             expect(TransactionModel.compare(tx1, tx2)).toBeLessThan(0);
             expect(TransactionModel.compare(tx2, tx1)).toBeGreaterThan(0);
@@ -177,8 +243,8 @@ describe('TransactionModel', () => {
             expect(TransactionModel.compare(tx2, tx2)).toEqual(0);
         });
         it('sorts undefined last', () => {
-            const tx1 = newTx({date: undefined});
-            const tx2 = newTx({date: '2020-12-02'});
+            const tx1 = newTxModel({date: undefined});
+            const tx2 = newTxModel({date: '2020-12-02'});
 
             expect(TransactionModel.compare(tx1, tx2)).toBeGreaterThan(0);
             expect(TransactionModel.compare(tx2, tx1)).toBeLessThan(0);

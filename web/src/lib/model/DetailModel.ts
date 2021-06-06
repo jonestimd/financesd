@@ -1,6 +1,6 @@
 import AccountStore from 'lib/store/AccountStore';
 import CategoryStore from 'lib/store/CategoryStore';
-import {computed, makeObservable, observable} from 'mobx';
+import {action, computed, makeObservable, observable} from 'mobx';
 import {AccountModel} from './account/AccountModel';
 import {CategoryModel} from './CategoryModel';
 import ChangeModel from './ChangeModel';
@@ -37,30 +37,30 @@ const toString = (value?: number) => typeof value === 'number' ? String(value) :
 
 const isCategory = (x: CategoryModel | AccountModel): x is CategoryModel => 'code' in x;
 
-export default class DetailModel implements ITransactionDetail {
+export default class DetailModel {
     private readonly accountStore: AccountStore;
     private readonly categoryStore: CategoryStore;
-    id: number;
-    @observable version: number;
+    id?: number;
+    @observable version?: number;
     @observable _amountText: string;
     @observable _assetQuantityText: string;
     @observable relatedDetail?: IRelatedDetail;
     private _changes: ChangeModel<IAddDetail & {amountText: string, assetQuantityText: string}>;
 
-    constructor(detail: ITransactionDetail, accountStore: AccountStore, categoryStore: CategoryStore) {
+    constructor(accountStore: AccountStore, categoryStore: CategoryStore, detail?: ITransactionDetail) {
         makeObservable(this);
         this.accountStore = accountStore;
         this.categoryStore = categoryStore;
-        this.id = detail.id;
-        this.version = detail.version;
-        this._amountText = String(detail.amount);
-        this._assetQuantityText = toString(detail.assetQuantity);
-        this.relatedDetail = detail.relatedDetail;
+        this.id = detail?.id;
+        this.version = detail?.version;
+        this._amountText = detail ? String(detail.amount) : '';
+        this._assetQuantityText = toString(detail?.assetQuantity);
+        this.relatedDetail = detail?.relatedDetail;
         this._changes = new ChangeModel({
-            ...detail,
-            transferAccountId: detail.relatedDetail?.transaction.accountId,
-            amountText: String(detail.amount),
-            assetQuantityText: toString(detail.assetQuantity),
+            ...(detail ?? {amount: NaN}),
+            transferAccountId: detail?.relatedDetail?.transaction.accountId,
+            amountText: this._amountText,
+            assetQuantityText: this._assetQuantityText,
         });
     }
 
@@ -116,8 +116,13 @@ export default class DetailModel implements ITransactionDetail {
     }
 
     @computed
-    get amount() {
+    private get _amount() {
         return this._changes.get('amount');
+    }
+
+    @computed
+    get amount() {
+        return isNaN(this._amount) ? 0 : this._amount;
     }
 
     set amount(amount: number) {
@@ -169,14 +174,19 @@ export default class DetailModel implements ITransactionDetail {
     }
 
     get isValid() {
-        return this.amountText != '' && !isNaN(this.amount);
+        return this.amountText != '' && !isNaN(this._amount);
+    }
+
+    get isEmpty() {
+        return this.id === undefined && this.amountText === '';
     }
 
     get changes(): IUpdateDetail {
         const {amountText, assetQuantityText, ...changes} = this._changes.changes;
-        return {...changes, id: this.id, version: this.version};
+        return {...changes, id: this.id, version: this.version} as IAddDetail;
     }
 
+    @action
     reset() {
         this._changes.revert();
     }

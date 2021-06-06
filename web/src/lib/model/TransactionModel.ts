@@ -1,6 +1,6 @@
 import {parseDate} from 'lib/formats';
 import AccountStore from 'lib/store/AccountStore';
-import {computed, makeObservable, observable} from 'mobx';
+import {action, computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 import ChangeModel from './ChangeModel';
 import DetailModel, {IAddDetail, ITransactionDetail, IUpdateDetail} from './DetailModel';
@@ -45,8 +45,8 @@ export interface IUpdateTransactions {
     deletes?: IVersionId[];
 }
 
-export default class TransactionModel implements ITransaction {
-    static compare(t1: ITransaction, t2: ITransaction): number {
+export default class TransactionModel {
+    static compare(t1: TransactionModel, t2: TransactionModel): number {
         if (t1.date === undefined) return t2.date === undefined ? 0 : 1;
         if (t2.date === undefined) return -1;
         if (t1.date === t2.date) return Number(t1.id) - Number(t2.id);
@@ -58,16 +58,17 @@ export default class TransactionModel implements ITransaction {
     readonly details = observable.array<DetailModel>();
     @observable balance = 0;
     private _changes: ChangeModel<Omit<ITransaction, 'id' | 'version' | 'details'>>;
-    // private readonly accountStore: AccountStore;
+    private readonly accountStore: AccountStore;
     private readonly categoryStore: CategoryStore;
 
     constructor(transaction: ITransaction, accountStore: AccountStore, categoryStore: CategoryStore) {
         makeObservable(this);
         this.id = transaction.id;
         this.version = transaction.version;
-        this.details.replace(transaction.details.map((detail) => new DetailModel(detail, accountStore, categoryStore)));
+        this.details.replace(transaction.details.map((detail) => new DetailModel(accountStore, categoryStore, detail)));
+        if (this.details.length === 0) this.details.push(new DetailModel(accountStore, categoryStore));
         this._changes = new ChangeModel(transaction);
-        // this.accountStore = accountStore;
+        this.accountStore = accountStore;
         this.categoryStore = categoryStore;
     }
 
@@ -130,17 +131,20 @@ export default class TransactionModel implements ITransaction {
     }
 
     get changes(): IUpdateTransaction {
-        const details = this.details.filter((d) => d.isChanged).map((d) => d.changes);
+        const details = this.details.filter((d) => !d.isEmpty && d.isChanged).map((d) => d.changes);
         return {...this._changes.changes, id: this.id, version: this.version, details};
     }
 
+    @action
     reset() {
         this._changes.revert();
+        this.details.filter((d) => d.isEmpty).forEach((d) => this.details.remove(d));
+        this.details.forEach((d) => d.reset());
     }
 
     @computed
     get isValid() {
-        return !!parseDate(this.date) && !this.details.some((d) => !d.isValid);
+        return !!parseDate(this.date) && !this.details.filter((d) => !d.isEmpty).some((d) => !d.isValid);
     }
 
     @computed
@@ -148,8 +152,13 @@ export default class TransactionModel implements ITransaction {
         return this.details.reduce((sum, detail) => this.isAssetValue(detail) ? sum : sum + detail.amount, 0);
     }
 
-    private isAssetValue({transactionCategoryId}: ITransactionDetail): boolean {
+    private isAssetValue({transactionCategoryId}: DetailModel): boolean {
         return this.categoryStore.getCategory(transactionCategoryId)?.isAssetValue ?? false;
+    }
+
+    @action
+    removeEmptyDetail() {
+        if (this.details.length > 1 && this.details[this.details.length-1].isEmpty) this.details.pop();
     }
 
     getField(fieldIndex: number, showSecurity?: boolean) {
@@ -165,9 +174,21 @@ export default class TransactionModel implements ITransaction {
         return fieldsPerItem(showSecurity) * (1 + this.details.length);
     }
 
-    nextField(fieldIndex: number, showSecurity?: boolean) {
-        if (fieldIndex < 0) return this.fieldCount(showSecurity) - 1;
-        if (fieldIndex >= this.fieldCount(showSecurity)) return 0;
+    @action
+    clampField(fieldIndex: number, showSecurity?: boolean) {
+        const fieldCount = this.fieldCount(showSecurity);
+        if (fieldIndex < 0) return fieldCount - 1;
+        const detailIndex = Math.trunc(fieldIndex / fieldsPerItem(showSecurity)) - 1;
+        if (this.details.length > 1 && detailIndex === this.details.length - 2 && this.details[detailIndex+1].isEmpty) {
+            this.details.pop();
+        }
+        if (fieldIndex >= fieldCount) {
+            if (this.details[this.details.length-1].isEmpty) {
+                this.details.pop();
+                return 0;
+            }
+            this.details.push(new DetailModel(this.accountStore, this.categoryStore));
+        }
         return fieldIndex;
     }
 }

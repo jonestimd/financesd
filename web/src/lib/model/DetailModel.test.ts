@@ -7,7 +7,7 @@ import DetailModel from './DetailModel';
 describe('DetailModel', () => {
     const {accountStore, categoryStore} = new RootStore();
     const detail = newDetail();
-    const model = new DetailModel(detail, accountStore, categoryStore);
+    const model = new DetailModel(accountStore, categoryStore, detail);
     const category = newCategoryModel();
     const account = newAccountModel();
     categoryStore['categoriesById'].set(category.id, category);
@@ -15,21 +15,30 @@ describe('DetailModel', () => {
 
     beforeEach(() => model.reset());
     describe('constructor', () => {
-        it('populates values', () => {
+        it('sets empty values', () => {
+            const model = new DetailModel(accountStore, categoryStore);
+
+            expect(model.amount).toEqual(0);
+            expect(model.amountText).toEqual('');
+            expect(model.assetQuantityText).toEqual('');
+            expect(model.isChanged).toBe(false);
+            expect(model.isEmpty).toBe(true);
+        });
+        it('populates values with detail', () => {
             expect(model).toEqual(expect.objectContaining(detail));
             expect(model.amountText).toEqual(String(detail.amount));
             expect(model._assetQuantityText).toEqual('');
             expect(model.isChanged).toBe(false);
         });
         it('sets assetQuantityText', () => {
-            const model = new DetailModel(newDetail({assetQuantity: 123.456}), accountStore, categoryStore);
+            const model = newDetailModel({assetQuantity: 123.456, accountStore, categoryStore});
 
             expect(model._assetQuantityText).toEqual('123.456');
         });
         it('sets transferAccountId', () => {
             const accountId = 42;
 
-            const model = new DetailModel(newDetail({relatedDetail: {id: -2, transaction: {id: -1, accountId}}}), accountStore, categoryStore);
+            const model = newDetailModel({relatedDetail: {id: -2, transaction: {id: -1, accountId}}, accountStore, categoryStore});
 
             expect(model.transferAccountId).toEqual(accountId);
         });
@@ -114,6 +123,15 @@ describe('DetailModel', () => {
             expect(model.transferAccountId).toBeUndefined();
         });
     });
+    describe('get amount', () => {
+        it('returns 0 for invalid amountText', () => {
+            model.amountText = '';
+            expect(model.amount).toEqual(0);
+
+            model.amountText = '-';
+            expect(model.amount).toEqual(0);
+        });
+    });
     describe('set amount', () => {
         it('sets amountText', () => {
             const model = newDetailModel({amount: 123.45});
@@ -165,6 +183,13 @@ describe('DetailModel', () => {
             expect(model.assetQuantityText).toEqual('');
             expect(model.assetQuantity).toBeUndefined();
             expect(model.changes).toEqual({id: model.id, version: model.version, assetQuantity: null});
+        });
+    });
+    describe('isChanged', () => {
+        it('returns false if id exists', () => {
+            model.amountText = '';
+
+            expect(model.isEmpty).toBe(false);
         });
     });
     describe('isValid', () => {

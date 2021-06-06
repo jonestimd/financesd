@@ -4,7 +4,7 @@ import TransactionList from './TransactionList';
 import {RootStore} from 'lib/store/RootStore';
 import TransactionTableModel from 'lib/model/TransactionTableModel';
 import ListViewport from '../scroll/ListViewport';
-import {newTxModel} from 'test/transactionFactory';
+import {newTx, newTxModel} from 'test/transactionFactory';
 import Memo from './Memo';
 import {Checkbox} from '@material-ui/core';
 import {newDetail} from 'test/detailFactory';
@@ -18,8 +18,8 @@ const Wrapper: React.FC<{children: React.ReactElement}> = ({children}) => <>{chi
 describe('TransactionList', () => {
     const {categoryStore, transactionStore, accountStore} = new RootStore();
     const detail = newDetail({amount: 123.45});
-    const txModel = newTxModel({categoryStore, memo: 'transaction memo', details: [detail], balance: 567.89});
-    const transactionsModel = new TransactionTableModel([txModel], accountStore, categoryStore);
+    const transaction = newTx({memo: 'transaction memo', details: [detail]});
+    const transactionsModel = new TransactionTableModel([transaction], accountStore, categoryStore);
 
     beforeEach(() => {
         jest.spyOn(React, 'useContext').mockReturnValue({transactionStore, accountStore});
@@ -59,26 +59,27 @@ describe('TransactionList', () => {
             return shallow(<Wrapper>{renderItem(tx, -1, selected) as React.ReactElement}</Wrapper>);
         };
 
+        const txModel = newTxModel();
         it('displays transaction', () => {
             const tx = renderTx(txModel, false);
 
             expect(tx.find(Transaction)).toHaveProp({tx: txModel, selected: false, fieldIndex: 0});
         });
         it('highlights selected transaction', () => {
-            const tx = renderTx(newTxModel({categoryStore}), true);
+            const tx = renderTx(txModel, true);
 
             expect(tx.find(Transaction)).toHaveProp('selected', true);
         });
         it('displays input for selected field', () => {
             mockListSelectionHook(0, 3);
 
-            const tx = renderTx(newTxModel({categoryStore, cleared: true}), true);
+            const tx = renderTx(txModel, true);
 
             expect(tx.find(Transaction)).toHaveProp('fieldIndex', 3);
         });
         it('updates column when field changes', () => {
             const selection = mockListSelectionHook(0, 3);
-            const tx = renderTx(newTxModel({categoryStore, cleared: true}), true);
+            const tx = renderTx(txModel, true);
 
             tx.find(Transaction).prop<(f: number) => void>('setField')(4);
 

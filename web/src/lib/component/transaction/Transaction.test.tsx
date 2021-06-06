@@ -48,49 +48,49 @@ describe('Transaction', () => {
         } as unknown as React.KeyboardEvent<HTMLDivElement>;
 
         it('moves to next field on Tab', () => {
-            jest.spyOn(props.tx, 'nextField').mockReturnValue(2);
+            jest.spyOn(props.tx, 'clampField').mockReturnValue(2);
             const component = shallow(<Transaction {...props} selected={true} />);
             const onKeyDown = component.find(DateInput).prop('onKeyDown')!;
 
             onKeyDown(event);
 
-            expect(props.tx.nextField).toBeCalledWith(1, true);
+            expect(props.tx.clampField).toBeCalledWith(1, true);
             expect(props.setField).toBeCalledWith(2);
             expect(event.preventDefault).toBeCalled();
             expect(event.stopPropagation).toBeCalled();
         });
         it('moves to previous field on shift+Tab', () => {
-            jest.spyOn(props.tx, 'nextField').mockReturnValue(2);
+            jest.spyOn(props.tx, 'clampField').mockReturnValue(2);
             const component = shallow(<Transaction {...props} selected={true} />);
             const onKeyDown = component.find(DateInput).prop('onKeyDown')!;
 
             onKeyDown({...event, shiftKey: true});
 
-            expect(props.tx.nextField).toBeCalledWith(-1, true);
+            expect(props.tx.clampField).toBeCalledWith(-1, true);
             expect(props.setField).toBeCalledWith(2);
             expect(event.preventDefault).toBeCalled();
             expect(event.stopPropagation).toBeCalled();
         });
         it('ignores ctrl+Tab', () => {
-            jest.spyOn(props.tx, 'nextField').mockReturnValue(2);
+            jest.spyOn(props.tx, 'clampField').mockReturnValue(2);
             const component = shallow(<Transaction {...props} selected={true} />);
             const onKeyDown = component.find(DateInput).prop('onKeyDown')!;
 
             onKeyDown({...event, ctrlKey: true});
 
-            expect(props.tx.nextField).not.toBeCalled();
+            expect(props.tx.clampField).not.toBeCalled();
             expect(props.setField).not.toBeCalledWith();
             expect(event.preventDefault).not.toBeCalled();
             expect(event.stopPropagation).not.toBeCalled();
         });
         it('ignores alt+Tab', () => {
-            jest.spyOn(props.tx, 'nextField').mockReturnValue(2);
+            jest.spyOn(props.tx, 'clampField').mockReturnValue(2);
             const component = shallow(<Transaction {...props} selected={true} />);
             const onKeyDown = component.find(DateInput).prop('onKeyDown')!;
 
             onKeyDown({...event, altKey: true});
 
-            expect(props.tx.nextField).not.toBeCalled();
+            expect(props.tx.clampField).not.toBeCalled();
             expect(props.setField).not.toBeCalledWith();
             expect(event.preventDefault).not.toBeCalled();
             expect(event.stopPropagation).not.toBeCalled();

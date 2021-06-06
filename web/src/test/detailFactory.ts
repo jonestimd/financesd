@@ -24,7 +24,7 @@ interface IModelOverrides extends Partial<ITransactionDetail> {
 const rootStore = new RootStore();
 
 export function newDetailModel({amountText, assetQuantityText, accountStore, categoryStore, ...overrides}: IModelOverrides = {}) {
-    const model = new DetailModel(newDetail(overrides), accountStore ?? rootStore.accountStore, categoryStore ?? rootStore.categoryStore);
+    const model = new DetailModel(accountStore ?? rootStore.accountStore, categoryStore ?? rootStore.categoryStore, newDetail(overrides));
     if (amountText !== undefined) model.amountText = amountText;
     if (assetQuantityText !== undefined) model.assetQuantityText = assetQuantityText;
     return model;

@@ -57,7 +57,7 @@ func GetRelatedDetailsByTxIDs(tx *sql.Tx, txIDs []int64) []*table.TransactionDet
 
 const insertDetailSQL = `insert into transaction_detail
 (transaction_id, amount, transaction_category_id, transaction_group_id, memo, asset_quantity, exchange_asset_id, change_date, change_user, version)
-values (?, ?, ?, ?, ?, ?, current_timestamp, ?, 0)`
+values (?, ?, ?, ?, ?, ?, ?, current_timestamp, ?, 0)`
 
 func InsertDetail(tx *sql.Tx, txID int64, amount interface{}, values InputObject, user string) {
 	id := runInsert(tx, insertDetailSQL, txID, amount, values.IntOrNull("transactionCategoryId"), values.IntOrNull("transactionGroupId"),

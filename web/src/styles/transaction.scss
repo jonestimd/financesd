@@ -1,47 +1,172 @@
-#transaction-pane {
-    border-top: 1px solid $table-border;
-    background-color: rgba($color: #000000, $alpha: 0.05);
-
-    .MuiTextField-root {
-        background-color: $mdc-theme-background;
+.transaction {
+    display: flex;
+    align-items: center;
+    .material-icons {
+        font-size: 18px;
     }
-
-    .header {
-        padding: 3px;
-        flex-grow: 0;
-        flex-basis: 20em;
-        display: flex;
-        flex-flow: row wrap;
-        border-right: 1px solid $table-border;
-        .MuiAutocomplete-root {
-            flex: 1 0.5 22ex;
+    @media (max-width: 835px) {
+        display: block;
+    }
+    border-bottom: 1px solid darkgray;
+    &.prototype {
+        position: absolute;
+        top: -400px;
+    }
+    &:nth-child(odd) {
+        background-color: #f0ffff;
+    }
+    &.changed {
+        background-color: $changed-background;
+        &:hover {
+            background-color: darken($color: $changed-background, $amount: 10%);
         }
-        .MuiTextField-root {
-            flex: 0.2 1 13ex;
-            &.memo {
-                flex-grow: 1;
+        &.selected {
+            background-color: $changed-selected-background;
+            &:hover {
+                background-color: darken($color: $changed-selected-background, $amount: 10%);
             }
         }
     }
-
+    &.selected {
+        background: $selected-background;
+        &:hover {
+            background-color: darken($color: $selected-background, $amount: 10%);
+        }
+        .details {
+            flex-wrap: wrap;
+        }
+    }
+    .MuiInputBase-root {
+        background-color: change-color($mdc-theme-background, $alpha: 0.9);
+    }
+    &:hover {
+        background-color: $transaction-hover-background;
+    }
+    &.header {
+        font-weight: 500;
+        .leading {
+            flex-basis: 10ex;
+            justify-content: space-around;
+        }
+        .details {
+            justify-content: space-around;
+        }
+    }
+    .leading {
+        display: flex;
+        flex-direction: row;
+        // flex-basis: 8em;
+        white-space: nowrap;
+        align-items: center;
+    }
+    span[data-type='ref'] {
+        font-weight: bold;
+        color: white;
+        background: #333333;
+        padding: 2px 6px 0;
+        border-radius: 1em;
+        margin-left: 3px;
+        @media (max-width: 835px) {
+            margin-left: auto;
+        }
+    }
+    .detail.chip {
+        display: inline-block;
+        background: #ececec;
+        span + span {
+            padding-left: 5px;
+            &.transfer {
+                padding-left: 2px;
+            }
+        }
+        .transfer i.material-icons {
+            background-image: linear-gradient(darkgreen, lightgreen);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .group {
+            color: darkcyan;
+        }
+        &.prefix {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            margin-right: 0;
+        }
+        &.suffix {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            margin-left: 0;
+        }
+        &.deleted {
+            background-color: #fbdee3;
+            text-decoration: line-through;
+        }
+        button.MuiIconButton-root {
+            vertical-align: top;
+        }
+        &:not(:hover) {
+            button.MuiIconButton-root {
+                display: none;
+            }
+        }
+    }
     .details {
         display: flex;
-        flex-flow: row wrap;
-        padding: 3px;
-
-        .detail {
-            display: flex;
-            flex-flow: row nowrap;
-            flex-grow: 1;
-
-            .MuiAutocomplete-root,
-            .MuiFormControl-root:not(.number) {
-                flex-grow: 1;
-                flex-basis: 22ex;
-            }
-            .MuiFormControl-root.number {
-                flex: 0.2 1 13ex;
+        // flex-wrap: wrap; TODO (removed for single line list item)
+        flex-grow: 1;
+        // TODO (for single line list item)
+        overflow: hidden;
+        align-items: center;
+        .MuiAutocomplete-root {
+            input.MuiInputBase-input {
+                width: initial;
             }
         }
+        .number {
+            flex-basis: 8em;
+            text-align: right;
+            flex-grow: 1;
+        }
+        span.shares {
+            em {
+                text-shadow: 0 0 2px #008a00;
+            }
+        }
+        span[data-type='payee'] {
+            background: lightyellow;
+        }
+        span[data-type='security'] {
+            background: #dbfadb;
+        }
+        span.chip[data-type='description'] {
+            background: white;
+        }
+        span.memo:not(.chip) {
+            font-style: italic;
+        }
+        .chip {
+            // TODO (for single line list item)
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            padding-bottom: 0;
+        }
+    }
+    .trailing {
+        display: flex;
+        flex-basis: 16em;
+        flex-shrink: 0;
+        .MuiCheckbox-root {
+            padding: 0;
+        }
+        .number {
+            flex-grow: 1;
+            text-align: right;
+            flex-basis: 50%;
+        }
+    }
+    .MuiTextField-root.error {
+        background-color: $error-background;
     }
 }

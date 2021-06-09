@@ -67,6 +67,45 @@ describe('TransactionModel', () => {
             expect(model.isChanged).toBe(true);
         });
     });
+    describe('deleteDetail', () => {
+        it('adds pre-existing detail to pending deletes', () => {
+            model.deleteDetail(model.details[0]);
+
+            expect(model.details).toHaveLength(2);
+            expect(model.deletedDetails).toEqual([model.details[0].id]);
+            expect(model.isChanged).toBe(true);
+        });
+        it('removes unsaved detail', () => {
+            const detail = new DetailModel(accountStore, categoryStore);
+            model.details.push(detail);
+
+            model.deleteDetail(detail);
+
+            expect(model.details).not.toContain(detail);
+            expect(model.deletedDetails).toHaveLength(0);
+            expect(model.isChanged).toBe(false);
+        });
+    });
+    describe('undeleteDetail', () => {
+        it('removes detail from pendeing deletes', () => {
+            model.deleteDetail(model.details[0]);
+
+            model.undeleteDetail(model.details[0]);
+
+            expect(model.details).toHaveLength(2);
+            expect(model.deletedDetails).toHaveLength(0);
+        });
+    });
+    describe('isDeleted', () => {
+        it('returns false if detail is not pending delete', () => {
+            model.details.forEach((d) => expect(model.isDeleted(d)).toBe(false));
+        });
+        it('returns true for pending delete', () => {
+            model.deleteDetail(model.details[0]);
+
+            expect(model.isDeleted(model.details[0])).toBe(true);
+        });
+    });
     describe('get changes', () => {
         it('returns changes with id and version', () => {
             model.memo = 'notes';
@@ -81,6 +120,12 @@ describe('TransactionModel', () => {
             model.details.push(new DetailModel(accountStore, categoryStore));
 
             expect(model.changes).toEqual({details: [detailChanges], id: model.id, version: model.version});
+        });
+        it('returns detail deletes', () => {
+            const detail = model.details[1];
+            model.deleteDetail(detail);
+
+            expect(model.changes).toEqual({details: [{id: detail.id, version: detail.version}], id: model.id, version: model.version});
         });
     });
     describe('reset', () => {
@@ -108,6 +153,13 @@ describe('TransactionModel', () => {
             model.reset();
 
             model.details.forEach((d) => expect(d.reset).toBeCalled());
+        });
+        it('cancels pending deletes', () => {
+            model.deleteDetail(model.details[0]);
+
+            model.reset();
+
+            expect(model.deletedDetails).toHaveLength(0);
         });
     });
     describe('isValid', () => {

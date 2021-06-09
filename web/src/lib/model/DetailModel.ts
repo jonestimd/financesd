@@ -31,7 +31,7 @@ export interface IAddDetail extends Omit<ITransactionDetail, 'id' | 'version' | 
     transferAccountId?: number
 }
 
-export type IUpdateDetail = IAddDetail | (Nullable<Partial<IAddDetail>> & Pick<ITransactionDetail, 'id' | 'version'>);
+export type IUpdateDetail = IAddDetail | (Nullable<Partial<IAddDetail>> & Required<Pick<ITransactionDetail, 'id' | 'version'>>);
 
 const toString = (value?: number) => typeof value === 'number' ? String(value) : '';
 

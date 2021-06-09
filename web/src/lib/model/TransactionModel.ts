@@ -1,5 +1,6 @@
 import {parseDate} from 'lib/formats';
 import AccountStore from 'lib/store/AccountStore';
+import {partition} from 'lodash';
 import {action, computed, makeObservable, observable} from 'mobx';
 import CategoryStore from '../store/CategoryStore';
 import ChangeModel from './ChangeModel';
@@ -56,6 +57,7 @@ export default class TransactionModel {
     id: number;
     @observable version: number;
     readonly details = observable.array<DetailModel>();
+    readonly deletedDetails = observable.array<number>();
     @observable balance = 0;
     private _changes: ChangeModel<Omit<ITransaction, 'id' | 'version' | 'details'>>;
     private readonly accountStore: AccountStore;
@@ -126,18 +128,37 @@ export default class TransactionModel {
         this._changes.set('cleared', cleared);
     }
 
+    @action
+    deleteDetail(detail: DetailModel) {
+        if (detail.id === undefined) this.details.remove(detail);
+        else this.deletedDetails.push(detail.id);
+    }
+
+    @action
+    undeleteDetail(detail: DetailModel) {
+        if (detail.id) this.deletedDetails.remove(detail.id);
+    }
+
+    isDeleted(detail: DetailModel) {
+        return detail.id !== undefined && this.deletedDetails.includes(detail.id);
+    }
+
     get isChanged() {
-        return this._changes.isChanged || this.details.some((d) => d.isChanged);
+        return this._changes.isChanged || this.details.some((d) => d.isChanged) || this.deletedDetails.length > 0;
     }
 
     get changes(): IUpdateTransaction {
-        const details = this.details.filter((d) => !d.isEmpty && d.isChanged).map((d) => d.changes);
+        const [toDelete, toKeep] = partition(this.details, (d) => this.isDeleted(d));
+        const details = toKeep.filter((d) => !d.isEmpty && d.isChanged).map((d) => d.changes)
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            .concat(toDelete.map((d) => ({id: d.id!, version: d.version!})));
         return {...this._changes.changes, id: this.id, version: this.version, details};
     }
 
     @action
     reset() {
         this._changes.revert();
+        this.deletedDetails.clear();
         this.details.filter((d) => d.isEmpty).forEach((d) => this.details.remove(d));
         this.details.forEach((d) => d.reset());
     }

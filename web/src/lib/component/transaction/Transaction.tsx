@@ -55,7 +55,8 @@ const Transaction: React.FC<IProps> = observer(({tx, selected, showSecurity, fie
                     ? <IconInput value={tx.memo ?? ''} {...inputProps} icon='notes' onChange={(event) => tx.memo = event.currentTarget.value} />
                     : <Memo text={tx.memo} />}
                 {tx.details.map((detail, index) =>
-                    <TxDetail key={detail.id ?? -index} detail={detail} editField={index === itemIndex && detailField} showSecurity={showSecurity} {...inputProps} />)}
+                    <TxDetail key={detail.id ?? -index} detail={detail} transaction={tx}
+                        editField={index === itemIndex && detailField} showSecurity={showSecurity} {...inputProps} />)}
             </div>
             <div className='trailing'>
                 <Checkbox checked={tx.cleared} onChange={(_event, checked) => tx.cleared = checked} />

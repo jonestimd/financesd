@@ -2,9 +2,9 @@ import React from 'react';
 import {Currency, Shares} from '../../formats';
 import Category from './Category';
 import Group from './Group';
-import {DetailField, securityDetailFields} from '../../model/TransactionModel';
+import TransactionModel, {DetailField, securityDetailFields} from '../../model/TransactionModel';
 import {observer} from 'mobx-react-lite';
-import {Icon, TextFieldProps} from '@material-ui/core';
+import {Icon, IconButton, TextFieldProps} from '@material-ui/core';
 import CategoryInput from './CategoryInput';
 import classNames from 'classnames';
 import GroupInput from './GroupInput';
@@ -13,6 +13,7 @@ import DetailModel from 'lib/model/DetailModel';
 import NumberInput from '../NumberInput';
 
 interface IProps {
+    transaction: TransactionModel;
     detail: DetailModel;
     editField: DetailField | false;
     // TODO use to filter categories
@@ -27,21 +28,27 @@ const fieldRenderers: Record<DetailField, (detail: DetailModel) => React.ReactNo
     memo: ({memo}) => memo ? <span key='memo' className='memo'><Icon>notes</Icon>{memo}</span> : null,
 };
 
-const leading = ({detail, editField}: IProps) => {
+const leading = ({transaction, detail, editField, deleted}: IProps & {deleted: boolean}) => {
     if (editField === securityDetailFields[0]) return null;
     const fields = editField ? securityDetailFields.slice(0, securityDetailFields.indexOf(editField)) : securityDetailFields;
     return (
-        <div className={classNames('detail chip', {prefix: editField})} id={`${detail.id}`}>
+        <div className={classNames('detail chip', {prefix: editField, deleted})} id={`${detail.id}`}>
+            {!deleted && transaction.details.length > 1
+                ? <IconButton size='small' onClick={() => transaction.deleteDetail(detail)}><Icon>delete</Icon></IconButton>
+                : null}
+            {deleted
+                ? <IconButton size='small' onClick={() => transaction.undeleteDetail(detail)}><Icon>undo</Icon></IconButton>
+                : null}
             {fields.map((field: DetailField) => fieldRenderers[field](detail))}
         </div>
     );
 };
 
-const trailing = ({detail, editField}: IProps) => {
+const trailing = ({detail, editField, deleted}: Pick<IProps, 'detail' | 'editField'> & {deleted: boolean}) => {
     if (!editField || editField === securityDetailFields[securityDetailFields.length-1]) return null;
     const fields = securityDetailFields.slice(securityDetailFields.indexOf(editField)+1);
     return (
-        <div className='detail chip suffix' id={`${detail.id}`}>
+        <div className={classNames('detail chip suffix', {deleted})} id={`${detail.id}`}>
             {fields.map((field) => fieldRenderers[field](detail))}
             <span>&nbsp;</span>
         </div>
@@ -51,10 +58,11 @@ const trailing = ({detail, editField}: IProps) => {
 // TODO validate number inputs: no alpha, precision, sign, shares required/not allowed
 // TODO clean up amountText, assetQuantityText on blur
 
-const TxDetail = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({detail, editField, showSecurity, ...inputProps}) => {
+const TxDetail = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({transaction, detail, editField, showSecurity, ...inputProps}) => {
     const {amountText, assetQuantityText, memo} = detail;
+    const deleted = transaction.isDeleted(detail);
     return <>
-        {leading({detail, editField})}
+        {leading({transaction, detail, editField, deleted})}
         {editField === 'amount' && <NumberInput {...inputProps} value={amountText} precision={2}
             onChange={(value) => detail.amountText = value} startAdornment={<span>$</span>} />}
         {editField === 'category' && <CategoryInput detail={detail} {...inputProps} />}
@@ -63,7 +71,7 @@ const TxDetail = observer<IProps & Partial<TextFieldProps>, HTMLDivElement>(({de
             onChange={({currentTarget}) => detail.assetQuantityText = currentTarget.value} />}
         {editField === 'memo' && <IconInput {...inputProps} value={memo ?? ''} icon='notes'
             onChange={({currentTarget}) => detail.memo = currentTarget.value || undefined} />}
-        {trailing({detail, editField})}
+        {trailing({detail, editField, deleted})}
     </>;
 }, {forwardRef: true});
 

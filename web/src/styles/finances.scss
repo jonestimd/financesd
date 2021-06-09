@@ -282,6 +282,18 @@ table.security-transactions {
             border-bottom-left-radius: 0;
             margin-left: 0;
         }
+        &.deleted {
+            background-color: #fbdee3;
+            text-decoration: line-through;
+        }
+        button.MuiIconButton-root {
+            vertical-align: top;
+        }
+        &:not(:hover) {
+            button.MuiIconButton-root {
+                display: none;
+            }
+        }
     }
     .details {
         display: flex;

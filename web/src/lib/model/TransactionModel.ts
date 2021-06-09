@@ -128,6 +128,11 @@ export default class TransactionModel {
         this._changes.set('cleared', cleared);
     }
 
+    @computed
+    get detailCount() {
+        return this.details.length - this.deletedDetails.length;
+    }
+
     @action
     deleteDetail(detail: DetailModel) {
         if (detail.id === undefined) this.details.remove(detail);
@@ -165,7 +170,7 @@ export default class TransactionModel {
 
     @computed
     get isValid() {
-        return !!parseDate(this.date) && !this.details.filter((d) => !d.isEmpty).some((d) => !d.isValid);
+        return !!parseDate(this.date) && !this.details.some((d) => !d.isValid);
     }
 
     @computed
@@ -200,7 +205,7 @@ export default class TransactionModel {
         const fieldCount = this.fieldCount(showSecurity);
         if (fieldIndex < 0) return fieldCount - 1;
         const detailIndex = Math.trunc(fieldIndex / fieldsPerItem(showSecurity)) - 1;
-        if (this.details.length > 1 && detailIndex === this.details.length - 2 && this.details[detailIndex+1].isEmpty) {
+        if (this.detailCount > 1 && detailIndex === this.details.length - 2 && this.details[detailIndex+1].isEmpty) {
             this.details.pop();
         }
         if (fieldIndex >= fieldCount) {

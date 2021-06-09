@@ -32,6 +32,13 @@ describe('TxDetail', () => {
         expect(component.find('.shares')).not.toExist();
         expect(component.find('.memo')).not.toExist();
     });
+    it('highlights invalid amount', () => {
+        detail.amountText = '';
+
+        const component = shallow(<TxDetail {...props} editField={false} />);
+
+        expect(component.find('span').at(0)).toHaveClassName('error');
+    });
     it('shows asset quantity', () => {
         const assetQuantity = 100.789;
         detail.assetQuantity = assetQuantity;
@@ -103,6 +110,13 @@ describe('TxDetail', () => {
         });
         it('is not displayed for single detail', () => {
             const component = shallow(<TxDetail {...props} editField='shares' />);
+
+            expect(component.find(IconButton)).not.toExist();
+        });
+        it('is not displayed for single undeleted detail', () => {
+            tx2.deleteDetail(tx2.details[0]);
+
+            const component = shallow(<TxDetail transaction={tx2} detail={tx2.details[1]} editField='shares' />);
 
             expect(component.find(IconButton)).not.toExist();
         });

@@ -21,7 +21,7 @@ interface IProps {
 }
 
 const fieldRenderers: Record<DetailField, (detail: DetailModel) => React.ReactNode> = {
-    amount: ({amount}) => <span key='amount'><Currency>{amount}</Currency></span>,
+    amount: ({amount, isValid}) => <span key='amount' className={classNames({error: !isValid})}><Currency>{amount}</Currency></span>,
     category: (detail) => <Category key='category' detail={detail} />,
     group: ({transactionGroupId}) => <Group key='group' id={transactionGroupId} />,
     shares: ({assetQuantity}) => assetQuantity ? <span key='shares' className='shares'><Icon>request_page</Icon><Shares>{assetQuantity}</Shares></span> : null,
@@ -32,8 +32,8 @@ const leading = ({transaction, detail, editField, deleted}: IProps & {deleted: b
     if (editField === securityDetailFields[0]) return null;
     const fields = editField ? securityDetailFields.slice(0, securityDetailFields.indexOf(editField)) : securityDetailFields;
     return (
-        <div className={classNames('detail chip', {prefix: editField, deleted})} id={`${detail.id}`}>
-            {!deleted && transaction.details.length > 1
+        <div className={classNames('detail chip', {prefix: editField, deleted})} data-id={`${detail.id}`}>
+            {!deleted && transaction.detailCount > 1
                 ? <IconButton size='small' onClick={() => transaction.deleteDetail(detail)}><Icon>delete</Icon></IconButton>
                 : null}
             {deleted
@@ -48,7 +48,7 @@ const trailing = ({detail, editField, deleted}: Pick<IProps, 'detail' | 'editFie
     if (!editField || editField === securityDetailFields[securityDetailFields.length-1]) return null;
     const fields = securityDetailFields.slice(securityDetailFields.indexOf(editField)+1);
     return (
-        <div className={classNames('detail chip suffix', {deleted})} id={`${detail.id}`}>
+        <div className={classNames('detail chip suffix', {deleted})} data-id={`${detail.id}`}>
             {fields.map((field) => fieldRenderers[field](detail))}
             <span>&nbsp;</span>
         </div>

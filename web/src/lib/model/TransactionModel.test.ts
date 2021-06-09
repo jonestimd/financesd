@@ -67,6 +67,13 @@ describe('TransactionModel', () => {
             expect(model.isChanged).toBe(true);
         });
     });
+    describe('get detailCount', () => {
+        it('excludes deleted details', () => {
+            model.deleteDetail(model.details[0]);
+
+            expect(model.detailCount).toEqual(1);
+        });
+    });
     describe('deleteDetail', () => {
         it('adds pre-existing detail to pending deletes', () => {
             model.deleteDetail(model.details[0]);
@@ -279,6 +286,14 @@ describe('TransactionModel', () => {
             expect(model.clampField(lastField, false)).toEqual(lastField);
 
             expect(model.details).toHaveLength(2);
+        });
+        it('retains empty detail for field of last pre-existing detail if other details are deleted', () => {
+            model.details.forEach((d) => model.deleteDetail(d));
+            model.details.push(new DetailModel(accountStore, categoryStore));
+
+            expect(model.clampField(lastField, false)).toEqual(lastField);
+
+            expect(model.details).toHaveLength(3);
         });
         it('returns last field for < 0', () => {
             expect(model.clampField(-1, false)).toEqual(lastField);
